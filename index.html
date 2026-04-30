@@ -225,6 +225,19 @@ section[hidden] {
 
 <body>
 
+<!-- ================= LOGIN ================= -->
+<section id="loginTab">
+  <div class="card">
+    <div class="section-title">Admin Login</div>
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button class="primary" id="loginBtn">Login</button>
+    <div id="loginError" style="color:red;margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+
 <header>
   <button id="tabClients" class="active">Clients</button>
   <button id="tabPractitioners">Practitioners</button>
@@ -790,6 +803,12 @@ exportExcelBtn.onclick = () => {
 
 /* ================= INIT ================= */
 window.onload = () => {
+
+   // hide dashboard until login
+  document.querySelector("header").hidden = true;
+  document.querySelector(".container").hidden = true;
+  document.getElementById("loginTab").hidden = false;
+  
   // attach tab handlers
   document.getElementById("tabClients").onclick = () => { showTab("clientsTab"); loadClients(); };
   document.getElementById("tabPractitioners").onclick = () => { showTab("practitionersTab"); loadPractitioners(); };
@@ -811,7 +830,34 @@ window.onload = () => {
   document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 };
 
+  /* ================= LOGIN LOGIC ================= */
+document.getElementById("loginBtn").onclick = async () => {
+  const email = loginEmail.value;
+  const password = loginPassword.value;
 
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    loginError.textContent = "Login failed: " + error.message;
+    return;
+  }
+
+  // show dashboard
+  loginTab.hidden = true;
+  document.querySelector("header").hidden = false;
+  document.querySelector(".container").hidden = false;
+
+  loadClients();
+  loadPractitioners();
+  loadAppointments();
+};
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await sb.auth.signOut();
+  document.querySelector("header").hidden = true;
+  document.querySelector(".container").hidden = true;
+  loginTab.hidden = false;
+};
+  
 </script>
 </body>
 </html>
