@@ -603,9 +603,41 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
   const c = clients.find(x=>x.id===a_client.value);
   const sstEligible = ["PB","PKP","SMFT"];
   const sst = (c.citizenship==="Foreigner" && sstEligible.includes(s.id))
-  ? +(s.price*0.06
+    ? +(s.price*0.06).toFixed(2)
+    : 0;
+  const startTime = `${a_date.value}T${a_time.value}:00Z`;
 
-<script>
+  if (appointment_id.value) {
+    await sb.from("appointments").update({
+      client_id:c.id,
+      service_id:s.id,
+      practitioner_id:a_practitioner.value,
+      payment_method:a_payment.value,
+      remarks:a_remarks.value,
+      amount:s.price,
+      sst,
+      total:s.price+sst,
+      start_time:startTime,
+      end_time:startTime
+    }).eq("id",appointment_id.value);
+  } else {
+    await sb.from("appointments").insert({
+      client_id:c.id,
+      service_id:s.id,
+      practitioner_id:a_practitioner.value,
+      payment_method:a_payment.value,
+      remarks:a_remarks.value,
+      amount:s.price,
+      sst,
+      total:s.price+sst,
+      start_time:startTime,
+      end_time:startTime
+    });
+  }
+
+  cancelAppointmentBtn.click();
+  loadAppointments();
+};
       
     /* ================= SALES REPORT ================= */
 applyReportBtn.onclick = () => {
@@ -725,7 +757,7 @@ exportExcelBtn.onclick = () => {
   XLSX.writeFile(wb, "sales_report.xlsx");
 };
 
-  <script>
+
 /* ================= INIT ================= */
 window.onload = () => {
   // Load initial data
