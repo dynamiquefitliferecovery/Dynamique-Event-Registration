@@ -225,7 +225,7 @@ section[hidden] {
 
 <body>
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN LOGIN ONLY -->
 <section id="loginTab">
   <div class="card">
     <div class="section-title">Admin Login</div>
@@ -246,8 +246,10 @@ section[hidden] {
 </header>
 
 <div class="container" hidden>
-  <!-- all your dashboard sections -->
+  <!-- all your dashboard sections go here -->
 </div>
+
+</body>
 
 
 <!-- ================= CLIENTS ================= -->
@@ -804,8 +806,9 @@ exportExcelBtn.onclick = () => {
   document.getElementById(btnMap[tabId]).classList.add("active");
 }
 
-/* ================= INIT ================= */
+/* INIT */
 window.onload = async () => {
+  // show only login form
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   document.getElementById("loginTab").hidden = false;
@@ -815,24 +818,6 @@ window.onload = async () => {
   if (session) {
     showDashboard();
   }
-};
-
-  
-
-  // attach tab handlers
-  document.getElementById("tabClients").onclick = () => { showTab("clientsTab"); loadClients(); };
-  document.getElementById("tabPractitioners").onclick = () => { showTab("practitionersTab"); loadPractitioners(); };
-  document.getElementById("tabAppointments").onclick = () => { showTab("appointmentsTab"); loadAppointments(); };
-  document.getElementById("tabReports").onclick = () => { showTab("reportsTab"); };
-
-  // formatters
-  document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
-  document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
-
-  // default date/time for appointment form
-  const now = new Date();
-  document.getElementById("a_date").value = now.toISOString().slice(0,10);
-  document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 };
 
 /* SHOW DASHBOARD */
@@ -863,7 +848,7 @@ document.getElementById("loginBtn").onclick = async () => {
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
-  // hide dashboard, show login
+  // hide dashboard, show login only
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   loginTab.hidden = false;
@@ -873,11 +858,12 @@ document.getElementById("logoutBtn").onclick = async () => {
   practitioners = [];
   appointments = [];
 
-   // clear tables
+  // clear tables
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionersTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
 };
+
   
 </script>
 </body>
