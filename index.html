@@ -636,13 +636,19 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
     });
   }
 
+   cancelAppointmentBtn.click();
+  loadAppointments();
+};  // ✅ closes the save function here
+
+// Define delete separately
   window.deleteAppointment = async id=>{
   if(!confirm("Delete appointment?")) return;
   await sb.from("appointments").delete().eq("id",id);
   loadAppointments();
 };
 
-cancelAppointmentBtn.onclick = ()=>{
+// Define cancel separately
+  cancelAppointmentBtn.onclick = ()=>{
   appointment_id.value="";
   a_remarks.value="";
 };
