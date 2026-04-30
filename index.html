@@ -733,13 +733,25 @@ exportExcelBtn.onclick = () => {
 
 /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
-  document.querySelectorAll(".tabContent").forEach(el => el.style.display = "none");
-  document.getElementById(tabId).style.display = "block";
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
+  document.getElementById(tabId).hidden = false;
+
+  // update active button styling
+  document.querySelectorAll("header button").forEach(btn => btn.classList.remove("active"));
+  const btnMap = {
+    clientsTab: "tabClients",
+    practitionersTab: "tabPractitioners",
+    appointmentsTab: "tabAppointments",
+    reportsTab: "tabReports"
+  };
+  document.getElementById(btnMap[tabId]).classList.add("active");
 }
-clientsTabBtn.onclick = () => showTab("clientsSection");
-practitionersTabBtn.onclick = () => showTab("practitionersSection");
-appointmentsTabBtn.onclick = () => showTab("appointmentsSection");
-salesReportTabBtn.onclick = () => showTab("salesReportSection");
+
+document.getElementById("tabClients").onclick = () => showTab("clientsTab");
+document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
+document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
+document.getElementById("tabReports").onclick = () => showTab("reportsTab");
+
 
 /* ================= INIT ================= */
 window.onload = () => {
