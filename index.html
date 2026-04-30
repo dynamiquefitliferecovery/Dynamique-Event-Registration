@@ -653,15 +653,10 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
   a_remarks.value="";
 };
       
-    /* ================= SALES REPORT ================= */
+ /* ================= SALES REPORT ================= */
 applyReportBtn.onclick = () => {
-  const serviceCount = {};
-  const serviceRevenue = {};
-  const paymentRevenue = {};
-  const ageRevenue = {};
-  let totalIncome = 0;
-  let totalSST = 0;
-
+  const serviceCount = {}, serviceRevenue = {}, paymentRevenue = {}, ageRevenue = {};
+  let totalIncome = 0, totalSST = 0;
   reportDetailTable.innerHTML = "";
 
   appointments.forEach(a => {
@@ -670,17 +665,12 @@ applyReportBtn.onclick = () => {
 
     const svc = SERVICES.find(s => s.id === a.service_id)?.name || "";
     const cli = clients.find(c => c.id === a.client_id);
-    const ag = age(cli.date_of_birth);
-    const ageGroup =
-      ag < 18 ? "<18" :
-      ag < 30 ? "18–29" :
-      ag < 40 ? "30–39" :
-      ag < 50 ? "40–49" : "50+";
+    const ag = calcAge(cli.date_of_birth);
+    const ageGroup = ag < 18 ? "<18" : ag < 30 ? "18–29" : ag < 40 ? "30–39" : ag < 50 ? "40–49" : "50+";
 
     serviceCount[svc] = (serviceCount[svc] || 0) + 1;
     serviceRevenue[svc] = (serviceRevenue[svc] || 0) + Number(a.total);
-    paymentRevenue[a.payment_method] =
-      (paymentRevenue[a.payment_method] || 0) + Number(a.total);
+    paymentRevenue[a.payment_method] = (paymentRevenue[a.payment_method] || 0) + Number(a.total);
     ageRevenue[ageGroup] = (ageRevenue[ageGroup] || 0) + Number(a.total);
 
     totalIncome += Number(a.total);
@@ -703,10 +693,9 @@ applyReportBtn.onclick = () => {
   kpiTotalIncome.textContent = `RM ${totalIncome.toFixed(2)}`;
   kpiTotalSST.textContent = `RM ${totalSST.toFixed(2)}`;
   kpiTxn.textContent = appointments.filter(a => {
-  const date = a.start_time.slice(0,10);
-  return date >= reportFrom.value && date <= reportTo.value;
-}).length;
-
+    const date = a.start_time.slice(0,10);
+    return date >= reportFrom.value && date <= reportTo.value;
+  }).length;
 
   serviceCountChart && serviceCountChart.destroy();
   serviceRevenueChart && serviceRevenueChart.destroy();
@@ -715,34 +704,19 @@ applyReportBtn.onclick = () => {
 
   serviceCountChart = new Chart(ctx("serviceCountChart"), {
     type: "bar",
-    data: {
-      labels: Object.keys(serviceCount),
-      datasets: [{ data: Object.values(serviceCount) }]
-    }
+    data: { labels: Object.keys(serviceCount), datasets: [{ data: Object.values(serviceCount) }] }
   });
-
   serviceRevenueChart = new Chart(ctx("serviceRevenueChart"), {
     type: "pie",
-    data: {
-      labels: Object.keys(serviceRevenue),
-      datasets: [{ data: Object.values(serviceRevenue) }]
-    }
+    data: { labels: Object.keys(serviceRevenue), datasets: [{ data: Object.values(serviceRevenue) }] }
   });
-
   paymentRevenueChart = new Chart(ctx("paymentRevenueChart"), {
     type: "pie",
-    data: {
-      labels: Object.keys(paymentRevenue),
-      datasets: [{ data: Object.values(paymentRevenue) }]
-    }
+    data: { labels: Object.keys(paymentRevenue), datasets: [{ data: Object.values(paymentRevenue) }] }
   });
-
   ageRevenueChart = new Chart(ctx("ageRevenueChart"), {
     type: "pie",
-    data: {
-      labels: Object.keys(ageRevenue),
-      datasets: [{ data: Object.values(ageRevenue) }]
-    }
+    data: { labels: Object.keys(ageRevenue), datasets: [{ data: Object.values(ageRevenue) }] }
   });
 };
 
@@ -750,42 +724,31 @@ exportExcelBtn.onclick = () => {
   const rows = [];
   document.querySelectorAll("#reportDetailTable tr").forEach(tr => {
     const t = [...tr.children].map(td => td.textContent);
-    rows.push({
-      Date: t[0],
-      Time: t[1],
-      Client: t[2],
-      Service: t[3],
-      Practitioner: t[4],
-      Payment: t[5],
-      Subtotal: t[6],
-      SST: t[7],
-      Total: t[8]
-    });
+    rows.push({ Date:t[0], Time:t[1], Client:t[2], Service:t[3], Practitioner:t[4], Payment:t[5], Subtotal:t[6], SST:t[7], Total:t[8] });
   });
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(
-    wb,
-    XLSX.utils.json_to_sheet(rows),
-    "Sales Detail"
-  );
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Sales Detail");
   XLSX.writeFile(wb, "sales_report.xlsx");
 };
 
+/* ================= TAB SWITCHING ================= */
+function showTab(tabId) {
+  document.querySelectorAll(".tabContent").forEach(el => el.style.display = "none");
+  document.getElementById(tabId).style.display = "block";
+}
+clientsTabBtn.onclick = () => showTab("clientsSection");
+practitionersTabBtn.onclick = () => showTab("practitionersSection");
+appointmentsTabBtn.onclick = () => showTab("appointmentsSection");
+salesReportTabBtn.onclick = () => showTab("salesReportSection");
 
 /* ================= INIT ================= */
 window.onload = () => {
-  // Load initial data
   loadClients();
   loadPractitioners();
   loadAppointments();
-
-  // Attach formatters to inputs
   document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
   document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
 };
 </script>
-
 </body>
 </html>
-
-  
