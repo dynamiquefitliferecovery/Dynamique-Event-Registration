@@ -405,6 +405,8 @@ const SERVICES = [
   { id:"PB", name:"Physio Bundle", price:400 },
   { id:"PKP", name:"Performance Kickstart Program", price:261 },
   { id:"SMFT", name:"Sports Massage - First Trial", price:189 }
+  { id:"QF15", name:"Quick Fix 15 minutes", price:15 }
+
 ];
 
 // ===== GLOBAL STATE (MUST BE TOP-LEVEL) =====
@@ -582,7 +584,7 @@ async function loadPractitioners() {
   // ✅ PRACTITIONER DROPDOWN (Appointments)
   a_practitioner.innerHTML = "<option value=''>Select Practitioner</option>";
   practitioners.forEach(p => {
-    a_practitioner.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+    a_practitioner.innerHTML += `<option value="${p.id}">${p.name}</option>`;
   });
 
   // ✅ PRACTITIONER TABLE
@@ -595,24 +597,6 @@ async function loadPractitioners() {
       </tr>`;
   });
 }
-
-async function loadAppointments() {
-  const { data } = await sb.from("appointments").select("*").order("start_time");
-  appointments = data || [];
-
-  appointmentsTable.innerHTML = "";
-  appointments.forEach(a => {
-    appointmentsTable.innerHTML += `
-      <tr>
-        <td>${a.start_time.slice(0,10)}</td>
-        <td>${a.start_time.slice(11,16)}</td>
-        <td>${a.practitioner}</td>
-        <td>${a.payment_method}</td>
-        <td>${a.total}</td>
-      </tr>`;
-  });
-}
-
 
 addPractitionerBtn.onclick = async ()=>{
   if(!p_name.value) return;
@@ -635,7 +619,11 @@ SERVICES.forEach(s=>{
 function recalcAppointment(){
   const s = SERVICES.find(x=>x.id===a_service.value);
   const c = clients.find(x=>x.id===a_client.value);
-  const sst = c?.citizenship==="Foreigner" ? +(s.price*0.06).toFixed(2) : 0;
+  const sstEligible = ["PB","PKP","SMFT"];
+  const sst = (c?.citizenship==="Foreigner" && sstEligible.includes(s.id))
+  ? +(s.price*0.06).toFixed(2)
+  : 0;
+
   a_price.value=s.price;
   a_sst.value=sst;
   a_total.value=(s.price+sst).toFixed(2);
@@ -656,7 +644,7 @@ async function loadAppointments(){
         <td>${a.start_time.slice(11,16)}</td>
         <td>${cn}</td>
         <td>${sn}</td>
-        <td>${a.practitioner}</td>
+        <td>${practitioners.find(p => p.id === a.practitioner_id)?.name || ""}</td>
         <td>${a.payment_method}</td>
         <td>${a.total}</td>
         <td><button class="small" onclick="editAppointment('${a.id}')">✏️</button></td>
@@ -672,7 +660,7 @@ window.editAppointment = id=>{
   a_time.value = a.start_time.slice(11,16);
   a_client.value = a.client_id;
   a_service.value = a.service_id;
-  a_practitioner.value = a.practitioner;
+  a_practitioner.value = a.practitioner_id;
   a_payment.value = a.payment_method;
   a_remarks.value = a.remarks||"";
   recalcAppointment();
@@ -681,14 +669,17 @@ window.editAppointment = id=>{
 saveAppointmentBtn.onclick = async ()=>{
   const s = SERVICES.find(x=>x.id===a_service.value);
   const c = clients.find(x=>x.id===a_client.value);
-  const sst = c.citizenship==="Foreigner" ? +(s.price*0.06).toFixed(2) : 0;
+  const sstEligible = ["PB","PKP","SMFT"];
+  const sst = (c.citizenship==="Foreigner" && sstEligible.includes(s.id))
+  ? +(s.price*0.06).toFixed(2)
+  : 0;
   const startTime = `${a_date.value}T${a_time.value}:00Z`;
 
   appointment_id.value
     ? await sb.from("appointments").update({
         client_id:c.id,
         service_id:s.id,
-        practitioner:a_practitioner.value,
+        practitioner_id:a_practitioner.value,
         payment_method:a_payment.value,
         remarks:a_remarks.value,
         amount:s.price,
@@ -700,7 +691,7 @@ saveAppointmentBtn.onclick = async ()=>{
     : await sb.from("appointments").insert({
         client_id:c.id,
         service_id:s.id,
-        practitioner:a_practitioner.value,
+        practitioner_id:a_practitioner.value,
         payment_method:a_payment.value,
         remarks:a_remarks.value,
         amount:s.price,
@@ -764,7 +755,7 @@ applyReportBtn.onclick = () => {
         <td>${a.start_time.slice(11,16)}</td>
         <td>${cli.full_name}</td>
         <td>${svc}</td>
-        <td>${a.practitioner}</td>
+        <td>${practitioners.find(p => p.id === a.practitioner_id)?.name || ""}</td>
         <td>${a.payment_method}</td>
         <td>${a.amount}</td>
         <td>${a.sst}</td>
@@ -870,18 +861,22 @@ exportExcelBtn.onclick = ()=>{
 
 /* ================= INIT ================= */
 
-window.onload = function () {
-  Promise.resolve()
-    .then(loadClients)
-    .then(loadPractitioners)
-    .then(loadAppointments)
-    .catch(err => console.error("Admin init failed:", err));
+/* ================= INIT ================= */
+
+window.onload = async () => {
+  try {
+    // Show Clients tab by default
+    showTab("clientsTab");
+
+    // Load initial data
+    await loadClients();
+    await loadPractitioners();
+    await loadAppointments();
+  } catch (err) {
+    console.error("Admin init failed:", err);
+  }
 };
 
-window.onload = () => {
-  showTab("clientsTab");
-  loadClients();
-};
   
 </script>
 
