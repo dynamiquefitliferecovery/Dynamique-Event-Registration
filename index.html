@@ -388,15 +388,12 @@ section[hidden] {
 </div>
 
 <script>
-
-  function ctx(id) {
-  return document.getElementById(id).getContext("2d");
-}
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* ================= SERVICES ================= */
 const SERVICES = [
   { id:"SM", name:"Sports Massage", price:45 },
   { id:"RCB", name:"Recovery Compression Boots", price:25 },
@@ -407,170 +404,100 @@ const SERVICES = [
   { id:"QF15", name:"Quick Fix 15 minutes", price:15 }
 ];
 
-// ===== GLOBAL STATE (MUST BE TOP-LEVEL) =====
-var clients = [];
-var practitioners = [];
-var appointments = [];
-
-let serviceCountChart, serviceRevenueChart, paymentRevenueChart, ageRevenueChart;
-
 /* ================= HELPERS ================= */
-const age = d => Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000));
-
-function showTab(tabId) {
-  clientsTab.hidden = true;
-  practitionersTab.hidden = true;
-  appointmentsTab.hidden = true;
-  reportsTab.hidden = true;
-
-  document.getElementById(tabId).hidden = false;
+function calcAge(dob) {
+  if (!dob) return "";
+  return Math.floor((Date.now() - new Date(dob)) / 31557600000);
 }
-
-tabClients.onclick = () => {
-  showTab("clientsTab");
-  loadClients();
-};
-
-tabPractitioners.onclick = () => {
-  showTab("practitionersTab");
-  loadPractitioners();
-};
-
-tabAppointments.onclick = async () => {
-  showTab("appointmentsTab");
-  await loadClients();
-  await loadPractitioners();
-  await loadAppointments();
-};
-
-tabReports.onclick = () => {
-  showTab("reportsTab");
-};
-  
-function showChartInfo(el, values, labels, unit){
-  if(!el.length) return;
-  const i = el[0].index;
-  const total = values.reduce((a,b)=>a+b,0);
-  alert(
-    `${labels[i]}\n${unit}: ${values[i].toFixed(2)}\nPercentage: ${((values[i]/total)*100).toFixed(1)}%`
-  );
+function fmtDate(d) {
+  if (!d) return "";
+  return new Date(d).toISOString().split("T")[0];
 }
-
-/* ================= FORMATTERS ================= */
-c_ic.oninput = ()=>{
-  let v = c_ic.value.replace(/-/g,"");
-  if(/^[A-Za-z]/.test(v)){ c_ic.value=v; return; }
-  v = v.replace(/\D/g,"");
-  c_ic.value =
-    v.length>8 ? v.slice(0,6)+"-"+v.slice(6,8)+"-"+v.slice(8,12)
-    : v.length>6 ? v.slice(0,6)+"-"+v.slice(6)
-    : v;
-};
-c_contact.oninput = ()=>{
-  let v = c_contact.value.replace(/\D/g,"");
-  c_contact.value = v.length>3 ? v.slice(0,3)+"-"+v.slice(3,11) : v;
-};
 
 /* ================= CLIENTS ================= */
-function loadClients() {
-  return sb.from("clients").select("*").order("created_at", { ascending: false })
-    .then(({ data, error }) => {
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      clients = data || [];
-
-      // ✅ CLIENT DROPDOWN (Appointments)
-      a_client.innerHTML = "<option value=''>Select Client</option>";
-      clients.forEach(c => {
-        a_client.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
-      });
-
-      // ✅ CLIENT TABLE
-      const table = clientsTable;
-      table.innerHTML = "";
-
-      clients.forEach(c => {
-        const age = c.date_of_birth ? Math.floor((Date.now() - new Date(c.date_of_birth)) / 31557600000) : "";
-        table.innerHTML += `
-          <tr>
-            <td>${c.full_name}</td>
-            <td>${c.date_of_birth || ""}</td>
-            <td>${age}</td>
-            <td>${c.gender || ""}</td>
-            <td>${c.citizenship || ""}</td>
-            <td>${c.ic_passport || ""}</td>
-            <td>${c.contact || ""}</td>
-            <td>${c.email || ""}</td>
-            <td>${c.address || ""}</td>
-            <td><button onclick="editClient('${c.id}')">✏️</button></td>
-            <td><button onclick="deleteClient('${c.id}')">🗑</button></td>
-          </tr>`;
-      });
-    });
+async function loadClients() {
+  const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  const table = document.getElementById("clientsTable");
+  table.innerHTML = "";
+  (data || []).forEach(c => {
+    table.innerHTML += `
+      <tr>
+        <td>${c.full_name || ""}</td>
+        <td>${fmtDate(c.date_of_birth)}</td>
+        <td>${calcAge(c.date_of_birth)}</td>
+        <td>${c.gender || ""}</td>
+        <td>${c.citizenship || ""}</td>
+        <td>${c.ic_passport || ""}</td>
+        <td>${c.contact || ""}</td>
+        <td>${c.email || ""}</td>
+        <td>${c.address || ""}</td>
+        <td><button onclick="editClient('${c.id}')">✏️</button></td>
+        <td><button onclick="deleteClient('${c.id}')">🗑</button></td>
+      </tr>`;
+  });
 }
-
 
 function editClient(id) {
-  if (!clients || clients.length === 0) {
-    console.error("Clients not loaded yet");
-    return;
-  }
-
-  const c = clients.find(x => x.id === id);
-
-  if (!c) {
-    console.error("Client not found:", id, clients);
-    return;
-  }
-
-  client_id.value = c.id;
-  c_name.value = c.full_name || "";
-  c_dob.value = c.date_of_birth || "";
-  c_gender.value = c.gender || "";
-  c_citizenship.value = c.citizenship || "";
-  c_ic.value = c.ic_passport || "";
-  c_contact.value = c.contact || "";
-  c_email.value = c.email || "";
-  c_address.value = c.address || "";
+  sb.from("clients").select("*").eq("id", id).single().then(({ data }) => {
+    if (!data) return;
+    client_id.value = data.id;
+    c_name.value = data.full_name || "";
+    c_dob.value = fmtDate(data.date_of_birth);
+    c_gender.value = data.gender || "Male";
+    c_citizenship.value = data.citizenship || "Malaysian";
+    c_ic.value = data.ic_passport || "";
+    c_contact.value = data.contact || "";
+    c_email.value = data.email || "";
+    c_address.value = data.address || "";
+  });
 }
 
-window.deleteClient = async id=>{
-  if(!confirm("Delete client?")) return;
-  await sb.from("clients").delete().eq("id",id);
+async function deleteClient(id) {
+  if (!confirm("Delete client?")) return;
+  await sb.from("clients").delete().eq("id", id);
   loadClients();
-};
+}
 
-saveClientBtn.onclick = async ()=>{
-  if(!c_name.value || !c_dob.value) return alert("Name & DOB required");
+document.getElementById("saveClientBtn").onclick = async () => {
+  if (!c_name.value || !c_dob.value) return alert("Name & DOB required");
   const payload = {
-    full_name:c_name.value,
-    date_of_birth:c_dob.value,
-    gender:c_gender.value,
-    citizenship:c_citizenship.value,
-    ic_passport:c_ic.value,
-    contact:c_contact.value,
-    email:c_email.value,
-    address:c_address.value||null
+    full_name: c_name.value,
+    date_of_birth: c_dob.value,
+    gender: c_gender.value,
+    citizenship: c_citizenship.value,
+    ic_passport: c_ic.value,
+    contact: c_contact.value,
+    email: c_email.value,
+    address: c_address.value || null
   };
-  client_id.value
-    ? await sb.from("clients").update(payload).eq("id",client_id.value)
-    : await sb.from("clients").insert(payload);
+  if (client_id.value) {
+    await sb.from("clients").update(payload).eq("id", client_id.value);
+  } else {
+    await sb.from("clients").insert(payload);
+  }
   cancelClientBtn.click();
   loadClients();
 };
 
-cancelClientBtn.onclick = ()=>{
-  client_id.value="";
-  c_name.value="";
-  c_dob.value="";
-  c_ic.value="";
-  c_contact.value="";
-  c_email.value="";
-  c_address.value="";
+document.getElementById("cancelClientBtn").onclick = () => {
+  client_id.value = "";
+  c_name.value = "";
+  c_dob.value = "";
+  c_gender.value = "Male";
+  c_citizenship.value = "Malaysian";
+  c_ic.value = "";
+  c_contact.value = "";
+  c_email.value = "";
+  c_address.value = "";
 };
+
+/* ================= INIT ================= */
+window.onload = () => {
+  loadClients();
+};
+</script>
+
 
 /* ================= PRACTITIONERS ================= */
 async function loadPractitioners() {
