@@ -861,7 +861,7 @@ document.getElementById("loginBtn").onclick = async () => {
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
-  // hide dashboard
+  // hide dashboard, show login
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   loginTab.hidden = false;
@@ -875,6 +875,15 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionersTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
+
+  // clear form fields if needed
+  document.getElementById("c_name").value = "";
+  document.getElementById("c_dob").value = "";
+  document.getElementById("c_gender").value = "";
+  document.getElementById("c_ic").value = "";
+  document.getElementById("c_contact").value = "";
+  document.getElementById("c_email").value = "";
+  document.getElementById("c_address").value = "";
 };
 
 
