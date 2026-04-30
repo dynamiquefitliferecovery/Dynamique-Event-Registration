@@ -872,12 +872,16 @@ document.getElementById("loginBtn").onclick = async () => {
   const password = loginPassword.value;
 
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  console.log("Login result:", data, error);  // 👈 add this line
+
   if (error) {
     loginError.textContent = "Login failed: " + error.message;
+    console.error(error);
     return;
   }
   showDashboard();
 };
+
 
 
 /* LOGOUT */
