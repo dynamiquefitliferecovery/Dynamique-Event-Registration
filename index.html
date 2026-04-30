@@ -691,22 +691,6 @@ cancelAppointmentBtn.onclick = ()=>{
   a_total.value = "";
 };
 
-// set default date/time on load
-window.onload = () => {
-  loadClients();
-  loadPractitioners();
-  loadAppointments();
-
-  document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
-  document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
-
-  const now = new Date();
-  a_date.value = now.toISOString().slice(0,10); // input type=date expects ISO
-  a_time.value = now.toTimeString().slice(0,5);
-};
-
-
-  
  /* ================= SALES REPORT ================= */
 applyReportBtn.onclick = () => {
   const serviceCount = {}, serviceRevenue = {}, paymentRevenue = {}, ageRevenue = {};
