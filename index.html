@@ -723,21 +723,19 @@ exportExcelBtn.onclick = () => {
   XLSX.writeFile(wb, "sales_report.xlsx");
 };
 
+  <script>
 /* ================= INIT ================= */
+window.onload = () => {
+  // Load initial data
+  loadClients();
+  loadPractitioners();
+  loadAppointments();
 
-window.onload = async () => {
-  try {
-    // Show Clients tab by default
-    showTab("clientsTab");
-
-    // Load initial data
-    await loadClients();
-    await loadPractitioners();
-    await loadAppointments();
-  } catch (err) {
-    console.error("Admin init failed:", err);
-  }
+  // Attach formatters to inputs
+  document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
+  document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
 };
+
 
   
 </script>
