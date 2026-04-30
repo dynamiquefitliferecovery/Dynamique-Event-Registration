@@ -860,10 +860,23 @@ document.getElementById("loginBtn").onclick = async () => {
 /* ================= LOGOUT ================= */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
+
+  // hide dashboard
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   loginTab.hidden = false;
+
+  // clear data arrays
+  clients = [];
+  practitioners = [];
+  appointments = [];
+
+  // clear tables
+  document.getElementById("clientsTable").innerHTML = "";
+  document.getElementById("practitionersTable").innerHTML = "";
+  document.getElementById("appointmentsTable").innerHTML = "";
 };
+
 
   
 </script>
