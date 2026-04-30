@@ -444,13 +444,12 @@ function formatContact(input) {
 
 /* ================= CLIENTS ================= */
 async function loadClients() {
-  const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
+  const { data, error } = await sb.from("clients")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) { console.error(error); return; }
 
-  clients = data || []; // <-- now fills the global array
-  // ... populate table and dropdown ...
-}
-
+  clients = data || []; // fills the global array
 
   // table
   const table = document.getElementById("clientsTable");
@@ -479,6 +478,7 @@ async function loadClients() {
     clientSelect.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
   });
 }
+
 
 function editClient(id) {
   sb.from("clients").select("*").eq("id", id).single().then(({ data }) => {
