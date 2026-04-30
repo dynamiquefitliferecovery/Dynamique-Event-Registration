@@ -492,25 +492,17 @@ document.getElementById("cancelClientBtn").onclick = () => {
   c_address.value = "";
 };
 
-/* ================= INIT ================= */
-window.onload = () => {
-  loadClients();
-};
-
 /* ================= PRACTITIONERS ================= */
 async function loadPractitioners() {
   const { data, error } = await sb.from("practitioners").select("*").order("name");
   if (error) return console.error(error);
 
   practitioners = data || [];
-
-  // ✅ PRACTITIONER DROPDOWN (Appointments)
   a_practitioner.innerHTML = "<option value=''>Select Practitioner</option>";
   practitioners.forEach(p => {
     a_practitioner.innerHTML += `<option value="${p.id}">${p.name}</option>`;
   });
 
-  // ✅ PRACTITIONER TABLE
   practitionerTable.innerHTML = "";
   practitioners.forEach(p => {
     practitionerTable.innerHTML += `
@@ -521,7 +513,7 @@ async function loadPractitioners() {
   });
 }
 
-addPractitionerBtn.onclick = async ()=>{
+document.getElementById("addPractitionerBtn").onclick = async ()=>{
   if(!p_name.value) return;
   await sb.from("practitioners").insert({ name:p_name.value });
   p_name.value="";
@@ -556,10 +548,7 @@ a_client.onchange = recalcAppointment;
 
 async function loadAppointments() {
   const { data, error } = await sb.from("appointments").select("*").order("start_time");
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) { console.error(error); return; }
 
   appointments = data || [];
   appointmentsTable.innerHTML = "";
@@ -584,7 +573,6 @@ async function loadAppointments() {
   });
 }
 
-
 window.editAppointment = id=>{
   const a = appointments.find(x=>x.id===id);
   appointment_id.value = a.id;
@@ -598,55 +586,12 @@ window.editAppointment = id=>{
   recalcAppointment();
 };
 
-saveAppointmentBtn.onclick = async ()=>{
+document.getElementById("saveAppointmentBtn").onclick = async ()=>{
   const s = SERVICES.find(x=>x.id===a_service.value);
   const c = clients.find(x=>x.id===a_client.value);
   const sstEligible = ["PB","PKP","SMFT"];
   const sst = (c.citizenship==="Foreigner" && sstEligible.includes(s.id))
-  ? +(s.price*0.06).toFixed(2)
-  : 0;
-  const startTime = `${a_date.value}T${a_time.value}:00Z`;
-
-  appointment_id.value
-    ? await sb.from("appointments").update({
-        client_id:c.id,
-        service_id:s.id,
-        practitioner_id:a_practitioner.value,
-        payment_method:a_payment.value,
-        remarks:a_remarks.value,
-        amount:s.price,
-        sst,
-        total:s.price+sst,
-        start_time:startTime,
-        end_time:startTime
-      }).eq("id",appointment_id.value)
-    : await sb.from("appointments").insert({
-        client_id:c.id,
-        service_id:s.id,
-        practitioner_id:a_practitioner.value,
-        payment_method:a_payment.value,
-        remarks:a_remarks.value,
-        amount:s.price,
-        sst,
-        total:s.price+sst,
-        start_time:startTime,
-        end_time:startTime
-      });
-
-  cancelAppointmentBtn.click();
-  loadAppointments();
-};
-
-window.deleteAppointment = async id=>{
-  if(!confirm("Delete appointment?")) return;
-  await sb.from("appointments").delete().eq("id",id);
-  loadAppointments();
-};
-
-cancelAppointmentBtn.onclick = ()=>{
-  appointment_id.value="";
-  a_remarks.value="";
-};
+  ? +(s.price*0.06
 
 /* ================= SALES REPORT ================= */
 applyReportBtn.onclick = () => {
