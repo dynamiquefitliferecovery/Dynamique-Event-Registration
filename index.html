@@ -631,20 +631,28 @@ function recalcAppointment(){
 a_service.onchange = recalcAppointment;
 a_client.onchange = recalcAppointment;
 
-async function loadAppointments(){
-  const { data } = await sb.from("appointments").select("*").order("start_time");
+async function loadAppointments() {
+  const { data, error } = await sb.from("appointments").select("*").order("start_time");
+  if (error) {
+    console.error(error);
+    return;
+  }
+
   appointments = data || [];
-  appointmentsTable.innerHTML="";
-  appointments.forEach(a=>{
-    const cn = clients.find(c=>c.id===a.client_id)?.full_name||"";
-    const sn = SERVICES.find(s=>s.id===a.service_id)?.name||"";
+  appointmentsTable.innerHTML = "";
+
+  appointments.forEach(a => {
+    const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
+    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
+    const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
+
     appointmentsTable.innerHTML += `
       <tr>
         <td>${a.start_time.slice(0,10)}</td>
         <td>${a.start_time.slice(11,16)}</td>
-        <td>${cn}</td>
-        <td>${sn}</td>
-        <td>${practitioners.find(p => p.id === a.practitioner_id)?.name || ""}</td>
+        <td>${clientName}</td>
+        <td>${serviceName}</td>
+        <td>${practitionerName}</td>
         <td>${a.payment_method}</td>
         <td>${a.total}</td>
         <td><button class="small" onclick="editAppointment('${a.id}')">✏️</button></td>
@@ -652,6 +660,7 @@ async function loadAppointments(){
       </tr>`;
   });
 }
+
 
 window.editAppointment = id=>{
   const a = appointments.find(x=>x.id===id);
@@ -765,8 +774,11 @@ applyReportBtn.onclick = () => {
 
   kpiTotalIncome.textContent = `RM ${totalIncome.toFixed(2)}`;
   kpiTotalSST.textContent = `RM ${totalSST.toFixed(2)}`;
-  kpiTxn.textContent =
-    Object.values(serviceCount).reduce((a,b)=>a+b,0);
+  kpiTxn.textContent = appointments.filter(a => {
+  const date = a.start_time.slice(0,10);
+  return date >= reportFrom.value && date <= reportTo.value;
+}).length;
+
 
   serviceCountChart && serviceCountChart.destroy();
   serviceRevenueChart && serviceRevenueChart.destroy();
@@ -830,36 +842,6 @@ exportExcelBtn.onclick = () => {
   );
   XLSX.writeFile(wb, "sales_report.xlsx");
 };
-
-(async () => {
-  const today = new Date().toISOString().slice(0,10);
-  a_date.value = today;
-  a_time.value = new Date().toTimeString().slice(0,5);
-  reportFrom.value = today;
-  reportTo.value = today;
-
-  await loadClients();
-  await loadPractitioners();
-  await loadAppointments();
-})();
-
-/* ================= EXCEL EXPORT ================= */
-exportExcelBtn.onclick = ()=>{
-  const rows=[];
-  document.querySelectorAll("#reportDetailTable tr").forEach(tr=>{
-    const t=[...tr.children].map(td=>td.textContent);
-    rows.push({
-      Date:t[0], Time:t[1], Client:t[2], Service:t[3],
-      Practitioner:t[4], Payment:t[5],
-      Subtotal:t[6], SST:t[7], Total:t[8]
-    });
-  });
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),"Sales Detail");
-  XLSX.writeFile(wb,"sales_report.xlsx");
-};
-
-/* ================= INIT ================= */
 
 /* ================= INIT ================= */
 
