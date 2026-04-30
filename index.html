@@ -225,7 +225,7 @@ section[hidden] {
 
 <body>
 
-<!-- LOGIN FORM -->
+<!-- ADMIN LOGIN -->
 <section id="loginTab">
   <div class="card">
     <div class="section-title">Admin Login</div>
@@ -246,7 +246,7 @@ section[hidden] {
 </header>
 
 <div class="container" hidden>
-  <!-- your Clients / Practitioners / Appointments / Reports sections -->
+  <!-- all your dashboard sections -->
 </div>
 
 
@@ -806,16 +806,18 @@ exportExcelBtn.onclick = () => {
 
 /* ================= INIT ================= */
 window.onload = async () => {
-  // hide dashboard until login
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   document.getElementById("loginTab").hidden = false;
 
-  // optional: check if already logged in
+  // check if already logged in
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     showDashboard();
   }
+};
+
+  
 
   // attach tab handlers
   document.getElementById("tabClients").onclick = () => { showTab("clientsTab"); loadClients(); };
@@ -833,7 +835,7 @@ window.onload = async () => {
   document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 };
 
-/* ================= SHOW DASHBOARD ================= */
+/* SHOW DASHBOARD */
 function showDashboard() {
   loginTab.hidden = true;
   document.querySelector("header").hidden = false;
@@ -844,7 +846,7 @@ function showDashboard() {
   loadAppointments();
 }
 
-/* ================= LOGIN LOGIC ================= */
+/* LOGIN */
 document.getElementById("loginBtn").onclick = async () => {
   const email = loginEmail.value;
   const password = loginPassword.value;
@@ -857,7 +859,7 @@ document.getElementById("loginBtn").onclick = async () => {
   showDashboard();
 };
 
-/* ================= LOGOUT ================= */
+/* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
@@ -871,22 +873,11 @@ document.getElementById("logoutBtn").onclick = async () => {
   practitioners = [];
   appointments = [];
 
-  // clear tables
+   // clear tables
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionersTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
-
-  // clear form fields if needed
-  document.getElementById("c_name").value = "";
-  document.getElementById("c_dob").value = "";
-  document.getElementById("c_gender").value = "";
-  document.getElementById("c_ic").value = "";
-  document.getElementById("c_contact").value = "";
-  document.getElementById("c_email").value = "";
-  document.getElementById("c_address").value = "";
 };
-
-
   
 </script>
 </body>
