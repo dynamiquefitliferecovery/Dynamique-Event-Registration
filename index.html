@@ -414,6 +414,18 @@ function fmtDate(d) {
   return new Date(d).toISOString().split("T")[0];
 }
 
+  /* FORMATTERS */
+function formatIC(input) {
+  let v = input.value.replace(/\D/g, "");
+  if (v.length > 6) v = v.slice(0,6) + "-" + v.slice(6);
+  if (v.length > 9) v = v.slice(0,9) + "-" + v.slice(9);
+  input.value = v;
+}
+function formatContact(input) {
+  let v = input.value.replace(/\D/g, "");
+  if (v.length > 3) v = v.slice(0,3) + "-" + v.slice(3);
+  input.value = v;
+
 /* ================= CLIENTS ================= */
 async function loadClients() {
   const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
