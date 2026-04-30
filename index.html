@@ -225,7 +225,7 @@ section[hidden] {
 
 <body>
 
-<!-- ADMIN LOGIN ONLY -->
+<!-- ADMIN LOGIN -->
 <section id="loginTab">
   <div class="card">
     <div class="section-title">Admin Login</div>
@@ -250,6 +250,7 @@ section[hidden] {
 </div>
 
 </body>
+
 
 
 <!-- ================= CLIENTS ================= -->
@@ -897,15 +898,14 @@ document.getElementById("logoutBtn").onclick = async () => {
   loginPassword.value = "";
   loginError.textContent = "";
 
-  // clear data arrays
+ // clear data arrays + tables + forms
   clients = [];
   practitioners = [];
   appointments = [];
-
-  // clear tables
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionersTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
+};
 
   // clear client form
   client_id.value = "";
