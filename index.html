@@ -465,7 +465,10 @@ async function loadClients() {
   const { data, error } = await sb.from("clients")
     .select("*")
     .order("created_at", { ascending: false });
-  if (error) { console.error(error); return; }
+  if (error) {
+    alert("Failed to load clients. Please try again.");
+    console.error(error);
+    return;
 
   clients = data || []; // fills the global array
 
@@ -555,7 +558,10 @@ document.getElementById("cancelClientBtn").onclick = () => {
 /* ================= PRACTITIONERS ================= */
 async function loadPractitioners() {
   const { data, error } = await sb.from("practitioners").select("*").order("name");
-  if (error) return console.error(error);
+  if (error) {
+    alert("Failed to load practitioners. Please try again.");
+    console.error(error);
+    return;
 
   practitioners = data || [];
   a_practitioner.innerHTML = "<option value=''>Select Practitioner</option>";
@@ -612,7 +618,11 @@ a_client.onchange = recalcAppointment;
 // load appointments table
 async function loadAppointments() {
   const { data, error } = await sb.from("appointments").select("*").order("start_time");
-  if (error) { console.error(error); return; }
+  if (error) {
+    alert("Failed to load appointments. Please try again.");
+    console.error(error);
+    return;
+
 
   appointments = data || [];
   appointmentsTable.innerHTML = "";
@@ -710,6 +720,10 @@ cancelAppointmentBtn.onclick = ()=>{
 };
 
  /* ================= SALES REPORT ================= */
+
+/* ================= SALES REPORT ================= */
+let serviceCountChart, serviceRevenueChart, paymentRevenueChart, ageRevenueChart;
+
 applyReportBtn.onclick = () => {
   const serviceCount = {}, serviceRevenue = {}, paymentRevenue = {}, ageRevenue = {};
   let totalIncome = 0, totalSST = 0;
@@ -746,6 +760,7 @@ applyReportBtn.onclick = () => {
       </tr>`;
   });
 
+  // update KPIs
   kpiTotalIncome.textContent = `RM ${totalIncome.toFixed(2)}`;
   kpiTotalSST.textContent = `RM ${totalSST.toFixed(2)}`;
   kpiTxn.textContent = appointments.filter(a => {
@@ -753,39 +768,62 @@ applyReportBtn.onclick = () => {
     return date >= reportFrom.value && date <= reportTo.value;
   }).length;
 
-  serviceCountChart && serviceCountChart.destroy();
-  serviceRevenueChart && serviceRevenueChart.destroy();
-  paymentRevenueChart && paymentRevenueChart.destroy();
-  ageRevenueChart && ageRevenueChart.destroy();
+  // destroy old charts if they exist
+  if (serviceCountChart) serviceCountChart.destroy();
+  if (serviceRevenueChart) serviceRevenueChart.destroy();
+  if (paymentRevenueChart) paymentRevenueChart.destroy();
+  if (ageRevenueChart) ageRevenueChart.destroy();
 
+  // create new charts
   serviceCountChart = new Chart(ctx("serviceCountChart"), {
     type: "bar",
-    data: { labels: Object.keys(serviceCount), datasets: [{ data: Object.values(serviceCount) }] }
+    data: {
+      labels: Object.keys(serviceCount),
+      datasets: [{ data: Object.values(serviceCount) }]
+    }
   });
+
   serviceRevenueChart = new Chart(ctx("serviceRevenueChart"), {
     type: "pie",
-    data: { labels: Object.keys(serviceRevenue), datasets: [{ data: Object.values(serviceRevenue) }] }
+    data: {
+      labels: Object.keys(serviceRevenue),
+      datasets: [{ data: Object.values(serviceRevenue) }]
+    }
   });
+
   paymentRevenueChart = new Chart(ctx("paymentRevenueChart"), {
     type: "pie",
-    data: { labels: Object.keys(paymentRevenue), datasets: [{ data: Object.values(paymentRevenue) }] }
+    data: {
+      labels: Object.keys(paymentRevenue),
+      datasets: [{ data: Object.values(paymentRevenue) }]
+    }
   });
+
   ageRevenueChart = new Chart(ctx("ageRevenueChart"), {
     type: "pie",
-    data: { labels: Object.keys(ageRevenue), datasets: [{ data: Object.values(ageRevenue) }] }
+    data: {
+      labels: Object.keys(ageRevenue),
+      datasets: [{ data: Object.values(ageRevenue) }]
+    }
   });
 };
 
+// export to Excel
 exportExcelBtn.onclick = () => {
   const rows = [];
   document.querySelectorAll("#reportDetailTable tr").forEach(tr => {
     const t = [...tr.children].map(td => td.textContent);
-    rows.push({ Date:t[0], Time:t[1], Client:t[2], Service:t[3], Practitioner:t[4], Payment:t[5], Subtotal:t[6], SST:t[7], Total:t[8] });
+    rows.push({
+      Date: t[0], Time: t[1], Client: t[2], Service: t[3],
+      Practitioner: t[4], Payment: t[5], Subtotal: t[6],
+      SST: t[7], Total: t[8]
+    });
   });
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Sales Detail");
   XLSX.writeFile(wb, "sales_report.xlsx");
 };
+
 
 /* ================= TAB SWITCHING ================= */
 
@@ -844,6 +882,7 @@ document.getElementById("loginBtn").onclick = async () => {
   showDashboard();
 };
 
+
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
@@ -852,6 +891,11 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   loginTab.hidden = false;
+
+  // clear login form
+  loginEmail.value = "";
+  loginPassword.value = "";
+  loginError.textContent = "";
 
   // clear data arrays
   clients = [];
@@ -862,6 +906,30 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionersTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
+
+  // clear client form
+  client_id.value = "";
+  c_name.value = "";
+  c_dob.value = "";
+  c_gender.value = "Male";
+  c_citizenship.value = "Malaysian";
+  c_ic.value = "";
+  c_contact.value = "";
+  c_email.value = "";
+  c_address.value = "";
+
+  // clear appointment form
+  appointment_id.value = "";
+  a_date.value = "";
+  a_time.value = "";
+  a_client.value = "";
+  a_service.value = "";
+  a_practitioner.value = "";
+  a_payment.value = "";
+  a_remarks.value = "";
+  a_price.value = "";
+  a_sst.value = "";
+  a_total.value = "";
 };
 
   
