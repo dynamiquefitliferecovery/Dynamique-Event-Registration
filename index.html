@@ -225,7 +225,7 @@ section[hidden] {
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN FORM -->
 <section id="loginTab">
   <div class="card">
     <div class="section-title">Admin Login</div>
@@ -236,16 +236,19 @@ section[hidden] {
   </div>
 </section>
 
-<!-- ================= DASHBOARD ================= -->
-
-<header>
+<!-- DASHBOARD (hidden until login) -->
+<header hidden>
   <button id="tabClients" class="active">Clients</button>
   <button id="tabPractitioners">Practitioners</button>
   <button id="tabAppointments">Appointments</button>
   <button id="tabReports">Sales Report</button>
+  <button id="logoutBtn">Logout</button>
 </header>
 
-<div class="container">
+<div class="container" hidden>
+  <!-- your Clients / Practitioners / Appointments / Reports sections -->
+</div>
+
 
 <!-- ================= CLIENTS ================= -->
 <section id="clientsTab">
@@ -802,23 +805,23 @@ exportExcelBtn.onclick = () => {
 }
 
 /* ================= INIT ================= */
-window.onload = () => {
-
-   // hide dashboard until login
+window.onload = async () => {
+  // hide dashboard until login
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   document.getElementById("loginTab").hidden = false;
-  
+
+  // optional: check if already logged in
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    showDashboard();
+  }
+
   // attach tab handlers
   document.getElementById("tabClients").onclick = () => { showTab("clientsTab"); loadClients(); };
   document.getElementById("tabPractitioners").onclick = () => { showTab("practitionersTab"); loadPractitioners(); };
   document.getElementById("tabAppointments").onclick = () => { showTab("appointmentsTab"); loadAppointments(); };
-  document.getElementById("tabReports").onclick = () => { showTab("reportsTab"); /* loadReports() if you have one */ };
-
-  // initial load
-  loadClients();
-  loadPractitioners();
-  loadAppointments();
+  document.getElementById("tabReports").onclick = () => { showTab("reportsTab"); };
 
   // formatters
   document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
@@ -826,11 +829,22 @@ window.onload = () => {
 
   // default date/time for appointment form
   const now = new Date();
-  document.getElementById("a_date").value = now.toISOString().slice(0,10); // input type=date expects ISO
+  document.getElementById("a_date").value = now.toISOString().slice(0,10);
   document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 };
 
-  /* ================= LOGIN LOGIC ================= */
+/* ================= SHOW DASHBOARD ================= */
+function showDashboard() {
+  loginTab.hidden = true;
+  document.querySelector("header").hidden = false;
+  document.querySelector(".container").hidden = false;
+
+  loadClients();
+  loadPractitioners();
+  loadAppointments();
+}
+
+/* ================= LOGIN LOGIC ================= */
 document.getElementById("loginBtn").onclick = async () => {
   const email = loginEmail.value;
   const password = loginPassword.value;
@@ -840,23 +854,17 @@ document.getElementById("loginBtn").onclick = async () => {
     loginError.textContent = "Login failed: " + error.message;
     return;
   }
-
-  // show dashboard
-  loginTab.hidden = true;
-  document.querySelector("header").hidden = false;
-  document.querySelector(".container").hidden = false;
-
-  loadClients();
-  loadPractitioners();
-  loadAppointments();
+  showDashboard();
 };
 
+/* ================= LOGOUT ================= */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   loginTab.hidden = false;
 };
+
   
 </script>
 </body>
