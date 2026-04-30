@@ -404,6 +404,12 @@ const SERVICES = [
   { id:"QF15", name:"Quick Fix 15 minutes", price:15 }
 ];
 
+/* ================= GLOBAL STATE ================= */
+let clients = [];
+let practitioners = [];
+let appointments = [];
+
+  
 /* ================= HELPERS ================= */
 function calcAge(dob) {
   if (!dob) return "";
@@ -435,14 +441,16 @@ function formatContact(input) {
   if (v.length > 3) v = v.slice(0,3) + "-" + v.slice(3);
   input.value = v;
 }
-  
 
 /* ================= CLIENTS ================= */
 async function loadClients() {
   const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
   if (error) { console.error(error); return; }
 
-  clients = data || [];
+  clients = data || []; // <-- now fills the global array
+  // ... populate table and dropdown ...
+}
+
 
   // table
   const table = document.getElementById("clientsTable");
