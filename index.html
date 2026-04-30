@@ -249,7 +249,7 @@ section[hidden] {
   <!-- all your dashboard sections go here -->
   
 <!-- ================= CLIENTS ================= -->
-<section id="clientsTab">
+<section id="clientsTab" hidden>
   <div class="card">
     <div class="section-title">Clients</div>
     <input type="hidden" id="client_id">
@@ -465,7 +465,7 @@ async function loadClients() {
     alert("Failed to load clients. Please try again.");
     console.error(error);
     return;
-
+}
   clients = data || []; // fills the global array
 
   // table
@@ -558,6 +558,7 @@ async function loadPractitioners() {
     alert("Failed to load practitioners. Please try again.");
     console.error(error);
     return;
+    }
 
   practitioners = data || [];
   a_practitioner.innerHTML = "<option value=''>Select Practitioner</option>";
@@ -618,6 +619,7 @@ async function loadAppointments() {
     alert("Failed to load appointments. Please try again.");
     console.error(error);
     return;
+    }
 
 
   appointments = data || [];
@@ -668,7 +670,7 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
   const sst = (c.citizenship==="Foreigner" && sstEligible.includes(s.id))
     ? +(s.price*0.06).toFixed(2)
     : 0;
-  const startTime = `${a_date.value}T${a_time.value}:00Z`;
+  const startTime = `${a_date.value}T${a_time.value}:00`;
 
   const payload = {
     client_id: c.id,
@@ -861,6 +863,7 @@ function showDashboard() {
   loadClients();
   loadPractitioners();
   loadAppointments();
+  showTab("clientsTab"); // default to Clients tab
 }
 
 /* LOGIN */
@@ -891,14 +894,13 @@ document.getElementById("logoutBtn").onclick = async () => {
   loginPassword.value = "";
   loginError.textContent = "";
 
- // clear data arrays + tables + forms
+  // clear data arrays + tables
   clients = [];
   practitioners = [];
   appointments = [];
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionersTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
-};
 
   // clear client form
   client_id.value = "";
@@ -924,6 +926,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_sst.value = "";
   a_total.value = "";
 };
+
 
   
 </script>
