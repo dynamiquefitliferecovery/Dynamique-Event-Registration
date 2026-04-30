@@ -804,47 +804,29 @@ exportExcelBtn.onclick = () => {
   document.getElementById(btnMap[tabId]).classList.add("active");
 }
 
-
-document.getElementById("tabClients").onclick = () => showTab("clientsTab");
-document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
-document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
-document.getElementById("tabReports").onclick = () => showTab("reportsTab");
-
-
 /* ================= INIT ================= */
 window.onload = () => {
+  // attach tab handlers
+  document.getElementById("tabClients").onclick = () => { showTab("clientsTab"); loadClients(); };
+  document.getElementById("tabPractitioners").onclick = () => { showTab("practitionersTab"); loadPractitioners(); };
+  document.getElementById("tabAppointments").onclick = () => { showTab("appointmentsTab"); loadAppointments(); };
+  document.getElementById("tabReports").onclick = () => { showTab("reportsTab"); /* loadReports() if you have one */ };
+
+  // initial load
   loadClients();
   loadPractitioners();
   loadAppointments();
-  document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
-  document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
-
-  // default date/time
-  const now = new Date();
-  a_date.value = now.toISOString().slice(0,10); // still ISO for input
-  a_time.value = now.toTimeString().slice(0,5);
-};
-
-  document.getElementById("tabClients").onclick = () => {
-  showTab("clientsTab");
-  loadClients();
-};
-document.getElementById("tabAppointments").onclick = () => {
-  showTab("appointmentsTab");
-  loadAppointments();
-};
 
   // formatters
   document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
   document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
 
-  // set default date/time for appointment
+  // default date/time for appointment form
   const now = new Date();
-  document.getElementById("a_date").value = now.toISOString().slice(0,10);
+  document.getElementById("a_date").value = now.toISOString().slice(0,10); // input type=date expects ISO
   document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 };
 
- 
 
 </script>
 </body>
