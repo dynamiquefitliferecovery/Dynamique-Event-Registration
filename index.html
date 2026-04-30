@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Montserrat", sans-serif;
+      background: #f4f4f4;
+    }
+
+    header {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      background: #111;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header button {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    header button.active {
+      background: #ff7a00;
+      color: #000;
+      font-weight: 600;
+    }
+header {
+  position: relative;
+  z-index: 1000;
+}
+
+section {
+  position: relative;
+}
+
+
+    .container {
+      max-width: 1300px;
+      margin: auto;
+      padding: 24px;
+    }
+
+section[hidden] {
+  display: none;
+}
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 6px;
+    }
+
+    /* ---------- FORM GRIDS ---------- */
+
+    .form-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .full-row {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    button.primary {
+      background: #ff7a00;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button.danger {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button.small {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f0f0f0;
+    }
+
+    .address-cell {
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .address-cell:hover {
+      white-space: normal;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .kpi {
+      background: #fafafa;
+      border-left: 6px solid #ff7a00;
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    .kpi .label {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .kpi .value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    canvas { max-height: 260px; }
+
+    @media (max-width: 900px) {
+      .form-grid-4,
+      .form-grid-3,
+      .form-grid-2,
+      .chart-grid,
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <button id="tabClients" class="active">Clients</button>
+  <button id="tabPractitioners">Practitioners</button>
+  <button id="tabAppointments">Appointments</button>
+  <button id="tabReports">Sales Report</button>
+</header>
+
+<div class="container">
+
+<!-- ================= CLIENTS ================= -->
+<section id="clientsTab">
+  <div class="card">
+    <div class="section-title">Clients</div>
+    <input type="hidden" id="client_id">
+
+    <div class="form-grid-4">
+      <div><label>Name</label><input id="c_name"></div>
+      <div><label>DOB</label><input type="date" id="c_dob"></div>
+      <div><label>Gender</label><select id="c_gender"><option>Male</option><option>Female</option></select></div>
+      <div><label>Citizenship</label><select id="c_citizenship"><option>Malaysian</option><option>Foreigner</option></select></div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top:16px">
+      <div><label>IC / Passport</label><input id="c_ic"></div>
+      <div><label>Contact</label><input id="c_contact"></div>
+      <div><label>Email</label><input id="c_email"></div>
+    </div>
+
+    <div class="form-grid-2" style="margin-top:16px">
+      <div class="full-row"><label>Address (Optional)</label><textarea id="c_address"></textarea></div>
+    </div>
+
+
+    <div style="margin-top:16px">
+      <button class="primary" id="saveClientBtn">Save</button>
+      <button class="primary" id="cancelClientBtn">Cancel</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th><th>DOB</th><th>Age</th><th>Gender</th><th>Citizen</th>
+          <th>IC / Passport</th><th>Contact</th><th>Email</th><th>Address</th>
+          <th>Edit</th><th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="clientsTable"></tbody>
+    </table>
+  </div>
+
+  <button class="primary" onclick="loadClients()">Refresh</button>
+</section>
+
+
+
+<!-- ================= PRACTITIONERS ================= -->
+<section id="practitionersTab" hidden>
+  <div class="card">
+    <div class="section-title">Practitioners</div>
+    <input id="p_name">
+    <button class="primary" id="addPractitionerBtn">Add</button>
+
+    <table>
+      <thead><tr><th>Name</th><th>Delete</th></tr></thead>
+      <tbody id="practitionerTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= APPOINTMENTS ================= -->
+<section id="appointmentsTab" hidden>
+  <div class="card">
+    <div class="section-title">Appointments</div>
+    <input type="hidden" id="appointment_id">
+
+    <div class="form-grid-2">
+      <div><label>Date</label><input type="date" id="a_date"></div>
+      <div><label>Time</label><input type="time" id="a_time"></div>
+      <div><label>Client</label><select id="a_client"></select></div>
+      <div><label>Practitioner</label><select id="a_practitioner"></select></div>
+    </div>
+
+    <div class="form-grid-2" style="margin-top:16px">
+      <div><label>Service</label><select id="a_service"></select></div>
+      <div><label>Payment</label><select id="a_payment"><option>Cash</option><option>Card</option><option>E‑Wallet</option></select></div>
+    </div>
+
+    <div class="form-grid-3" style="margin-top:16px">
+      <div><label>Base (RM)</label><input id="a_price" readonly></div>
+      <div><label>SST (RM)</label><input id="a_sst" readonly></div>
+      <div><label>Total (RM)</label><input id="a_total" readonly></div>
+    </div>
+
+    <div class="form-grid-1 full-row" style="margin-top:16px">
+      <label>Remarks</label>
+      <textarea id="a_remarks"></textarea>
+    </div>
+
+    <div style="margin-top:16px">
+      <button class="primary" id="saveAppointmentBtn">Save</button>
+      <button class="primary" id="cancelAppointmentBtn">Cancel</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+          <th>Practitioner</th><th>Payment</th><th>Total</th>
+          <th>Edit</th><th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="appointmentsTable"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= SALES REPORT ================= -->
+<section id="reportsTab" hidden>
+  <div class="card">
+    <div class="section-title">Sales Report</div>
+    <input type="date" id="reportFrom">
+    <input type="date" id="reportTo">
+    <button class="primary" id="applyReportBtn">Generate</button>
+    <button class="primary" id="exportExcelBtn">Export Excel</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="label">Total Income</div><div class="value" id="kpiTotalIncome">RM 0.00</div></div>
+    <div class="kpi"><div class="label">Total SST</div><div class="value" id="kpiTotalSST">RM 0.00</div></div>
+    <div class="kpi"><div class="label">Transactions</div><div class="value" id="kpiTxn">0</div></div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+          <th>Practitioner</th><th>Payment</th><th>Subtotal</th><th>SST</th><th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="reportDetailTable"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="chart-grid">
+      <canvas id="serviceCountChart"></canvas>
+      <canvas id="serviceRevenueChart"></canvas>
+    </div>
+    <div class="chart-grid">
+      <canvas id="paymentRevenueChart"></canvas>
+      <canvas id="ageRevenueChart"></canvas>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+
+  function ctx(id) {
+  return document.getElementById(id).getContext("2d");
+}
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo
+";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const SERVICES = [
+  { id:"SM", name:"Sports Massage", price:45 },
+  { id:"RCB", name:"Recovery Compression Boots", price:25 },
+  { id:"AS", name:"Assisted Stretch Session", price:20 },
+  { id:"PB", name:"Physio Bundle", price:400 },
+  { id:"PKP", name:"Performance Kickstart Program", price:261 },
+  { id:"SMFT", name:"Sports Massage - First Trial", price:189 }
+];
+
+// ===== GLOBAL STATE (MUST BE TOP-LEVEL) =====
+var clients = [];
+var practitioners = [];
+var appointments = [];
+
+let serviceCountChart, serviceRevenueChart, paymentRevenueChart, ageRevenueChart;
+
+/* ================= HELPERS ================= */
+const age = d => Math.floor((Date.now() - new Date(d)) / (365.25 * 86400000));
+
+function showTab(tabId) {
+  clientsTab.hidden = true;
+  practitionersTab.hidden = true;
+  appointmentsTab.hidden = true;
+  reportsTab.hidden = true;
+
+  document.getElementById(tabId).hidden = false;
+}
+
+tabClients.onclick = () => {
+  showTab("clientsTab");
+  loadClients();
+};
+
+tabPractitioners.onclick = () => {
+  showTab("practitionersTab");
+  loadPractitioners();
+};
+
+tabAppointments.onclick = async () => {
+  showTab("appointmentsTab");
+  await loadClients();
+  await loadPractitioners();
+  await loadAppointments();
+};
+
+tabReports.onclick = () => {
+  showTab("reportsTab");
+};
+  
+function showChartInfo(el, values, labels, unit){
+  if(!el.length) return;
+  const i = el[0].index;
+  const total = values.reduce((a,b)=>a+b,0);
+  alert(
+    `${labels[i]}\n${unit}: ${values[i].toFixed(2)}\nPercentage: ${((values[i]/total)*100).toFixed(1)}%`
+  );
+}
+
+/* ================= FORMATTERS ================= */
+c_ic.oninput = ()=>{
+  let v = c_ic.value.replace(/-/g,"");
+  if(/^[A-Za-z]/.test(v)){ c_ic.value=v; return; }
+  v = v.replace(/\D/g,"");
+  c_ic.value =
+    v.length>8 ? v.slice(0,6)+"-"+v.slice(6,8)+"-"+v.slice(8,12)
+    : v.length>6 ? v.slice(0,6)+"-"+v.slice(6)
+    : v;
+};
+c_contact.oninput = ()=>{
+  let v = c_contact.value.replace(/\D/g,"");
+  c_contact.value = v.length>3 ? v.slice(0,3)+"-"+v.slice(3,11) : v;
+};
+
+/* ================= CLIENTS ================= */
+function loadClients() {
+  return sb.from("clients").select("*").order("created_at", { ascending: false })
+    .then(({ data, error }) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      clients = data || [];
+
+      // ✅ CLIENT DROPDOWN (Appointments)
+      a_client.innerHTML = "<option value=''>Select Client</option>";
+      clients.forEach(c => {
+        a_client.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
+      });
+
+      // ✅ CLIENT TABLE
+      const table = clientsTable;
+      table.innerHTML = "";
+
+      clients.forEach(c => {
+        const age = c.date_of_birth ? Math.floor((Date.now() - new Date(c.date_of_birth)) / 31557600000) : "";
+        table.innerHTML += `
+          <tr>
+            <td>${c.full_name}</td>
+            <td>${c.date_of_birth || ""}</td>
+            <td>${age}</td>
+            <td>${c.gender || ""}</td>
+            <td>${c.citizenship || ""}</td>
+            <td>${c.ic_passport || ""}</td>
+            <td>${c.contact || ""}</td>
+            <td>${c.email || ""}</td>
+            <td>${c.address || ""}</td>
+            <td><button onclick="editClient('${c.id}')">✏️</button></td>
+            <td><button onclick="deleteClient('${c.id}')">🗑</button></td>
+          </tr>`;
+      });
+    });
+}
+
+
+function editClient(id) {
+  if (!clients || clients.length === 0) {
+    console.error("Clients not loaded yet");
+    return;
+  }
+
+  const c = clients.find(x => x.id === id);
+
+  if (!c) {
+    console.error("Client not found:", id, clients);
+    return;
+  }
+
+  client_id.value = c.id;
+  c_name.value = c.full_name || "";
+  c_dob.value = c.date_of_birth || "";
+  c_gender.value = c.gender || "";
+  c_citizenship.value = c.citizenship || "";
+  c_ic.value = c.ic_passport || "";
+  c_contact.value = c.contact || "";
+  c_email.value = c.email || "";
+  c_address.value = c.address || "";
+}
+
+window.deleteClient = async id=>{
+  if(!confirm("Delete client?")) return;
+  await sb.from("clients").delete().eq("id",id);
+  loadClients();
+};
+
+saveClientBtn.onclick = async ()=>{
+  if(!c_name.value || !c_dob.value) return alert("Name & DOB required");
+  const payload = {
+    full_name:c_name.value,
+    date_of_birth:c_dob.value,
+    gender:c_gender.value,
+    citizenship:c_citizenship.value,
+    ic_passport:c_ic.value,
+    contact:c_contact.value,
+    email:c_email.value,
+    address:c_address.value||null
+  };
+  client_id.value
+    ? await sb.from("clients").update(payload).eq("id",client_id.value)
+    : await sb.from("clients").insert(payload);
+  cancelClientBtn.click();
+  loadClients();
+};
+
+cancelClientBtn.onclick = ()=>{
+  client_id.value="";
+  c_name.value="";
+  c_dob.value="";
+  c_ic.value="";
+  c_contact.value="";
+  c_email.value="";
+  c_address.value="";
+};
+
+/* ================= PRACTITIONERS ================= */
+async function loadPractitioners() {
+  const { data, error } = await sb.from("practitioners").select("*").order("name");
+  if (error) return console.error(error);
+
+  practitioners = data || [];
+
+  // ✅ PRACTITIONER DROPDOWN (Appointments)
+  a_practitioner.innerHTML = "<option value=''>Select Practitioner</option>";
+  practitioners.forEach(p => {
+    a_practitioner.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+  });
+
+  // ✅ PRACTITIONER TABLE
+  practitionerTable.innerHTML = "";
+  practitioners.forEach(p => {
+    practitionerTable.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td><button onclick="deletePractitioner('${p.id}')">🗑</button></td>
+      </tr>`;
+  });
+}
+
+async function loadAppointments() {
+  const { data } = await sb.from("appointments").select("*").order("start_time");
+  appointments = data || [];
+
+  appointmentsTable.innerHTML = "";
+  appointments.forEach(a => {
+    appointmentsTable.innerHTML += `
+      <tr>
+        <td>${a.start_time.slice(0,10)}</td>
+        <td>${a.start_time.slice(11,16)}</td>
+        <td>${a.practitioner}</td>
+        <td>${a.payment_method}</td>
+        <td>${a.total}</td>
+      </tr>`;
+  });
+}
+
+
+addPractitionerBtn.onclick = async ()=>{
+  if(!p_name.value) return;
+  await sb.from("practitioners").insert({ name:p_name.value });
+  p_name.value="";
+  loadPractitioners();
+};
+
+window.deletePractitioner = async id=>{
+  if(!confirm("Delete practitioner?")) return;
+  await sb.from("practitioners").delete().eq("id",id);
+  loadPractitioners();
+};
+
+/* ================= APPOINTMENTS ================= */
+SERVICES.forEach(s=>{
+  a_service.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+});
+
+function recalcAppointment(){
+  const s = SERVICES.find(x=>x.id===a_service.value);
+  const c = clients.find(x=>x.id===a_client.value);
+  const sst = c?.citizenship==="Foreigner" ? +(s.price*0.06).toFixed(2) : 0;
+  a_price.value=s.price;
+  a_sst.value=sst;
+  a_total.value=(s.price+sst).toFixed(2);
+}
+a_service.onchange = recalcAppointment;
+a_client.onchange = recalcAppointment;
+
+async function loadAppointments(){
+  const { data } = await sb.from("appointments").select("*").order("start_time");
+  appointments = data || [];
+  appointmentsTable.innerHTML="";
+  appointments.forEach(a=>{
+    const cn = clients.find(c=>c.id===a.client_id)?.full_name||"";
+    const sn = SERVICES.find(s=>s.id===a.service_id)?.name||"";
+    appointmentsTable.innerHTML += `
+      <tr>
+        <td>${a.start_time.slice(0,10)}</td>
+        <td>${a.start_time.slice(11,16)}</td>
+        <td>${cn}</td>
+        <td>${sn}</td>
+        <td>${a.practitioner}</td>
+        <td>${a.payment_method}</td>
+        <td>${a.total}</td>
+        <td><button class="small" onclick="editAppointment('${a.id}')">✏️</button></td>
+        <td><button class="danger small" onclick="deleteAppointment('${a.id}')">🗑</button></td>
+      </tr>`;
+  });
+}
+
+window.editAppointment = id=>{
+  const a = appointments.find(x=>x.id===id);
+  appointment_id.value = a.id;
+  a_date.value = a.start_time.slice(0,10);
+  a_time.value = a.start_time.slice(11,16);
+  a_client.value = a.client_id;
+  a_service.value = a.service_id;
+  a_practitioner.value = a.practitioner;
+  a_payment.value = a.payment_method;
+  a_remarks.value = a.remarks||"";
+  recalcAppointment();
+};
+
+saveAppointmentBtn.onclick = async ()=>{
+  const s = SERVICES.find(x=>x.id===a_service.value);
+  const c = clients.find(x=>x.id===a_client.value);
+  const sst = c.citizenship==="Foreigner" ? +(s.price*0.06).toFixed(2) : 0;
+  const startTime = `${a_date.value}T${a_time.value}:00Z`;
+
+  appointment_id.value
+    ? await sb.from("appointments").update({
+        client_id:c.id,
+        service_id:s.id,
+        practitioner:a_practitioner.value,
+        payment_method:a_payment.value,
+        remarks:a_remarks.value,
+        amount:s.price,
+        sst,
+        total:s.price+sst,
+        start_time:startTime,
+        end_time:startTime
+      }).eq("id",appointment_id.value)
+    : await sb.from("appointments").insert({
+        client_id:c.id,
+        service_id:s.id,
+        practitioner:a_practitioner.value,
+        payment_method:a_payment.value,
+        remarks:a_remarks.value,
+        amount:s.price,
+        sst,
+        total:s.price+sst,
+        start_time:startTime,
+        end_time:startTime
+      });
+
+  cancelAppointmentBtn.click();
+  loadAppointments();
+};
+
+window.deleteAppointment = async id=>{
+  if(!confirm("Delete appointment?")) return;
+  await sb.from("appointments").delete().eq("id",id);
+  loadAppointments();
+};
+
+cancelAppointmentBtn.onclick = ()=>{
+  appointment_id.value="";
+  a_remarks.value="";
+};
+
+/* ================= SALES REPORT ================= */
+applyReportBtn.onclick = () => {
+  const serviceCount = {};
+  const serviceRevenue = {};
+  const paymentRevenue = {};
+  const ageRevenue = {};
+  let totalIncome = 0;
+  let totalSST = 0;
+
+  reportDetailTable.innerHTML = "";
+
+  appointments.forEach(a => {
+    const date = a.start_time.slice(0,10);
+    if (date < reportFrom.value || date > reportTo.value) return;
+
+    const svc = SERVICES.find(s => s.id === a.service_id)?.name || "";
+    const cli = clients.find(c => c.id === a.client_id);
+    const ag = age(cli.date_of_birth);
+    const ageGroup =
+      ag < 18 ? "<18" :
+      ag < 30 ? "18–29" :
+      ag < 40 ? "30–39" :
+      ag < 50 ? "40–49" : "50+";
+
+    serviceCount[svc] = (serviceCount[svc] || 0) + 1;
+    serviceRevenue[svc] = (serviceRevenue[svc] || 0) + Number(a.total);
+    paymentRevenue[a.payment_method] =
+      (paymentRevenue[a.payment_method] || 0) + Number(a.total);
+    ageRevenue[ageGroup] = (ageRevenue[ageGroup] || 0) + Number(a.total);
+
+    totalIncome += Number(a.total);
+    totalSST += Number(a.sst);
+
+    reportDetailTable.innerHTML += `
+      <tr>
+        <td>${date}</td>
+        <td>${a.start_time.slice(11,16)}</td>
+        <td>${cli.full_name}</td>
+        <td>${svc}</td>
+        <td>${a.practitioner}</td>
+        <td>${a.payment_method}</td>
+        <td>${a.amount}</td>
+        <td>${a.sst}</td>
+        <td>${a.total}</td>
+      </tr>`;
+  });
+
+  kpiTotalIncome.textContent = `RM ${totalIncome.toFixed(2)}`;
+  kpiTotalSST.textContent = `RM ${totalSST.toFixed(2)}`;
+  kpiTxn.textContent =
+    Object.values(serviceCount).reduce((a,b)=>a+b,0);
+
+  serviceCountChart && serviceCountChart.destroy();
+  serviceRevenueChart && serviceRevenueChart.destroy();
+  paymentRevenueChart && paymentRevenueChart.destroy();
+  ageRevenueChart && ageRevenueChart.destroy();
+
+  serviceCountChart = new Chart(ctx("serviceCountChart"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(serviceCount),
+      datasets: [{ data: Object.values(serviceCount) }]
+    }
+  });
+
+  serviceRevenueChart = new Chart(ctx("serviceRevenueChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(serviceRevenue),
+      datasets: [{ data: Object.values(serviceRevenue) }]
+    }
+  });
+
+  paymentRevenueChart = new Chart(ctx("paymentRevenueChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(paymentRevenue),
+      datasets: [{ data: Object.values(paymentRevenue) }]
+    }
+  });
+
+  ageRevenueChart = new Chart(ctx("ageRevenueChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(ageRevenue),
+      datasets: [{ data: Object.values(ageRevenue) }]
+    }
+  });
+};
+
+exportExcelBtn.onclick = () => {
+  const rows = [];
+  document.querySelectorAll("#reportDetailTable tr").forEach(tr => {
+    const t = [...tr.children].map(td => td.textContent);
+    rows.push({
+      Date: t[0],
+      Time: t[1],
+      Client: t[2],
+      Service: t[3],
+      Practitioner: t[4],
+      Payment: t[5],
+      Subtotal: t[6],
+      SST: t[7],
+      Total: t[8]
+    });
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(
+    wb,
+    XLSX.utils.json_to_sheet(rows),
+    "Sales Detail"
+  );
+  XLSX.writeFile(wb, "sales_report.xlsx");
+};
+
+(async () => {
+  const today = new Date().toISOString().slice(0,10);
+  a_date.value = today;
+  a_time.value = new Date().toTimeString().slice(0,5);
+  reportFrom.value = today;
+  reportTo.value = today;
+
+  await loadClients();
+  await loadPractitioners();
+  await loadAppointments();
+})();
+
+/* ================= EXCEL EXPORT ================= */
+exportExcelBtn.onclick = ()=>{
+  const rows=[];
+  document.querySelectorAll("#reportDetailTable tr").forEach(tr=>{
+    const t=[...tr.children].map(td=>td.textContent);
+    rows.push({
+      Date:t[0], Time:t[1], Client:t[2], Service:t[3],
+      Practitioner:t[4], Payment:t[5],
+      Subtotal:t[6], SST:t[7], Total:t[8]
+    });
+  });
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),"Sales Detail");
+  XLSX.writeFile(wb,"sales_report.xlsx");
+};
+
+/* ================= INIT ================= */
+
+window.onload = function () {
+  Promise.resolve()
+    .then(loadClients)
+    .then(loadPractitioners)
+    .then(loadAppointments)
+    .catch(err => console.error("Admin init failed:", err));
+};
+
+window.onload = () => {
+  showTab("clientsTab");
+  loadClients();
+};
+  
+</script>
+
+</body>
+</html>
