@@ -635,8 +635,15 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
     });
   }
 
-  cancelAppointmentBtn.click();
+  window.deleteAppointment = async id=>{
+  if(!confirm("Delete appointment?")) return;
+  await sb.from("appointments").delete().eq("id",id);
   loadAppointments();
+};
+
+cancelAppointmentBtn.onclick = ()=>{
+  appointment_id.value="";
+  a_remarks.value="";
 };
       
     /* ================= SALES REPORT ================= */
