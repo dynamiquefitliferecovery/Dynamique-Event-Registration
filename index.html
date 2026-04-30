@@ -732,8 +732,11 @@ exportExcelBtn.onclick = () => {
 };
 
 /* ================= TAB SWITCHING ================= */
-function showTab(tabId) {
+
+ function showTab(tabId) {
+  // hide all sections
   document.querySelectorAll("section").forEach(el => el.hidden = true);
+  // show the selected section
   document.getElementById(tabId).hidden = false;
 
   // update active button styling
@@ -747,6 +750,7 @@ function showTab(tabId) {
   document.getElementById(btnMap[tabId]).classList.add("active");
 }
 
+
 document.getElementById("tabClients").onclick = () => showTab("clientsTab");
 document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
 document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
@@ -758,9 +762,11 @@ window.onload = () => {
   loadClients();
   loadPractitioners();
   loadAppointments();
+
   document.getElementById("c_ic").addEventListener("input", e => formatIC(e.target));
   document.getElementById("c_contact").addEventListener("input", e => formatContact(e.target));
 };
+
 </script>
 </body>
 </html>
