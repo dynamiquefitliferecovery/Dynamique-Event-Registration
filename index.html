@@ -767,7 +767,7 @@ paymentRevenueChartInstance = new Chart(paymentRevenueChart, {
     }
   }
 });
-
+}; 
 
 /* ================= EXPORT ================= */
 document.getElementById("exportExcelBtn").onclick = () => {
@@ -778,7 +778,7 @@ document.getElementById("exportExcelBtn").onclick = () => {
   XLSX.utils.book_append_sheet(wb, ws, "SalesReport");
   XLSX.writeFile(wb, "SalesReport.xlsx");
 };
-}
+
 
   /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
