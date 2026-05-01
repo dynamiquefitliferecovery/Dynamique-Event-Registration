@@ -4,26 +4,137 @@
   <meta charset="UTF-8">
   <title>Dynamique Sports Rehab Centre</title>
   <style>
-    body { background: #f4f4f9; font-family: 'Segoe UI', sans-serif; margin:0; }
-header { background: #333; color: #fff; padding: 10px; display:flex; gap:10px; }
-header button { background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
-header button:hover { background:#0056b3; }
-.container { padding:20px; }
-.card { background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:20px; }
-.section-title { margin-bottom:10px; color:#007bff; }
-.form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
-.form-actions { margin-top:15px; display:flex; gap:10px; }
-table { width:100%; border-collapse:collapse; margin-top:15px; }
-th, td { border:1px solid #ddd; padding:8px; text-align:left; }
-th { background:#007bff; color:#fff; }
-.small { font-size:12px; padding:4px 8px; }
-.primary { background:#28a745; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-.primary:hover { background:#218838; }
-.danger { background:#dc3545; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-.danger:hover { background:#c82333; }
+ /* ===== Global Layout ===== */
+body {
+  background: orange;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  color: black;
+}
+
+.container {
+  padding: 20px;
+}
+
+/* ===== Header Navigation ===== */
+header {
+  background: black;
+  color: white;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+header button {
+  background: orange;
+  color: black;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+header button:hover {
+  background: white;
+  color: black;
+  border: 1px solid orange;
+}
+
+/* ===== Cards & Sections ===== */
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  margin-bottom: 20px;
+}
+
+.section-title {
+  color: black;
+  border-bottom: 2px solid orange;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* ===== Forms ===== */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* ===== Buttons ===== */
+button.primary {
+  background: orange;
+  color: black;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.primary:hover {
+  background: black;
+  color: white;
+}
+
+button.danger {
+  background: black;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button.danger:hover {
+  background: orange;
+  color: black;
+}
+
+/* ===== Tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: black;
+  color: white;
+}
+
+.small {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
 
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -68,54 +179,48 @@ th { background:#007bff; color:#fff; }
     </div>
   </section>
 
-  <!-- Practitioners -->
-  <section id="practitionersTab" hidden>
-    <h2 class="section-title">Practitioners</h2>
-    <div class="card">
-      <div class="form-grid-2">
-        <label>Name <input id="p_name"></label>
-      </div>
-      <div class="form-actions">
-  <button id="addPractitionerBtn" class="primary">Add</button>
-  <button id="cancelPractitionerBtn" class="danger">Cancel</button>
-</div>
-<table>
-  <thead>
-    <tr><th>Name</th><th>Delete</th></tr>
-  </thead>
-  <tbody id="practitionerTable"></tbody>
-</table>
+ <!-- Practitioners -->
+ <section id="practitionersTab" hidden>
+  <h2 class="section-title">Practitioners</h2>
+  <div class="card">
+    <div class="form-grid-2">
+      <label>Name <input id="p_name"></label>
     </div>
-  </section>
+    <div class="form-actions">
+      <button id="addPractitionerBtn" class="primary">Add</button>
+      <button id="cancelPractitionerBtn" class="danger">Cancel</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Delete</th></tr></thead>
+      <tbody id="practitionerTable"></tbody>
+    </table>
+  </div>
+</section>
+
 
   <!-- Appointments -->
   <section id="appointmentsTab" hidden>
     <h2 class="section-title">Appointments</h2>
     <div class="card">
       <div class="form-grid-2">
-        <label>Date <input id="a_date" type="date" value=""></label>
-        <label>Time <input id="a_time" type="time" value=""></label>
+        <label>Date <input id="a_date" type="date"></label>
+        <label>Time <input id="a_time" type="time"></label>
         <label>Client <select id="a_client"></select></label>
         <label>Practitioner <select id="a_practitioner"></select></label>
         <label>Service <select id="a_service"></select></label>
+        <label>Payment <select id="a_payment"><option>Cash</option><option>Card</option><option>E-Wallet</option></select></label>
+        <label>Remarks <input id="a_remarks"></label>
         <label>Amount <input id="a_amount" readonly></label>
         <label>SST <input id="a_sst" readonly></label>
         <label>Total <input id="a_total" readonly></label>
-        <label>Payment <select id="a_payment"><option>Cash</option><option>Card</option><option>E‑Wallet</option></select></label>
-        <label>Remarks <input id="a_remarks"></label>
       </div>
       <div class="form-actions">
         <button id="saveAppointmentBtn" class="primary">Save</button>
-        <button class="primary">Cancel</button>
+        <button class="danger">Cancel</button>
       </div>
       <table>
         <thead>
-          <tr>
-            <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
-            <th>Practitioner</th><th>Payment</th>
-            <th>Amount</th><th>SST</th><th>Total</th>
-            <th>Remarks</th><th>Edit</th><th>Delete</th>
-          </tr>
+          <tr><th>Date</th><th>Time</th><th>Client</th><th>Service</th><th>Practitioner</th><th>Payment</th><th>Amount</th><th>SST</th><th>Total</th><th>Remarks</th><th>Edit</th><th>Delete</th></tr>
         </thead>
         <tbody id="appointmentsTable"></tbody>
       </table>
@@ -123,18 +228,22 @@ th { background:#007bff; color:#fff; }
   </section>
 
   <!-- Sales Report -->
-  <section id="reportsTab" hidden>
-    <h2 class="section-title">Sales Report</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr>
-        </thead>
-        <tbody id="salesReportTable"></tbody>
-      </table>
-    </div>
-  </section>
-</div>
+<section id="reportsTab" hidden>
+  <h2 class="section-title">Sales Report</h2>
+  <div class="card">
+    <input type="date" id="reportStart">
+    <input type="date" id="reportEnd">
+    <button id="filterReportBtn" class="primary">Filter</button>
+    <button id="exportExcelBtn" class="primary">Export to Excel</button>
+    <canvas id="salesChart"></canvas>
+    <table>
+      <thead><tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr></thead>
+      <tbody id="salesReportTable"></tbody>
+    </table>
+  </div>
+</section>
+
+ 
 
 <!-- Login -->
 <section id="loginTab">
@@ -314,7 +423,7 @@ function resetClientSave() {
 
 /* ================= PRACTITIONERS ================= */
 document.getElementById("addPractitionerBtn").onclick = async () => {
-  const name = document.getElementById("p_name").value;
+  const name = document.getElementById("p_name").value.trim();
   if (!name) return;
   const { error } = await sb.from("practitioners").insert({ name });
   if (error) { alert("Error saving practitioner: " + error.message); return; }
@@ -322,11 +431,10 @@ document.getElementById("addPractitionerBtn").onclick = async () => {
   document.getElementById("p_name").value = "";
 };
 
-async function deletePractitioner(id) {
-  const { error } = await sb.from("practitioners").delete().eq("id", id);
-  if (error) { alert("Error deleting practitioner: " + error.message); return; }
-  loadPractitioners();
-}
+document.getElementById("cancelPractitionerBtn").onclick = () => {
+  document.getElementById("p_name").value = "";
+};
+
 async function loadPractitioners() {
   const { data, error } = await sb.from("practitioners").select("*").order("created_at",{ascending:false});
   if (error) { console.error("Error loading practitioners:", error); return; }
@@ -347,7 +455,13 @@ async function loadPractitioners() {
   }
 }
 
-/* ================= APPOINTMENTS ================= */
+async function deletePractitioner(id) {
+  const { error } = await sb.from("practitioners").delete().eq("id", id);
+  if (error) { alert("Error deleting practitioner: " + error.message); return; }
+  loadPractitioners();
+}
+
+
 /* ================= APPOINTMENTS ================= */
 
 // Auto-populate current date/time
@@ -497,9 +611,17 @@ function resetAppointmentSave() {
 }
   
 /* ================= SALES REPORT ================= */
+let salesChartInstance = null;
+
 async function loadSalesReport() {
-  const { data, error } = await sb.from("appointments").select("*");
-  if (error) { console.error("Error loading appointments for report:", error); return; }
+  const start = document.getElementById("reportStart").value;
+  const end = document.getElementById("reportEnd").value;
+  let query = sb.from("appointments").select("*");
+  if (start) query = query.gte("start_time", start);
+  if (end) query = query.lte("start_time", end);
+  const { data, error } = await query;
+  if (error) { console.error(error); return; }
+
   const report = {};
   data.forEach(a => {
     const serviceName = SERVICES.find(s=>s.id===a.service_id)?.name || "Unknown";
@@ -508,6 +630,8 @@ async function loadSalesReport() {
     report[serviceName].sst += a.sst || 0;
     report[serviceName].total += a.total || 0;
   });
+
+  // Update table
   const table = document.getElementById("salesReportTable");
   table.innerHTML = "";
   Object.keys(report).forEach(service => {
@@ -520,7 +644,38 @@ async function loadSalesReport() {
     </tr>`;
     table.insertAdjacentHTML("beforeend", row);
   });
+
+  // Refresh chart
+  const ctx = document.getElementById("salesChart").getContext("2d");
+  if (salesChartInstance) salesChartInstance.destroy();
+  salesChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(report),
+      datasets: [{
+        label: 'Total Sales',
+        data: Object.values(report).map(r=>r.total),
+        backgroundColor: 'orange'
+      }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}} }
+  });
+
+  // Export to Excel (CSV)
+  document.getElementById("exportExcelBtn").onclick = () => {
+    let csv = "Service,Amount,SST,Total\n";
+    Object.keys(report).forEach(s => {
+      const r = report[s];
+      csv += `${s},${r.amount.toFixed(2)},${r.sst.toFixed(2)},${r.total.toFixed(2)}\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "sales_report.csv"; a.click();
+  };
 }
+
+document.getElementById("filterReportBtn").onclick = loadSalesReport;
 
 
 /* ================= LOGIN/LOGOUT ================= */
