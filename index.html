@@ -670,6 +670,7 @@ document.getElementById("exportExcelBtn").onclick = () => {
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
+
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
     document.getElementById("loginError").innerText = error.message;
@@ -686,6 +687,7 @@ document.getElementById("loginBtn").onclick = async () => {
   loadPractitioners();
   loadAppointments();
 };
+
 
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
@@ -710,10 +712,12 @@ document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
 window.onload = () => {
-  // Show login screen by default
   document.getElementById("loginTab").hidden = false;
   document.querySelector(".container").hidden = true;
   document.getElementById("logoutMessage").hidden = true;
+  document.getElementById("loginError").innerText = "";
+};
+
 
   // Reset login error
   document.getElementById("loginError").innerText = "";
