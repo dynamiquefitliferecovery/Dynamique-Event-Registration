@@ -679,6 +679,7 @@ document.getElementById("loginBtn").onclick = async () => {
   }
 
   if (data.session) {
+    // Hide login, show dashboard
     document.getElementById("loginTab").hidden = true;
     document.querySelector(".container").hidden = false;
     document.getElementById("logoutMessage").hidden = true;
@@ -706,33 +707,26 @@ document.getElementById("tabAppointments").onclick = ()=>showTab("appointmentsTa
 document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
+
 window.onload = async () => {
-  try {
-    // Check if a session already exists
-    const { data: { session }, error } = await sb.auth.getSession();
-    if (error) {
-      console.error("Error checking session:", error);
-    }
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    document.getElementById("loginTab").hidden = true;
+    document.querySelector(".container").hidden = false;
+    document.getElementById("logoutMessage").hidden = true;
 
-    if (session) {
-      // Already logged in → show dashboard
-      document.getElementById("loginTab").hidden = true;
-      document.querySelector(".container").hidden = false;
-      document.getElementById("logoutMessage").hidden = true;
+    loadClients();
+    loadPractitioners();
+    loadAppointments();
+  } else {
+    document.getElementById("loginTab").hidden = false;
+    document.querySelector(".container").hidden = true;
+    document.getElementById("logoutMessage").hidden = true;
+  }
 
-      // Load data
-      loadClients();
-      loadPractitioners();
-      loadAppointments();
-    } else {
-      // No session → show login
-      document.getElementById("loginTab").hidden = false;
-      document.querySelector(".container").hidden = true;
-      document.getElementById("logoutMessage").hidden = true;
-    }
+  document.getElementById("loginError").innerText = "";
+}
 
-    // Reset login error message
-    document.getElementById("loginError").innerText = "";
 
     // Optional: set default date/time for appointments
     if (typeof setCurrentDateTime === "function") {
