@@ -927,14 +927,6 @@ window.onload = async () => {
   a_time.value = `${hh}:${min}`;
 };
 
-  // re‑enable tab buttons
-  document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
-
-  loadClients();
-  loadPractitioners();
-  loadAppointments();
-  showTab("clientsTab");
-}
 
 /* LOGIN */
 document.getElementById("loginBtn").onclick = async () => {
