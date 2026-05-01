@@ -672,12 +672,19 @@ document.getElementById("loginBtn").onclick = async () => {
   const password = document.getElementById("loginPassword").value;
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
-    document.getElementById("loginError").textContent = "Login failed: " + error.message;
+    document.getElementById("loginError").innerText = error.message;
     return;
   }
+
+  // Hide login, show dashboard
   document.getElementById("loginTab").hidden = true;
   document.querySelector(".container").hidden = false;
-  loadClients(); loadPractitioners(); loadAppointments();
+  document.getElementById("logoutMessage").hidden = true;
+
+  // Load data
+  loadClients();
+  loadPractitioners();
+  loadAppointments();
 };
 
 document.getElementById("logoutBtn").onclick = async () => {
@@ -703,18 +710,25 @@ document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
 window.onload = () => {
-  const serviceSelect = document.getElementById("a_service");
-  if (serviceSelect) {
-    serviceSelect.innerHTML = "<option value=''>Select Service</option>";
-    SERVICES.forEach(s => {
-      serviceSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-    });
-  }
-  setCurrentDateTime();
-  updateTotals();
+  // Show login screen by default
   document.getElementById("loginTab").hidden = false;
   document.querySelector(".container").hidden = true;
+  document.getElementById("logoutMessage").hidden = true;
+
+  // Reset login error
+  document.getElementById("loginError").innerText = "";
+
+  // Optional: set default date/time for appointments
+  if (typeof setCurrentDateTime === "function") {
+    setCurrentDateTime();
+  }
+
+  // Optional: initialize totals
+  if (typeof updateTotals === "function") {
+    updateTotals();
+  }
 };
+
 </script>
 </body>
 </html>
