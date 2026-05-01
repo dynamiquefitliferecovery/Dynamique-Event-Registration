@@ -970,12 +970,8 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.querySelectorAll("section").forEach(el => el.hidden = true);
 
   // show only login form
-function showDashboard() {
-  loginTab.hidden = true;
-  document.getElementById("logoutMessage").hidden = true; // hide logout message when logged in
-  document.querySelector("header").hidden = false;
-  document.querySelector(".container").hidden = false;
-
+  loginTab.hidden = false;
+  document.getElementById("logoutMessage").hidden = false; // show logout confirmation
 
   // disable tab buttons while logged out
   document.querySelectorAll("header button").forEach(btn => btn.disabled = true);
@@ -1017,6 +1013,23 @@ function showDashboard() {
   a_sst.value = "";
   a_total.value = "";
 };
+
+/* SHOW DASHBOARD */
+function showDashboard() {
+  loginTab.hidden = true;
+  document.getElementById("logoutMessage").hidden = true; // hide logout message when logged in
+  document.querySelector("header").hidden = false;
+  document.querySelector(".container").hidden = false;
+
+  // re‑enable tab buttons
+  document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
+
+  loadClients();
+  loadPractitioners();
+  loadAppointments();
+  showTab("clientsTab");
+}
+
 </script>
 </body>
 </html>
