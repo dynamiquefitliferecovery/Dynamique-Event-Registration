@@ -667,6 +667,7 @@ document.getElementById("exportExcelBtn").onclick = () => {
 
 
 /* ================= LOGIN/LOGOUT ================= */
+
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
@@ -677,29 +678,17 @@ document.getElementById("loginBtn").onclick = async () => {
     return;
   }
 
-  // Confirm session exists
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    // Hide login, show dashboard
+  if (data.session) {
     document.getElementById("loginTab").hidden = true;
     document.querySelector(".container").hidden = false;
     document.getElementById("logoutMessage").hidden = true;
 
- // Load data
     loadClients();
     loadPractitioners();
     loadAppointments();
   } else {
     document.getElementById("loginError").innerText = "Login failed: no session created.";
   }
-};
-
-
-document.getElementById("logoutBtn").onclick = async () => {
-  await sb.auth.signOut();
-  document.querySelector(".container").hidden = true;
-  document.getElementById("loginTab").hidden = false;
-  document.getElementById("logoutMessage").hidden = false;
 };
 
 
@@ -718,37 +707,46 @@ document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
 window.onload = async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    // Already logged in
-    document.getElementById("loginTab").hidden = true;
-    document.querySelector(".container").hidden = false;
-    document.getElementById("logoutMessage").hidden = true;
+  try {
+    // Check if a session already exists
+    const { data: { session }, error } = await sb.auth.getSession();
+    if (error) {
+      console.error("Error checking session:", error);
+    }
 
-    loadClients();
-    loadPractitioners();
-    loadAppointments();
-  } else {
-    // Show login
-    document.getElementById("loginTab").hidden = false;
-    document.querySelector(".container").hidden = true;
-    document.getElementById("logoutMessage").hidden = true;
-  }
+    if (session) {
+      // Already logged in → show dashboard
+      document.getElementById("loginTab").hidden = true;
+      document.querySelector(".container").hidden = false;
+      document.getElementById("logoutMessage").hidden = true;
 
-  // Reset login error
-  document.getElementById("loginError").innerText = "";
+      // Load data
+      loadClients();
+      loadPractitioners();
+      loadAppointments();
+    } else {
+      // No session → show login
+      document.getElementById("loginTab").hidden = false;
+      document.querySelector(".container").hidden = true;
+      document.getElementById("logoutMessage").hidden = true;
+    }
 
-  // Optional: set default date/time for appointments
-  if (typeof setCurrentDateTime === "function") {
-    setCurrentDateTime();
-  }
+    // Reset login error message
+    document.getElementById("loginError").innerText = "";
 
-  // Optional: initialize totals
-  if (typeof updateTotals === "function") {
-    updateTotals();
+    // Optional: set default date/time for appointments
+    if (typeof setCurrentDateTime === "function") {
+      setCurrentDateTime();
+    }
+
+    // Optional: initialize totals
+    if (typeof updateTotals === "function") {
+      updateTotals();
+    }
+  } catch (err) {
+    console.error("Initialization error:", err);
   }
 };
-
 
 </script>
 </body>
