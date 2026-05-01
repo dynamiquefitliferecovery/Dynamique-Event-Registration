@@ -225,7 +225,7 @@ section[hidden] {
 
 <body>
 
-<!-- ADMIN LOGIN -->
+<!-- ================= LOGIN ================= -->
 <section id="loginTab">
   <div class="card">
     <div class="section-title">Admin Login</div>
@@ -236,22 +236,22 @@ section[hidden] {
   </div>
 </section>
 
-<!-- DASHBOARD (hidden until login) -->
+<!-- ================= DASHBOARD ================= -->
 <header hidden>
-  <button id="tabClients" onclick="showTab('clientsTab')" class="active">Clients</button>
-  <button id="tabPractitioners" onclick="showTab('practitionersTab')">Practitioners</button>
-  <button id="tabAppointments" onclick="showTab('appointmentsTab')">Appointments</button>
-  <button id="tabReports" onclick="showTab('reportsTab')">Sales Report</button>
+  <button id="tabClients" class="active">Clients</button>
+  <button id="tabPractitioners">Practitioners</button>
+  <button id="tabAppointments">Appointments</button>
+  <button id="tabReports">Sales Report</button>
   <button id="logoutBtn">Logout</button>
 </header>
 
 <div class="container" hidden>
-  <section id="clientsTab" hidden>…</section>
-  <section id="practitionersTab" hidden>…</section>
-  <section id="appointmentsTab" hidden>…</section>
-  <section id="reportsTab" hidden>…</section>
+  <!-- Clients, Practitioners, Appointments, Sales Report sections go here -->
 </div>
-  
+
+</body>
+
+
 <!-- ================= CLIENT REGISTRATION ================= -->
 <section id="clientsTab" hidden>
   <h2>Client Registration</h2>
