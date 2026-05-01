@@ -20,12 +20,12 @@
   <style>
     * { box-sizing: border-box; }
 
- body {
+  body {
   margin: 0;
   font-family: "Montserrat", sans-serif;
   background: #ff7a00;   /* solid orange */
   min-height: 100vh;
-  display: block;        /* stack children vertically */
+  display: block;
 }
 
     header {
@@ -933,7 +933,7 @@ window.onload = async () => {
   const hh = String(now.getHours()).padStart(2, "0");
   const min = String(now.getMinutes()).padStart(2, "0");
   a_time.value = `${hh}:${min}`;
-};
+
 
 
 /* LOGIN */
@@ -966,20 +966,7 @@ function showDashboard() {
   showTab("clientsTab");
 }
 
-    function showTab(tabId) {
-      document.querySelectorAll("section").forEach(el => el.hidden = true);
-      document.getElementById(tabId).hidden = false;
-      document.querySelectorAll("header button").forEach(btn => btn.classList.remove("active"));
-      const btnMap = {
-        clientsTab: "tabClients",
-        practitionersTab: "tabPractitioners",
-        appointmentsTab: "tabAppointments",
-        reportsTab: "tabReports"
-      };
-      document.getElementById(btnMap[tabId]).classList.add("active");
-    }
-
- 
+   
 /* SHOW DASHBOARD */
     document.getElementById("tabClients").onclick = () => showTab("clientsTab");
     document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
