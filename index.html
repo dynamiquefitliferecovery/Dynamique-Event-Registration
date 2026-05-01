@@ -117,7 +117,12 @@
   <section id="reportsTab" hidden>
     <h2 class="section-title">Sales Report</h2>
     <div class="card">
-      <!-- your report content -->
+      <table>
+        <thead>
+          <tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr>
+        </thead>
+        <tbody id="salesReportTable"></tbody>
+      </table>
     </div>
   </section>
 </div>
@@ -136,7 +141,7 @@
 <script>
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
+const SUPABASE_ANON_KEY = "YOUR_KEY_HERE"; // replace with your actual key
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ================= SERVICES ================= */
@@ -234,6 +239,63 @@ async function loadClients() {
   }
 }
 
+async function deleteClient(id) {
+  const { error } = await sb.from("clients").delete().eq("id", id);
+  if (error) { alert("Error deleting client: " + error.message); return; }
+  loadClients();
+}
+
+async function editClient(id) {
+  const client = clients.find(c => c.id === id);
+  if (!client) return;
+  document.getElementById("c_name").value = client.full_name;
+  document.getElementById("c_dob").value = client.date_of_birth;
+  document.getElementById("c_age").value = calcAge(client.date_of_birth);
+  document.getElementById("c_gender").value = client.gender;
+  document.getElementById("c_citizen").value = client.citizenship;
+  document.getElementById("c_ic").value = client.ic_passport;
+  document.getElementById("c_contact").value = client.contact;
+  document.getElementById("c_email").value = client.email;
+  document.getElementById("c_address").value = client.address;
+
+  document.getElementById("addClientBtn").onclick = async () => {
+    const updated = {
+      full_name: document.getElementById("c_name").value,
+      date_of_birth: document.getElementById("c_dob").value,
+      gender: document.getElementById("c_gender").value,
+      citizenship: document.getElementById("c_citizen").value,
+      ic_passport: document.getElementById("c_ic").value,
+      contact: document.getElementById("c_contact").value,
+      email: document.getElementById("c_email").value,
+      address: document.getElementById("c_address").value
+    };
+    const { error } = await sb.from("clients").update(updated).eq("id", id);
+    if (error) { alert("Error updating client: " + error.message); return; }
+    loadClients();
+    resetClientSave();
+  };
+}
+
+function resetClientSave() {
+  document.getElementById("addClientBtn").onclick = async () => {
+    const client = {
+      full_name: document.getElementById("c_name").value,
+      date_of_birth: document.getElementById("c_dob").value,
+      gender: document.getElementById("c_gender").value,
+      citizenship: document.getElementById("c_citizen").value,
+      ic_passport: document.getElementById("c_ic").value,
+      contact: document.getElementById("c_contact").value,
+      email: document.getElementById("c_email").value,
+      address: document.getElementById("c_address").value
+    };
+    const { error } = await sb.from("clients").insert(client);
+    if (error) { alert("Error saving client: " + error.message); return; }
+    loadClients();
+    ["c_name","c_dob","c_age","c_gender","c_citizen","c_ic","c_contact","c_email","c_address"]
+      .forEach(id => document.getElementById(id).value = "");
+  };
+}
+
 /* ================= PRACTITIONERS ================= */
 document.getElementById("addPractitionerBtn").onclick = async () => {
   const name = document.getElementById("p_name").value;
@@ -249,7 +311,6 @@ async function deletePractitioner(id) {
   if (error) { alert("Error deleting practitioner: " + error.message); return; }
   loadPractitioners();
 }
-
 async function loadPractitioners() {
   const { data, error } = await sb.from("practitioners").select("*").order("created_at",{ascending:false});
   if (error) { console.error("Error loading practitioners:", error); return; }
@@ -326,127 +387,9 @@ async function deleteAppointment(id) {
   loadAppointments();
 }
 
-/* ================= LOGIN/LOGOUT ================= */
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) {
-    document.getElementById("loginError").textContent = "Login failed: " + error.message;
-    return;
-  }
-  document.getElementById("loginTab").hidden = true;
-  document.querySelector(".container").hidden = false;
-  loadClients(); loadPractitioners(); loadAppointments();
-};
-
-document.getElementById("logoutBtn").onclick = async () => {
-  await sb.auth.signOut();
-  document.querySelector(".container").hidden = true;
-  document.getElementById("loginTab").hidden = false;
-  document.getElementById("logoutMessage").hidden = false;
-};
-
-/* ================= TAB SWITCHING ================= */
-function showTab(tabId) {
-  ["clientsTab","practitionersTab","appointmentsTab","reportsTab"].forEach(id=>{
-    document.getElementById(id).hidden = true;
-  });
-  document.getElementById(tabId).hidden = false;
-}
-document.getElementById("tabClients").onclick = ()=>showTab("clientsTab");
-document.getElementById("tabPractitioners").onclick = ()=>showTab("practitionersTab");
-document.getElementById("tabAppointments").onclick = ()=>showTab("appointmentsTab");
-document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
-
-/* ================= INITIALIZATION ================= */
-window.onload = async () => {
-  // Populate service dropdown
-  const serviceSelect = document.getElementById("a_service");
-  if (serviceSelect) {
-    serviceSelect.innerHTML = "<option value=''>Select Service</option>";
-    SERVICES.forEach(s => {
-      serviceSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-    });
-  }
-
-  // Default view: login visible, dashboard hidden
-  document.getElementById("loginTab").hidden = false;
-  document.querySelector(".container").hidden = true;
-};
-
-/* ================= CLIENT EDIT/DELETE ================= */
-async function deleteClient(id) {
-  const { error } = await sb.from("clients").delete().eq("id", id);
-  if (error) { alert("Error deleting client: " + error.message); return; }
-  loadClients();
-}
-
-async function editClient(id) {
-  const client = clients.find(c => c.id === id);
-  if (!client) return;
-  // Populate form with existing values
-  document.getElementById("c_name").value = client.full_name;
-  document.getElementById("c_dob").value = client.date_of_birth;
-  document.getElementById("c_age").value = calcAge(client.date_of_birth);
-  document.getElementById("c_gender").value = client.gender;
-  document.getElementById("c_citizen").value = client.citizenship;
-  document.getElementById("c_ic").value = client.ic_passport;
-  document.getElementById("c_contact").value = client.contact;
-  document.getElementById("c_email").value = client.email;
-  document.getElementById("c_address").value = client.address;
-
-  // Override Save button to update instead of insert
-  document.getElementById("addClientBtn").onclick = async () => {
-    const updated = {
-      full_name: document.getElementById("c_name").value,
-      date_of_birth: document.getElementById("c_dob").value,
-      gender: document.getElementById("c_gender").value,
-      citizenship: document.getElementById("c_citizen").value,
-      ic_passport: document.getElementById("c_ic").value,
-      contact: document.getElementById("c_contact").value,
-      email: document.getElementById("c_email").value,
-      address: document.getElementById("c_address").value
-    };
-    const { error } = await sb.from("clients").update(updated).eq("id", id);
-    if (error) { alert("Error updating client: " + error.message); return; }
-    loadClients();
-    // Reset Save button back to insert mode
-    resetClientSave();
-  };
-}
-
-function resetClientSave() {
-  document.getElementById("addClientBtn").onclick = async () => {
-    const client = {
-      full_name: document.getElementById("c_name").value,
-      date_of_birth: document.getElementById("c_dob").value,
-      gender: document.getElementById("c_gender").value,
-      citizenship: document.getElementById("c_citizen").value,
-      ic_passport: document.getElementById("c_ic").value,
-      contact: document.getElementById("c_contact").value,
-      email: document.getElementById("c_email").value,
-      address: document.getElementById("c_address").value
-    };
-    const { error } = await sb.from("clients").insert(client);
-    if (error) { alert("Error saving client: " + error.message); return; }
-    loadClients();
-    ["c_name","c_dob","c_age","c_gender","c_citizen","c_ic","c_contact","c_email","c_address"]
-      .forEach(id => document.getElementById(id).value = "");
-  };
-}
-
-/* ================= APPOINTMENT EDIT/DELETE ================= */
-async function deleteAppointment(id) {
-  const { error } = await sb.from("appointments").delete().eq("id", id);
-  if (error) { alert("Error deleting appointment: " + error.message); return; }
-  loadAppointments();
-}
-
 async function editAppointment(id) {
   const a = appointments.find(appt => appt.id === id);
   if (!a) return;
-  // Populate form
   document.getElementById("a_date").value = a.start_time.slice(0,10);
   document.getElementById("a_time").value = a.start_time.slice(11,16);
   document.getElementById("a_client").value = a.client_id;
@@ -455,7 +398,6 @@ async function editAppointment(id) {
   document.getElementById("a_payment").value = a.payment_method;
   document.getElementById("a_remarks").value = a.remarks;
 
-  // Override Save button to update instead of insert
   document.getElementById("saveAppointmentBtn").onclick = async () => {
     const service = SERVICES.find(s => s.id === document.getElementById("a_service").value);
     const amount = service?.price || 0;
@@ -499,6 +441,84 @@ function resetAppointmentSave() {
       .forEach(id => document.getElementById(id).value = "");
   };
 }
+
+/* ================= SALES REPORT ================= */
+async function loadSalesReport() {
+  const { data, error } = await sb.from("appointments").select("*");
+  if (error) { console.error("Error loading appointments for report:", error); return; }
+  const report = {};
+  data.forEach(a => {
+    const serviceName = SERVICES.find(s=>s.id===a.service_id)?.name || "Unknown";
+    if (!report[serviceName]) report[serviceName] = { amount:0, sst:0, total:0 };
+    report[serviceName].amount += a.amount || 0;
+    report[serviceName].sst += a.sst || 0;
+    report[serviceName].total += a.total || 0;
+  });
+  const table = document.getElementById("salesReportTable");
+  table.innerHTML = "";
+  Object.keys(report).forEach(service => {
+    const r = report[service];
+    const row = `<tr>
+      <td>${service}</td>
+      <td>${r.amount.toFixed(2)}</td>
+      <td>${r.sst.toFixed(2)}</td>
+      <td>${r.total.toFixed(2)}</td>
+    </tr>`;
+    table.insertAdjacentHTML("beforeend", row);
+  });
+}
+
+/* ================= LOGIN/LOGOUT ================= */
+document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    document.getElementById("loginError").textContent = "Login failed: " + error.message;
+    return;
+  }
+  document.getElementById("loginTab").hidden = true;
+  document.querySelector(".container").hidden = false;
+  loadClients(); loadPractitioners(); loadAppointments();
+};
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = async () => {
+  await sb.auth.signOut();
+  document.querySelector(".container").hidden = true;
+  document.getElementById("loginTab").hidden = false;
+  document.getElementById("logoutMessage").hidden = false;
+};
+
+/* ================= TAB SWITCHING ================= */
+function showTab(tabId) {
+  ["clientsTab","practitionersTab","appointmentsTab","reportsTab"].forEach(id=>{
+    document.getElementById(id).hidden = true;
+  });
+  document.getElementById(tabId).hidden = false;
+  if (tabId === "reportsTab") loadSalesReport();
+}
+
+document.getElementById("tabClients").onclick = ()=>showTab("clientsTab");
+document.getElementById("tabPractitioners").onclick = ()=>showTab("practitionersTab");
+document.getElementById("tabAppointments").onclick = ()=>showTab("appointmentsTab");
+document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
+
+/* ================= INITIALIZATION ================= */
+window.onload = () => {
+  // Populate service dropdown
+  const serviceSelect = document.getElementById("a_service");
+  if (serviceSelect) {
+    serviceSelect.innerHTML = "<option value=''>Select Service</option>";
+    SERVICES.forEach(s => {
+      serviceSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+    });
+  }
+
+  // Default view: login visible, dashboard hidden
+  document.getElementById("loginTab").hidden = false;
+  document.querySelector(".container").hidden = true;
+};
+
 </script>
 </body>
 </html>
