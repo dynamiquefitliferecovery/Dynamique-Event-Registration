@@ -4,103 +4,26 @@
   <meta charset="UTF-8">
   <title>Dynamique Sports Rehab Centre</title>
   <style>
- /* ===== Global Layout ===== */
-body {
-  background: orange;
-  font-family: 'Segoe UI', sans-serif;
-  margin: 0;
-  color: black;
-}
-header {
-  background: black;
-  color: white;
-  padding: 10px;
-  display: flex;
-  gap: 10px;
-}
-header button {
-  background: orange;
-  color: black;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-}
-header button:hover {
-  background: white;
-  color: black;
-  border: 1px solid orange;
-}
-.container { padding: 20px; }
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  margin-bottom: 20px;
-}
-.section-title {
-  color: black;
-  border-bottom: 2px solid orange;
-  margin-bottom: 15px;
-  font-size: 18px;
-  font-weight: bold;
-}
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-.form-actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-input, select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-button.primary {
-  background: orange;
-  color: black;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-}
-button.primary:hover { background: black; color: white; }
-button.danger {
-  background: black;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-button.danger:hover { background: orange; color: black; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-th, td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-th {
-  background: black;
-  color: white;
-}
-.small { font-size: 12px; padding: 4px 8px; }
-
-
+    body { background: orange; font-family: 'Segoe UI', sans-serif; margin:0; color:black; }
+    header { background:black; color:white; padding:10px; display:flex; gap:10px; }
+    header button { background:orange; color:black; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:600; }
+    header button:hover { background:white; color:black; border:1px solid orange; }
+    .container { padding:20px; }
+    .card { background:white; padding:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.2); margin-bottom:20px; }
+    .section-title { color:black; border-bottom:2px solid orange; margin-bottom:15px; font-size:18px; font-weight:bold; }
+    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+    .form-actions { margin-top:15px; display:flex; gap:10px; }
+    input, select, textarea { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; }
+    button.primary { background:orange; color:black; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:600; }
+    button.primary:hover { background:black; color:white; }
+    button.danger { background:black; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
+    button.danger:hover { background:orange; color:black; }
+    table { width:100%; border-collapse:collapse; margin-top:15px; }
+    th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+    th { background:black; color:white; }
+    .small { font-size:12px; padding:4px 8px; }
   </style>
-   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -124,47 +47,41 @@ th {
         <label>Age <input id="c_age" readonly></label>
         <label>Gender <select id="c_gender"><option>Male</option><option>Female</option></select></label>
         <label>Citizen <select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select></label>
-        <label>IC / Passport <input id="c_ic" oninput="formatIC(this)"></label>
-        <label>Contact <input id="c_contact" oninput="formatContact(this)"></label>
+        <label>IC / Passport <input id="c_ic"></label>
+        <label>Contact <input id="c_contact"></label>
         <label>Email <input id="c_email"></label>
         <label>Address <input id="c_address"></label>
       </div>
       <div class="form-actions">
         <button id="addClientBtn" class="primary">Save</button>
-        <button class="primary">Cancel</button>
+        <button class="danger">Cancel</button>
       </div>
       <table>
         <thead>
-          <tr>
-            <th>Name</th><th>DOB</th><th>Age</th><th>Gender</th>
-            <th>Citizen</th><th>IC / Passport</th><th>Contact</th>
-            <th>Email</th><th>Address</th><th>Edit</th><th>Delete</th>
-          </tr>
+          <tr><th>Name</th><th>DOB</th><th>Age</th><th>Gender</th><th>Citizen</th><th>IC</th><th>Contact</th><th>Email</th><th>Address</th><th>Edit</th><th>Delete</th></tr>
         </thead>
         <tbody id="clientsTable"></tbody>
       </table>
     </div>
   </section>
 
- <!-- Practitioners -->
- <section id="practitionersTab" hidden>
-  <h2 class="section-title">Practitioners</h2>
-  <div class="card">
-    <div class="form-grid-2">
-      <label>Name <input id="p_name"></label>
+  <!-- Practitioners -->
+  <section id="practitionersTab" hidden>
+    <h2 class="section-title">Practitioners</h2>
+    <div class="card">
+      <div class="form-grid-2">
+        <label>Name <input id="p_name"></label>
+      </div>
+      <div class="form-actions">
+        <button id="addPractitionerBtn" class="primary">Add</button>
+        <button id="cancelPractitionerBtn" class="danger">Cancel</button>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Delete</th></tr></thead>
+        <tbody id="practitionerTable"></tbody>
+      </table>
     </div>
-    <div class="form-actions">
-      <button id="addPractitionerBtn" class="primary">Add</button>
-      <button id="cancelPractitionerBtn" class="danger">Cancel</button>
-    </div>
-    <table>
-      <thead><tr><th>Name</th><th>Delete</th></tr></thead>
-      <tbody id="practitionerTable"></tbody>
-    </table>
-  </div>
-</section>
-
-
+  </section>
 
   <!-- Appointments -->
   <section id="appointmentsTab" hidden>
@@ -184,7 +101,7 @@ th {
       </div>
       <div class="form-actions">
         <button id="saveAppointmentBtn" class="primary">Save</button>
-        <button class="danger">Cancel</button>
+        <button id="cancelAppointmentBtn" class="danger">Cancel</button>
       </div>
       <table>
         <thead>
@@ -196,21 +113,21 @@ th {
   </section>
 
   <!-- Sales Report -->
-<section id="reportsTab" hidden>
-  <h2 class="section-title">Sales Report</h2>
-  <div class="card">
-    <input type="date" id="reportStart">
-    <input type="date" id="reportEnd">
-    <button id="filterReportBtn" class="primary">Filter</button>
-    <button id="exportExcelBtn" class="primary">Export to Excel</button>
-    <canvas id="salesChart"></canvas>
-    <table>
-      <thead><tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr></thead>
-      <tbody id="salesReportTable"></tbody>
-    </table>
-  </div>
-</section>
-
+  <section id="reportsTab" hidden>
+    <h2 class="section-title">Sales Report</h2>
+    <div class="card">
+      <input type="date" id="reportStart">
+      <input type="date" id="reportEnd">
+      <button id="filterReportBtn" class="primary">Filter</button>
+      <button id="exportExcelBtn" class="primary">Export to Excel</button>
+      <canvas id="salesChart"></canvas>
+      <table>
+        <thead><tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr></thead>
+        <tbody id="salesReportTable"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
 
 <!-- Login -->
 <section id="loginTab">
@@ -579,13 +496,14 @@ function resetAppointmentSave() {
   
 /* ================= SALES REPORT ================= */
 let salesChartInstance = null;
+let latestReport = {};
 
 async function loadSalesReport() {
   const start = document.getElementById("reportStart").value;
   const end = document.getElementById("reportEnd").value;
   let query = sb.from("appointments").select("*");
-  if (start) query = query.gte("start_time", start);
-  if (end) query = query.lte("start_time", end);
+  if (start) query = query.gte("start_time", start + "T00:00:00");
+  if (end) query = query.lte("start_time", end + "T23:59:59");
   const { data, error } = await query;
   if (error) { console.error(error); return; }
 
@@ -597,8 +515,8 @@ async function loadSalesReport() {
     report[serviceName].sst += a.sst || 0;
     report[serviceName].total += a.total || 0;
   });
-
-  // Update table
+  latestReport = report;
+ // Update table
   const table = document.getElementById("salesReportTable");
   table.innerHTML = "";
   Object.keys(report).forEach(service => {
@@ -627,22 +545,20 @@ async function loadSalesReport() {
     },
     options: { responsive:true, plugins:{legend:{display:false}} }
   });
-
-  // Export to Excel (CSV)
-  document.getElementById("exportExcelBtn").onclick = () => {
-    let csv = "Service,Amount,SST,Total\n";
-    Object.keys(report).forEach(s => {
-      const r = report[s];
-      csv += `${s},${r.amount.toFixed(2)},${r.sst.toFixed(2)},${r.total.toFixed(2)}\n`;
-    });
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "sales_report.csv"; a.click();
-  };
 }
 
-document.getElementById("filterReportBtn").onclick = loadSalesReport;
+ document.getElementById("filterReportBtn").onclick = loadSalesReport;
+document.getElementById("exportExcelBtn").onclick = () => {
+  let csv = "Service,Amount,SST,Total\n";
+  Object.keys(latestReport).forEach(s => {
+    const r = latestReport[s];
+    csv += `${s},${r.amount.toFixed(2)},${r.sst.toFixed(2)},${r.total.toFixed(2)}\n`;
+  });
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "sales_report.csv"; a.click();
+};
 
 
 /* ================= LOGIN/LOGOUT ================= */
@@ -658,13 +574,14 @@ document.getElementById("loginBtn").onclick = async () => {
   document.querySelector(".container").hidden = false;
   loadClients(); loadPractitioners(); loadAppointments();
 };
-/* ================= LOGOUT ================= */
+
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
   document.querySelector(".container").hidden = true;
   document.getElementById("loginTab").hidden = false;
   document.getElementById("logoutMessage").hidden = false;
 };
+
 
 /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
@@ -674,7 +591,6 @@ function showTab(tabId) {
   document.getElementById(tabId).hidden = false;
   if (tabId === "reportsTab") loadSalesReport();
 }
-
 document.getElementById("tabClients").onclick = ()=>showTab("clientsTab");
 document.getElementById("tabPractitioners").onclick = ()=>showTab("practitionersTab");
 document.getElementById("tabAppointments").onclick = ()=>showTab("appointmentsTab");
@@ -682,7 +598,6 @@ document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
 window.onload = () => {
-  // Populate service dropdown
   const serviceSelect = document.getElementById("a_service");
   if (serviceSelect) {
     serviceSelect.innerHTML = "<option value=''>Select Service</option>";
@@ -690,16 +605,11 @@ window.onload = () => {
       serviceSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
     });
   }
-
-  // Auto-set current date/time for appointments
   setCurrentDateTime();
-
-  // Default view: login visible, dashboard hidden
+  updateTotals();
   document.getElementById("loginTab").hidden = false;
   document.querySelector(".container").hidden = true;
 };
-
-
 </script>
 </body>
 </html>
