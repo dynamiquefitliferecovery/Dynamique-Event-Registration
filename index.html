@@ -521,44 +521,40 @@ function formatContact(input) {
 
 /* ================= CLIENTS ================= */
 async function loadClients() {
-  const { data, error } = await sb.from("clients")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
   if (error) {
-    alert("Failed to load clients. Please try again.");
-    console.error(error);
+    console.error("Error loading clients:", error);
     return;
-}
-  clients = data || []; // fills the global array
+  }
 
   // table
-  const table = document.getElementById("clientsTable");
+  const table = document.querySelector("#clientsTab table tbody");
   table.innerHTML = "";
-  clients.forEach(c => {
-    table.innerHTML += `
-      <tr>
-        <td>${c.full_name || ""}</td>
-        <td>${fmtDMY(c.date_of_birth)}</td>
-        <td>${calcAge(c.date_of_birth)}</td>
-        <td>${c.gender || ""}</td>
-        <td>${c.citizenship || ""}</td>
-        <td>${c.ic_passport || ""}</td>
-        <td>${c.contact || ""}</td>
-        <td>${c.email || ""}</td>
-        <td>${c.address || ""}</td>
-        <td><button onclick="editClient('${c.id}')">✏️</button></td>
-        <td><button onclick="deleteClient('${c.id}')">🗑</button></td>
-      </tr>`;
+  data.forEach(c => {
+    const row = `<tr>
+      <td>${c.full_name || ""}</td>
+      <td>${c.date_of_birth || ""}</td>
+      <td>${c.gender || ""}</td>
+      <td>${c.citizenship || ""}</td>
+      <td>${c.ic_passport || ""}</td>
+      <td>${c.contact || ""}</td>
+      <td>${c.email || ""}</td>
+      <td class="address-cell">${c.address || ""}</td>
+      <td><button onclick="editClient('${c.id}')" class="small primary">Edit</button></td>
+      <td><button onclick="deleteClient('${c.id}')" class="small danger">Delete</button></td>
+    </tr>`;
+    table.insertAdjacentHTML("beforeend", row);
   });
 
   // dropdown for appointments
   const clientSelect = document.getElementById("a_client");
-  clientSelect.innerHTML = "<option value=''>Select Client</option>";
-  clients.forEach(c => {
-    clientSelect.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
-  });
+  if (clientSelect) {
+    clientSelect.innerHTML = "<option value=''>Select Client</option>";
+    data.forEach(c => {
+      clientSelect.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
+    });
+  }
 }
-
 
 function editClient(id) {
   sb.from("clients").select("*").eq("id", id).single().then(({ data }) => {
@@ -614,107 +610,125 @@ document.getElementById("cancelClientBtn").onclick = () => {
   c_address.value = "";
 };
 
+
 /* ================= PRACTITIONERS ================= */
 async function loadPractitioners() {
-  const { data, error } = await sb.from("practitioners").select("*").order("name");
+  const { data, error } = await sb.from("practitioners").select("*").order("created_at", { ascending: false });
   if (error) {
-    alert("Failed to load practitioners. Please try again.");
-    console.error(error);
+    console.error("Error loading practitioners:", error);
     return;
-    }
+  }
 
-  practitioners = data || [];
-  a_practitioner.innerHTML = "<option value=''>Select Practitioner</option>";
-  practitioners.forEach(p => {
-    a_practitioner.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+  // table
+  const table = document.querySelector("#practitionersTab table tbody");
+  table.innerHTML = "";
+  data.forEach(p => {
+    const row = `<tr>
+      <td>${p.name || ""}</td>
+      <td>${p.specialty || ""}</td>
+      <td>${p.contact || ""}</td>
+      <td>${p.email || ""}</td>
+      <td class="address-cell">${p.address || ""}</td>
+      <td><button onclick="editPractitioner('${p.id}')" class="small primary">Edit</button></td>
+      <td><button onclick="deletePractitioner('${p.id}')" class="small danger">Delete</button></td>
+    </tr>`;
+    table.insertAdjacentHTML("beforeend", row);
   });
 
-  practitionerTable.innerHTML = "";
-  practitioners.forEach(p => {
-    practitionerTable.innerHTML += `
-      <tr>
-        <td>${p.name}</td>
-        <td><button onclick="deletePractitioner('${p.id}')">🗑</button></td>
-      </tr>`;
+  // dropdown for appointments
+  const pracSelect = document.getElementById("a_practitioner");
+  if (pracSelect) {
+    pracSelect.innerHTML = "<option value=''>Select Practitioner</option>";
+    data.forEach(p => {
+      pracSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+    });
+  }
+}
+
+function editPractitioner(id) {
+  sb.from("practitioners").select("*").eq("id", id).single().then(({ data }) => {
+    if (!data) return;
+    practitioner_id.value = data.id;
+    p_name.value = data.name || "";
+    p_specialty.value = data.specialty || "";
+    p_contact.value = data.contact || "";
+    p_email.value = data.email || "";
+    p_address.value = data.address || "";
   });
 }
 
-document.getElementById("addPractitionerBtn").onclick = async ()=>{
-  if(!p_name.value) return;
-  await sb.from("practitioners").insert({ name:p_name.value });
-  p_name.value="";
+async function deletePractitioner(id) {
+  if (!confirm("Delete practitioner?")) return;
+  await sb.from("practitioners").delete().eq("id", id);
   loadPractitioners();
-};
-
-window.deletePractitioner = async id=>{
-  if(!confirm("Delete practitioner?")) return;
-  await sb.from("practitioners").delete().eq("id",id);
-  loadPractitioners();
-};
-
-
-/* ================= APPOINTMENTS ================= */
-
-// populate service dropdown once
-SERVICES.forEach(s=>{
-  a_service.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-});
-
-// recalc totals when service or client changes
-function recalcAppointment(){
-  const s = SERVICES.find(x=>x.id===a_service.value);
-  const c = clients.find(x=>x.id===a_client.value);
-  const sstEligible = ["PB","PKP","SMFT"];
-  const sst = (c?.citizenship==="Foreigner" && sstEligible.includes(s.id))
-    ? +(s.price*0.06).toFixed(2)
-    : 0;
-
-  a_price.value = s ? s.price : "";
-  a_sst.value = s ? sst : "";
-  a_total.value = s ? (s.price+sst).toFixed(2) : "";
 }
-a_service.onchange = recalcAppointment;
-a_client.onchange = recalcAppointment;
 
-// load appointments table
+document.getElementById("savePractitionerBtn").onclick = async () => {
+  if (!p_name.value) return alert("Name required");
+  const payload = {
+    name: p_name.value,
+    specialty: p_specialty.value,
+    contact: p_contact.value,
+    email: p_email.value,
+    address: p_address.value || null
+  };
+  if (practitioner_id.value) {
+    await sb.from("practitioners").update(payload).eq("id", practitioner_id.value);
+  } else {
+    await sb.from("practitioners").insert(payload);
+  }
+  cancelPractitionerBtn.click();
+  loadPractitioners();
+};
+
+document.getElementById("cancelPractitionerBtn").onclick = () => {
+  practitioner_id.value = "";
+  p_name.value = "";
+  p_specialty.value = "";
+  p_contact.value = "";
+  p_email.value = "";
+  p_address.value = "";
+};
+
+
+ /* ================= APPOINTMENTS ================= */
 async function loadAppointments() {
   const { data, error } = await sb.from("appointments").select("*").order("start_time");
   if (error) {
-    alert("Failed to load appointments. Please try again.");
-    console.error(error);
+    console.error("Error loading appointments:", error);
     return;
-    }
+  }
 
-
-  appointments = data || [];
-  appointmentsTable.innerHTML = "";
-
-  appointments.forEach(a => {
+  const table = document.querySelector("#appointmentsTab table tbody");
+  table.innerHTML = "";
+  data.forEach(a => {
     const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
-    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
     const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
+    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
 
-    appointmentsTable.innerHTML += `
-      <tr>
-        <td>${fmtDMY(a.start_time)}</td>
-        <td>${a.start_time.slice(11,16)}</td>
-        <td>${clientName}</td>
-        <td>${serviceName}</td>
-        <td>${practitionerName}</td>
-        <td>${a.payment_method}</td>
-        <td>${a.total}</td>
-        <td><button class="small" onclick="editAppointment('${a.id}')">✏️</button></td>
-        <td><button class="danger small" onclick="deleteAppointment('${a.id}')">🗑</button></td>
-      </tr>`;
+    const row = `<tr>
+      <td>${a.start_time.slice(0,10)}</td>
+      <td>${a.start_time.slice(11,16)}</td>
+      <td>${clientName}</td>
+      <td>${serviceName}</td>
+      <td>${practitionerName}</td>
+      <td>${a.payment_method}</td>
+      <td>${a.amount.toFixed(2)}</td>
+      <td>${a.sst.toFixed(2)}</td>
+      <td>${a.total.toFixed(2)}</td>
+      <td>${a.remarks || ""}</td>
+      <td><button onclick="editAppointment('${a.id}')" class="small primary">Edit</button></td>
+      <td><button onclick="deleteAppointment('${a.id}')" class="small danger">Delete</button></td>
+    </tr>`;
+    table.insertAdjacentHTML("beforeend", row);
   });
 }
 
-// edit existing appointment
-window.editAppointment = id=>{
-  const a = appointments.find(x=>x.id===id);
+function editAppointment(id) {
+  const a = appointments.find(x => x.id === id);
   if (!a) return;
   appointment_id.value = a.id;
-  a_date.value = a.start_time.slice(0,10); // input type=date expects ISO
+  a_date.value = a.start_time.slice(0,10);
   a_time.value = a.start_time.slice(11,16);
   a_client.value = a.client_id;
   a_service.value = a.service_id;
@@ -722,19 +736,22 @@ window.editAppointment = id=>{
   a_payment.value = a.payment_method;
   a_remarks.value = a.remarks || "";
   recalcAppointment();
-};
+}
 
-// save appointment (insert or update)
-document.getElementById("saveAppointmentBtn").onclick = async ()=>{
-  const s = SERVICES.find(x=>x.id===a_service.value);
-  const c = clients.find(x=>x.id===a_client.value);
-  if (!s || !c) return alert("Please select client and service");
+async function deleteAppointment(id) {
+  if (!confirm("Delete appointment?")) return;
+  await sb.from("appointments").delete().eq("id", id);
+  loadAppointments();
+}
 
+document.getElementById("saveAppointmentBtn").onclick = async () => {
+  const s = SERVICES.find(x => x.id === a_service.value);
+  const c = clients.find(x => x.id === a_client.value);
   const sstEligible = ["PB","PKP","SMFT"];
-  const sst = (s && c?.citizenship==="Foreigner" && sstEligible.includes(s.id))
-  ? +(s.price*0.06).toFixed(2)
-  : 0;
-  const startTime = `${a_date.value}T${a_time.value}:00`;
+  const sst = (c.citizenship === "Foreigner" && sstEligible.includes(s.id))
+    ? +(s.price * 0.06).toFixed(2)
+    : 0;
+  const startTime = `${a_date.value}T${a_time.value}:00Z`;
 
   const payload = {
     client_id: c.id,
@@ -744,7 +761,7 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
     remarks: a_remarks.value,
     amount: s.price,
     sst,
-    total: s.price+sst,
+    total: s.price + sst,
     start_time: startTime,
     end_time: startTime
   };
@@ -759,15 +776,7 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
   loadAppointments();
 };
 
-// delete appointment
-window.deleteAppointment = async id=>{
-  if (!confirm("Delete appointment?")) return;
-  await sb.from("appointments").delete().eq("id", id);
-  loadAppointments();
-};
-
-// cancel form
-cancelAppointmentBtn.onclick = ()=>{
+document.getElementById("cancelAppointmentBtn").onclick = () => {
   appointment_id.value = "";
   a_date.value = "";
   a_time.value = "";
@@ -781,124 +790,71 @@ cancelAppointmentBtn.onclick = ()=>{
   a_total.value = "";
 };
 
-/* ================= SALES REPORT ================= */
-let serviceCountChart, serviceRevenueChart, paymentRevenueChart, ageRevenueChart;
 
-applyReportBtn.onclick = () => {
-  const serviceCount = {}, serviceRevenue = {}, paymentRevenue = {}, ageRevenue = {};
-  let totalIncome = 0, totalSST = 0;
-  reportDetailTable.innerHTML = "";
+<!-- ================= SALES REPORT ================= -->
+<section id="reportsTab" hidden>
+  <h2 class="section-title">Sales Report</h2>
 
-  appointments.forEach(a => {
-    const date = a.start_time.slice(0,10);
-    if (date < reportFrom.value || date > reportTo.value) return;
+  <!-- Date range + actions -->
+  <div class="card">
+    <label for="reportFrom">From:</label>
+    <input type="date" id="reportFrom">
+    <label for="reportTo">To:</label>
+    <input type="date" id="reportTo">
+    <div class="form-actions">
+      <button class="primary" id="applyReportBtn">Generate</button>
+      <button class="primary" id="exportExcelBtn">Export Excel</button>
+    </div>
+  </div>
 
-    const svc = SERVICES.find(s => s.id === a.service_id)?.name || "";
-    const cli = clients.find(c => c.id === a.client_id);
-    const ag = calcAge(cli.date_of_birth);
-    const ageGroup = ag < 18 ? "<18" : ag < 30 ? "18–29" : ag < 40 ? "30–39" : ag < 50 ? "40–49" : "50+";
+  <!-- KPI summary -->
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="label">Total Income</div>
+      <div class="value" id="kpiTotalIncome">RM 0.00</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Total SST</div>
+      <div class="value" id="kpiTotalSST">RM 0.00</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Transactions</div>
+      <div class="value" id="kpiTxn">0</div>
+    </div>
+  </div>
 
-    serviceCount[svc] = (serviceCount[svc] || 0) + 1;
-    serviceRevenue[svc] = (serviceRevenue[svc] || 0) + Number(a.total);
-    paymentRevenue[a.payment_method] = (paymentRevenue[a.payment_method] || 0) + Number(a.total);
-    ageRevenue[ageGroup] = (ageRevenue[ageGroup] || 0) + Number(a.total);
+  <!-- Detailed table -->
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Practitioner</th>
+          <th>Payment</th>
+          <th>Subtotal</th>
+          <th>SST</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="reportDetailTable"></tbody>
+    </table>
+  </div>
 
-    totalIncome += Number(a.total);
-    totalSST += Number(a.sst);
-
-    reportDetailTable.innerHTML += `
-      <tr>
-        <td>${date}</td>
-        <td>${a.start_time.slice(11,16)}</td>
-        <td>${cli.full_name}</td>
-        <td>${svc}</td>
-        <td>${practitioners.find(p => p.id === a.practitioner_id)?.name || ""}</td>
-        <td>${a.payment_method}</td>
-        <td>${Number(a.amount).toFixed(2)}</td>
-        <td>${Number(a.sst).toFixed(2)}</td>
-        <td>${Number(a.total).toFixed(2)}</td>
-
-      </tr>`;
-  });
-
-  // update KPIs
-  kpiTotalIncome.textContent = `RM ${totalIncome.toFixed(2)}`;
-  kpiTotalSST.textContent = `RM ${totalSST.toFixed(2)}`;
-  kpiTxn.textContent = appointments.filter(a => {
-    const date = a.start_time.slice(0,10);
-    return date >= reportFrom.value && date <= reportTo.value;
-  }).length;
-
-  // destroy old charts if they exist
-  if (serviceCountChart) serviceCountChart.destroy();
-  if (serviceRevenueChart) serviceRevenueChart.destroy();
-  if (paymentRevenueChart) paymentRevenueChart.destroy();
-  if (ageRevenueChart) ageRevenueChart.destroy();
-
-  // create new charts
-function ctx(id) {
-  const el = document.getElementById(id);
-  return el ? el.getContext("2d") : null;
-}
-  
-if (Object.keys(serviceCount).length) {
-  serviceCountChart = new Chart(ctx("serviceCountChart"), {
-    type: "bar",
-    data: {
-      labels: Object.keys(serviceCount),
-      datasets: [{ data: Object.values(serviceCount), label: "Count" }]
-    }
-  });
-}
-
-if (Object.keys(serviceRevenue).length) {
-  serviceRevenueChart = new Chart(ctx("serviceRevenueChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(serviceRevenue),
-      datasets: [{ data: Object.values(serviceRevenue), label: "Revenue" }]
-    }
-  });
-}
-
-if (Object.keys(paymentRevenue).length) {
-  paymentRevenueChart = new Chart(ctx("paymentRevenueChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(paymentRevenue),
-      datasets: [{ data: Object.values(paymentRevenue), label: "Revenue" }]
-    }
-  });
-}
-
-if (Object.keys(ageRevenue).length) {
-  ageRevenueChart = new Chart(ctx("ageRevenueChart"), {
-    type: "pie",
-    data: {
-      labels: Object.keys(ageRevenue),
-      datasets: [{ data: Object.values(ageRevenue), label: "Revenue" }]
-    }
-  });
-  }
-};
-
- 
-
-// export to Excel
-exportExcelBtn.onclick = () => {
-  const rows = [];
-  document.querySelectorAll("#reportDetailTable tr").forEach(tr => {
-    const t = [...tr.children].map(td => td.textContent);
-    rows.push({
-      Date: t[0], Time: t[1], Client: t[2], Service: t[3],
-      Practitioner: t[4], Payment: t[5], Subtotal: t[6],
-      SST: t[7], Total: t[8]
-    });
-  });
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Sales Detail");
-  XLSX.writeFile(wb, "sales_report.xlsx");
-};
+  <!-- Charts -->
+  <div class="card">
+    <div class="chart-grid">
+      <canvas id="serviceCountChart"></canvas>
+      <canvas id="serviceRevenueChart"></canvas>
+    </div>
+    <div class="chart-grid">
+      <canvas id="paymentRevenueChart"></canvas>
+      <canvas id="ageRevenueChart"></canvas>
+    </div>
+  </div>
+</section>
 
 /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
