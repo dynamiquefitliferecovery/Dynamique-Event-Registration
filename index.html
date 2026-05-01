@@ -840,9 +840,9 @@ exportExcelBtn.onclick = () => {
 };
 
 
+<script>
 /* ================= TAB SWITCHING ================= */
-
- function showTab(tabId) {
+function showTab(tabId) {
   // hide all sections
   document.querySelectorAll("section").forEach(el => el.hidden = true);
   // show the selected section
@@ -905,15 +905,13 @@ function showDashboard() {
   showTab("clientsTab");
 }
 
-
-
 /* LOGIN */
 document.getElementById("loginBtn").onclick = async () => {
   const email = loginEmail.value;
   const password = loginPassword.value;
 
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  console.log("Login result:", data, error);  // 👈 add this line
+  console.log("Login result:", data, error);
 
   if (error) {
     loginError.textContent = "Login failed: " + error.message;
@@ -928,7 +926,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
   // hide nav bar + dashboard
-  document.querySelector("header").remove();
+  document.querySelector("header").hidden = true;   // safer than remove()
   document.querySelector(".container").hidden = true;
 
   // hide all tab sections
@@ -977,9 +975,6 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_sst.value = "";
   a_total.value = "";
 };
-
-
-
 </script>
 </body>
 </html>
