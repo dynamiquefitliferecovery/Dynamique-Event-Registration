@@ -23,8 +23,13 @@
 body {
   margin: 0;
   font-family: "Montserrat", sans-serif;
-  background: #f4f4f4;
+  background: linear-gradient(135deg, #111 0%, #ff7a00 100%); /* sporty gradient */
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 
 header {
   max-width: 1000px;
@@ -55,6 +60,29 @@ header button.active {
   padding: 24px;
 }
 
+.login-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  max-width: 400px;
+  width: 100%;
+  padding: 32px;
+  text-align: center;
+}
+.login-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ff7a00;
+  margin-bottom: 20px;
+}
+.login-card p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+
+    
 section[hidden] {
   display: none;
 }
@@ -132,10 +160,17 @@ textarea {
 button.primary {
   background: #ff7a00;
   border: none;
-  padding: 10px 18px;
+  padding: 12px 20px;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
+button.primary:hover {
+  background: #e96a00;
+  transform: scale(1.05);
+}
+
 
 button.danger {
   background: #e74c3c;
@@ -229,14 +264,15 @@ canvas { max-height: 260px; }
 
 <!-- ================= LOGIN ================= -->
 <section id="loginTab">
-  <div class="card">
-    <div class="section-title">Admin Login</div>
-    <input type="email" id="loginEmail" placeholder="Email">
-    <input type="password" id="loginPassword" placeholder="Password">
+  <div class="login-card">
+    <h2>Admin Login</h2>
+    <p id="logoutMessage" hidden>You’ve been logged out successfully. Please log in again to continue.</p>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
     <button class="primary" id="loginBtn">Login</button>
-    <div id="loginError" style="color:red;margin-top:8px"></div>
   </div>
 </section>
+
 
 <!-- ================= DASHBOARD ================= -->
 <header hidden>
@@ -933,7 +969,9 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.querySelectorAll("section").forEach(el => el.hidden = true);
 
   // show only login form
-  loginTab.hidden = false;
+loginTab.hidden = false;
+document.getElementById("logoutMessage").hidden = false; // show logout confirmation
+
 
   // disable tab buttons while logged out
   document.querySelectorAll("header button").forEach(btn => btn.disabled = true);
