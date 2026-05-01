@@ -82,7 +82,25 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<!-- Login -->
+  <section id="loginTab">
+    <div class="login-card">
+      <h2>Login</h2>
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <button id="loginBtn">Login</button>
+      <div id="loginError"></div>
+    </div>
+  </section>
 
+  <!-- Logout message -->
+  <div id="logoutMessage" hidden>
+    <div class="login-card">
+      <h2>Logged out successfully</h2>
+      <p>Please log in again to continue.</p>
+    </div>
+  </div>
+  
 <div class="container" hidden>
   <header>
     <button id="tabClients">Clients</button>
@@ -134,6 +152,7 @@
     <table>
       <thead><tr><th>Name</th><th>Delete</th></tr></thead>
       <tbody id="practitionerTable"></tbody>
+      <select id="a_practitioner"></select>
     </table>
   </div>
 </section>
