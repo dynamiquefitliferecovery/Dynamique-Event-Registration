@@ -28,16 +28,15 @@
 
  
 header {
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
-  gap: 12px;
+  justify-content: space-around; /* spread buttons evenly */
   padding: 14px;
   background: #111;
   position: sticky;
   top: 0;
   z-index: 10;
-
-   max-width: 1000px;   /* narrower header */
-  margin: 0 auto;      /* center header */
 }
 
 header button {
@@ -47,6 +46,8 @@ header button {
   padding: 8px 18px;
   border-radius: 8px;
   cursor: pointer;
+  min-width: 120px;   /* consistent tab width */
+  text-align: center;
 }
 
 header button.active {
@@ -56,7 +57,7 @@ header button.active {
 }
 
 .container {
-  max-width: 1000px;   /* match header width */
+  max-width: 1000px;  /* same as header */
   margin: auto;
   padding: 24px;
 }
@@ -66,15 +67,13 @@ section[hidden] {
 }
 
 .card {
+  max-width: 900px;   /* consistent form/report width */
+  margin: 0 auto 24px;
+  padding: 20px;
   background: #fff;
   border: 1px solid #e0e0e0;
-  padding: 20px;
   border-radius: 12px;
-  margin-bottom: 24px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-
-  max-width: 800px;    /* keep form narrower */
-  margin: 0 auto;      /* center the form */
 }
 
 .section-title {
@@ -83,144 +82,168 @@ section[hidden] {
   margin-bottom: 14px;
   border-bottom: 2px solid #eee;
   padding-bottom: 6px;
-  text-align: center;  /* optional: center section titles */
+  text-align: center;
 }
 
+.kpi-grid {
+  display: flex;
+  justify-content: space-between;
+  max-width: 900px;   /* same width as card */
+  margin: 0 auto 24px;
+}
 
-    /* ---------- FORM GRIDS ---------- */
+.kpi {
+  flex: 1;
+  text-align: center;
+}
 
-    .form-grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
+/* ---------- FORM GRIDS ---------- */
 
-    .form-grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
+.form-grid-4,
+.form-grid-3,
+.form-grid-2 {
+  display: grid;
+  gap: 16px;
+  max-width: 900px;   /* match card width */
+  margin: 0 auto;     /* center the grid */
+}
 
-    .form-grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
+.form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
 
-    .full-row {
-      grid-column: 1 / -1;
-    }
+.form-grid-1 {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 900px;
+  margin: 0 auto;
+}
 
-    label {
-      font-size: 12px;
-      font-weight: 600;
-    }
+.full-row {
+  grid-column: 1 / -1;
+}
 
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin-top: 4px;
-      font-size: 14px;
-    }
+label {
+  font-size: 12px;
+  font-weight: 600;
+}
 
-    textarea {
-      min-height: 70px;
-      resize: vertical;
-    }
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 4px;
+  font-size: 14px;
+}
 
-    button.primary {
-      background: #ff7a00;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+textarea {
+  min-height: 70px;
+  resize: vertical;
+}
 
-    button.danger {
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+button.primary {
+  background: #ff7a00;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    button.small {
-      padding: 6px 10px;
-      font-size: 12px;
-    }
+button.danger {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: 13px;
-    }
+button.small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
 
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 10px;
-      vertical-align: top;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+  font-size: 13px;
+  table-layout: fixed;   /* prevent uneven stretching */
+  max-width: 900px;      /* match card width */
+  margin: 0 auto;        /* center table */
+}
 
-    th {
-      background: #f0f0f0;
-    }
+th, td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  vertical-align: top;
+  word-wrap: break-word; /* allow text wrapping */
+}
 
-    .address-cell {
-      max-width: 260px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+th {
+  background: #f0f0f0;
+}
 
-    .address-cell:hover {
-      white-space: normal;
-    }
+.address-cell {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+.address-cell:hover {
+  white-space: normal;
+}
 
-    .kpi {
-      background: #fafafa;
-      border-left: 6px solid #ff7a00;
-      padding: 14px;
-      border-radius: 8px;
-    }
+.kpi-grid {
+  display: flex;
+  justify-content: space-between;
+  max-width: 900px;   /* same width as card */
+  margin: 0 auto 24px;
+  gap: 16px;
+}
 
-    .kpi .label {
-      font-size: 12px;
-      color: #777;
-    }
+.kpi {
+  flex: 1;
+  text-align: center;
+  background: #fafafa;
+  border-left: 6px solid #ff7a00;
+  padding: 14px;
+  border-radius: 8px;
+}
 
-    .kpi .value {
-      font-size: 22px;
-      font-weight: 700;
-    }
+.kpi .label {
+  font-size: 12px;
+  color: #777;
+}
 
-    .chart-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
+.kpi .value {
+  font-size: 22px;
+  font-weight: 700;
+}
 
-    canvas { max-height: 260px; }
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 900px;   /* match card width */
+  margin: 0 auto;
+}
 
-    @media (max-width: 900px) {
-      .form-grid-4,
-      .form-grid-3,
-      .form-grid-2,
-      .chart-grid,
-      .kpi-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+canvas { max-height: 260px; }
+
+@media (max-width: 900px) {
+  .form-grid-4,
+  .form-grid-3,
+  .form-grid-2,
+  .chart-grid,
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;   /* allow full width on small screens */
+  }
+}
+
   </style>
 </head>
 
@@ -867,9 +890,11 @@ document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 /* INIT */
 window.onload = async () => {
   // hide everything first
-  document.querySelector("header").hidden = true;
-  document.querySelector(".container").hidden = true;
-  document.querySelectorAll("section").forEach(el => el.hidden = true);
+document.querySelector("header").hidden = true;
+document.querySelector(".container").hidden = true;
+document.querySelectorAll("section").forEach(el => el.hidden = true);
+document.getElementById("loginTab").hidden = false;
+
 
   // show only login form
   document.getElementById("loginTab").hidden = false;
@@ -899,11 +924,16 @@ function showDashboard() {
   document.querySelector("header").hidden = false;
   document.querySelector(".container").hidden = false;
 
+  // re‑enable tab buttons
+  document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
+
   loadClients();
   loadPractitioners();
   loadAppointments();
-  showTab("clientsTab"); // default to Clients tab
+  showTab("clientsTab");
 }
+
+
 
 /* LOGIN */
 document.getElementById("loginBtn").onclick = async () => {
@@ -926,14 +956,17 @@ document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
   // hide nav bar + dashboard
-  document.querySelector("header").hidden = true;       // hides the tab buttons
-  document.querySelector(".container").hidden = true;   // hides dashboard content
+  document.querySelector("header").hidden = true;
+  document.querySelector(".container").hidden = true;
 
   // hide all tab sections
   document.querySelectorAll("section").forEach(el => el.hidden = true);
 
   // show only login form
   loginTab.hidden = false;
+
+  // disable tab buttons while logged out
+  document.querySelectorAll("header button").forEach(btn => btn.disabled = true);
 
   // clear login form
   loginEmail.value = "";
@@ -972,6 +1005,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_sst.value = "";
   a_total.value = "";
 };
+
 
 
 </script>
