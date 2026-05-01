@@ -907,8 +907,6 @@ document.getElementById("loginBtn").onclick = async () => {
   showDashboard();
 };
 
-
-
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
@@ -917,6 +915,9 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   loginTab.hidden = false;
+
+  // hide all tab sections
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
 
   // clear login form
   loginEmail.value = "";
@@ -955,6 +956,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_sst.value = "";
   a_total.value = "";
 };
+
 
 </script>
 </body>
