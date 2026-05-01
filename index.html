@@ -46,7 +46,7 @@
   color: black;
 }
 
-.login-card input {
+.login-card input, .login-card button {
   width: 100%;
   margin-bottom: 15px;
   padding: 10px;
@@ -55,12 +55,8 @@
 }
 
 .login-card button {
-  width: 100%;
   background: orange;
   color: black;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -70,8 +66,8 @@
   color: white;
 }
 
-#loginError, #logoutMessage {
-  margin-top: 15px;
+#loginError {
+  margin-top: 10px;
   color: red;
   font-size: 14px;
 }
@@ -83,23 +79,23 @@
 </head>
 <body>
 <!-- Login -->
-  <section id="loginTab">
-    <div class="login-card">
-      <h2>Login</h2>
-      <input id="loginEmail" placeholder="Email">
-      <input id="loginPassword" type="password" placeholder="Password">
-      <button id="loginBtn">Login</button>
-      <div id="loginError"></div>
-    </div>
-  </section>
-
-  <!-- Logout message -->
-  <div id="logoutMessage" hidden>
-    <div class="login-card">
-      <h2>Logged out successfully</h2>
-      <p>Please log in again to continue.</p>
-    </div>
+ <section id="loginTab">
+  <div class="login-card">
+    <h2>Login</h2>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <div id="loginError"></div>
   </div>
+</section>
+
+<div id="logoutMessage" hidden>
+  <div class="login-card">
+    <h2>Logged out successfully</h2>
+    <p>Please log in again to continue.</p>
+  </div>
+</div>
+
   
 <div class="container" hidden>
   <header>
@@ -188,19 +184,26 @@
 
   <!-- Sales Report -->
   <section id="reportsTab" hidden>
-    <h2 class="section-title">Sales Report</h2>
-    <div class="card">
-      <input type="date" id="reportStart">
-      <input type="date" id="reportEnd">
-      <button id="filterReportBtn" class="primary">Filter</button>
-      <button id="exportExcelBtn" class="primary">Export to Excel</button>
+  <h2 class="section-title">Sales Report</h2>
+  <div class="card">
+    <input type="date" id="reportStart">
+    <input type="date" id="reportEnd">
+    <button id="filterReportBtn" class="primary">Filter</button>
+    <button id="exportExcelBtn" class="primary">Export to Excel</button>
+
+    <!-- Table first -->
+    <table style="margin-top:20px;">
+      <thead><tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr></thead>
+      <tbody id="salesReportTable"></tbody>
+    </table>
+
+    <!-- Chart after table with spacing -->
+    <div style="margin-top:30px;">
       <canvas id="salesChart"></canvas>
-      <table>
-        <thead><tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr></thead>
-        <tbody id="salesReportTable"></tbody>
-      </table>
     </div>
-  </section>
+  </div>
+</section>
+
 </div>
 
 <!-- Login -->
@@ -380,11 +383,12 @@ function resetClientSave() {
 }
 
 /* ================= PRACTITIONERS ================= */
+
 // Add practitioner
 document.getElementById("addPractitionerBtn").onclick = async () => {
   const name = document.getElementById("p_name").value.trim();
   if (!name) {
-    alert("Please enter a name.");
+    alert("Please enter a practitioner name.");
     return;
   }
   const { error } = await sb.from("practitioners").insert({ name });
@@ -403,7 +407,9 @@ document.getElementById("cancelPractitionerBtn").onclick = () => {
 
 // Load practitioners
 async function loadPractitioners() {
-  const { data, error } = await sb.from("practitioners").select("*").order("created_at",{ascending:false});
+  const { data, error } = await sb.from("practitioners")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) {
     console.error("Error loading practitioners:", error);
     return;
@@ -442,6 +448,7 @@ async function deletePractitioner(id) {
   await loadPractitioners();
 }
 
+ 
 /* ================= APPOINTMENTS ================= */
 
 // Auto-populate current date/time
