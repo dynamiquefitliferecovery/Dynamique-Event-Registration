@@ -289,7 +289,7 @@ canvas { max-height: 260px; }
 
 <!-- ================= CLIENT REGISTRATION ================= -->
 <section id="clientsTab" hidden>
-  <h2>Client Registration</h2>
+  <div class="section-title">Client Registration</div>
 
   <div class="form-grid-4">
     <div><label>Name</label><input id="c_name"></div>
@@ -707,9 +707,9 @@ document.getElementById("saveAppointmentBtn").onclick = async ()=>{
   if (!s || !c) return alert("Please select client and service");
 
   const sstEligible = ["PB","PKP","SMFT"];
-  const sst = (c.citizenship==="Foreigner" && sstEligible.includes(s.id))
-    ? +(s.price*0.06).toFixed(2)
-    : 0;
+  const sst = (s && c?.citizenship==="Foreigner" && sstEligible.includes(s.id))
+  ? +(s.price*0.06).toFixed(2)
+  : 0;
   const startTime = `${a_date.value}T${a_time.value}:00`;
 
   const payload = {
@@ -790,9 +790,10 @@ applyReportBtn.onclick = () => {
         <td>${svc}</td>
         <td>${practitioners.find(p => p.id === a.practitioner_id)?.name || ""}</td>
         <td>${a.payment_method}</td>
-        <td>${a.amount}</td>
-        <td>${a.sst}</td>
-        <td>${a.total}</td>
+        <td>${Number(a.amount).toFixed(2)}</td>
+        <td>${Number(a.sst).toFixed(2)}</td>
+        <td>${Number(a.total).toFixed(2)}</td>
+
       </tr>`;
   });
 
@@ -969,8 +970,11 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.querySelectorAll("section").forEach(el => el.hidden = true);
 
   // show only login form
-loginTab.hidden = false;
-document.getElementById("logoutMessage").hidden = false; // show logout confirmation
+function showDashboard() {
+  loginTab.hidden = true;
+  document.getElementById("logoutMessage").hidden = true; // hide logout message when logged in
+  document.querySelector("header").hidden = false;
+  document.querySelector(".container").hidden = false;
 
 
   // disable tab buttons while logged out
