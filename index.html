@@ -36,7 +36,7 @@ header {
   top: 0;
   z-index: 10;
 
-  max-width: 1200px;   /* constrain width */
+   max-width: 1000px;   /* narrower header */
   margin: 0 auto;      /* center header */
 }
 
@@ -57,7 +57,7 @@ header button.active {
 
 
     .container {
-      max-width: 1300px;
+      max-width: 1000px;
       margin: auto;
       padding: 24px;
     }
@@ -873,6 +873,20 @@ window.onload = async () => {
   if (session) {
     showDashboard();
   }
+
+  // auto‑set appointment date & time
+  const now = new Date();
+
+  // format YYYY-MM-DD for <input type="date">
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  a_date.value = `${yyyy}-${mm}-${dd}`;
+
+  // format HH:MM for <input type="time">
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  a_time.value = `${hh}:${min}`;
 };
 
 /* SHOW DASHBOARD */
