@@ -865,7 +865,6 @@ document.getElementById("tabPractitioners").onclick = () => showTab("practitione
 document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
 document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
-
 /* INIT */
 window.onload = async () => {
   // hide everything first
@@ -879,8 +878,6 @@ window.onload = async () => {
   // check if already logged in
   const { data: { session } } = await sb.auth.getSession();
   if (session) showDashboard();
-};
-
 
   // auto‑set appointment date & time
   const now = new Date();
@@ -892,8 +889,6 @@ window.onload = async () => {
   const min = String(now.getMinutes()).padStart(2, "0");
   a_time.value = `${hh}:${min}`;
 };
-
-
 
 /* SHOW DASHBOARD */
 function showDashboard() {
@@ -957,7 +952,6 @@ document.getElementById("logoutBtn").onclick = async () => {
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionerTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
-};
 
   // clear client form
   client_id.value = "";
