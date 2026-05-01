@@ -26,37 +26,33 @@
       background: #f4f4f4;
     }
 
-    header {
-      display: flex;
-      gap: 12px;
-      padding: 14px;
-      background: #111;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    header button {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    header button.active {
-      background: #ff7a00;
-      color: #000;
-      font-weight: 600;
-    }
+ 
 header {
-  position: relative;
-  z-index: 1000;
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: #111;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  max-width: 1200px;   /* constrain width */
+  margin: 0 auto;      /* center header */
 }
 
-section {
-  position: relative;
+header button {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+header button.active {
+  background: #ff7a00;
+  color: #000;
+  font-weight: 600;
 }
 
 
@@ -954,6 +950,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_sst.value = "";
   a_total.value = "";
 };
+
 
 
 </script>
