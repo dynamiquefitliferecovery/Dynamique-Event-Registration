@@ -20,38 +20,37 @@
   <style>
     * { box-sizing: border-box; }
 
-  body {
+ body {
   margin: 0;
   font-family: "Montserrat", sans-serif;
   background: #ff7a00;   /* solid orange */
   min-height: 100vh;
-  display: block;
 }
 
-   header {
+/* Header navigation */
+header {
   display: flex;
-  justify-content: space-around;   /* spread buttons evenly */
-  background: #000;                /* solid black bar */
+  justify-content: space-around;
+  background: #000;
   padding: 10px;
 }
 
 header button {
-  background: #222;                /* dark background */
-  color: #fff;                     /* white text */
+  background: #222;
+  color: #fff;
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  min-width: 120px;                /* consistent width */
+  min-width: 120px;
 }
 
 header button.active {
-  background: #ff7a00;             /* orange highlight */
-  color: #000;                     /* black text for active */
+  background: #ff7a00;
+  color: #000;
   font-weight: 600;
 }
-
     .container {
       max-width: 1000px;
       margin: auto;
@@ -94,15 +93,23 @@ header button.active {
     }
 
 .card {
-  max-width: 900px;   /* consistent form/report width */
-  margin: 0 auto 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 900px;
 }
 
-.section-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; text-align: center; }
-    table { width: 100%; border-collapse: collapse; max-width: 900px; margin: 0 auto; }
-    th, td { border-bottom: 1px solid #ddd; padding: 10px; word-wrap: break-word; }
-    th { background: #f0f0f0; }
-
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  border-bottom: 3px solid #ff7a00;
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+  text-align: center;
+}
 .form-actions {
   display: flex;
   justify-content: flex-end;   /* align Save/Cancel to right edge of form */
@@ -159,16 +166,16 @@ textarea {
 
 button.primary {
   background: #ff7a00;
+  color: #000;
   border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 10px 18px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
-  transition: transform 0.2s ease, background 0.2s ease;
 }
+
 button.primary:hover {
   background: #e96a00;
-  transform: scale(1.05);
 }
 
 
@@ -186,25 +193,31 @@ button.small {
   font-size: 12px;
 }
 
+/* Tables */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 14px;
-  font-size: 13px;
-  table-layout: fixed;   /* prevent uneven stretching */
-  max-width: 900px;      /* match card width */
-  margin: 0 auto;        /* center table */
+  font-size: 14px;
 }
 
 th, td {
   border-bottom: 1px solid #ddd;
   padding: 10px;
-  vertical-align: top;
-  word-wrap: break-word; /* allow text wrapping */
+  text-align: left;
 }
 
 th {
-  background: #f0f0f0;
+  background: #f9f9f9;
+  font-weight: 600;
+}
+    
+tr:nth-child(even) {
+  background: #fdfdfd;
+}
+
+tr:hover {
+  background: #f1f1f1;
 }
 
 .address-cell {
@@ -889,12 +902,9 @@ exportExcelBtn.onclick = () => {
 
 /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
-  // hide all sections
   document.querySelectorAll("section").forEach(el => el.hidden = true);
-  // show the selected section
   document.getElementById(tabId).hidden = false;
 
-  // update active button styling
   document.querySelectorAll("header button").forEach(btn => btn.classList.remove("active"));
   const btnMap = {
     clientsTab: "tabClients",
@@ -905,7 +915,7 @@ function showTab(tabId) {
   document.getElementById(btnMap[tabId]).classList.add("active");
 }
 
-// attach handlers once, outside the function
+/* Attach handlers */
 document.getElementById("tabClients").onclick = () => showTab("clientsTab");
 document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
 document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
@@ -913,67 +923,55 @@ document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
 /* INIT */
 window.onload = async () => {
-  // Hide header and dashboard initially
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
   document.querySelectorAll("section").forEach(el => el.hidden = true);
   document.getElementById("loginTab").hidden = false;
 
-  // Check Supabase session
   const { data: { session } } = await sb.auth.getSession();
   if (session) showDashboard();
 };
 
-
-  // auto‑set appointment date & time
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  a_date.value = `${yyyy}-${mm}-${dd}`;
-  const hh = String(now.getHours()).padStart(2, "0");
-  const min = String(now.getMinutes()).padStart(2, "0");
-  a_time.value = `${hh}:${min}`;
-
-
+/* Auto‑set appointment date & time */
+const now = new Date();
+const yyyy = now.getFullYear();
+const mm = String(now.getMonth() + 1).padStart(2, "0");
+const dd = String(now.getDate()).padStart(2, "0");
+a_date.value = `${yyyy}-${mm}-${dd}`;
+const hh = String(now.getHours()).padStart(2, "0");
+const min = String(now.getMinutes()).padStart(2, "0");
+a_time.value = `${hh}:${min}`;
 
 /* LOGIN */
-    document.getElementById("loginBtn").onclick = async () => {
-      const email = loginEmail.value;
-      const password = loginPassword.value;
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        loginError.textContent = "Login failed: " + error.message;
-        return;
-      }
-      showDashboard();
-    };
+document.getElementById("loginBtn").onclick = async () => {
+  const email = loginEmail.value;
+  const password = loginPassword.value;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    loginError.textContent = "Login failed: " + error.message;
+    return;
+  }
+  showDashboard();
+};
 
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
-  document.querySelector("header").hidden = true;      // hide header tabs
-  document.querySelector(".container").hidden = true;  // hide dashboard
+  document.querySelector("header").hidden = true;
+  document.querySelector(".container").hidden = true;
   document.querySelectorAll("section").forEach(el => el.hidden = true);
-  document.getElementById("loginTab").hidden = false;  // show login card
-  document.getElementById("logoutMessage").hidden = false; // show logout text
+  document.getElementById("loginTab").hidden = false;
+  document.getElementById("logoutMessage").hidden = false;
 };
 
+/* SHOW DASHBOARD */
 function showDashboard() {
   document.getElementById("loginTab").hidden = true;
   document.getElementById("logoutMessage").hidden = true;
-  document.querySelector("header").hidden = false;      // show header tabs
-  document.querySelector(".container").hidden = false;  // show dashboard
+  document.querySelector("header").hidden = false;
+  document.querySelector(".container").hidden = false;
   showTab("clientsTab");
 }
-
-   
-/* SHOW DASHBOARD */
-    document.getElementById("tabClients").onclick = () => showTab("clientsTab");
-    document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
-    document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
-    document.getElementById("tabReports").onclick = () => showTab("reportsTab");
-
 
 
 </script>
