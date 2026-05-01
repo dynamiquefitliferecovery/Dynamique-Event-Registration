@@ -666,7 +666,6 @@ document.getElementById("exportExcelBtn").onclick = () => {
 };
 
 
-/* ================= LOGIN/LOGOUT ================= */
 
 /* ================= LOGIN ================= */
 document.getElementById("loginBtn").onclick = async () => {
@@ -676,25 +675,23 @@ document.getElementById("loginBtn").onclick = async () => {
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
     document.getElementById("loginError").innerText = error.message;
+    console.error("Login error:", error);
     return;
   }
 
   if (data.session) {
-    // Switch UI
     document.getElementById("loginTab").hidden = true;
     document.querySelector(".container").hidden = false;
     document.getElementById("logoutMessage").hidden = true;
 
-    // Load data
     loadClients();
     loadPractitioners();
     loadAppointments();
   } else {
     document.getElementById("loginError").innerText = "Login failed: no session created.";
+    console.error("No session returned:", data);
   }
 };
-
-
 
 /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
@@ -711,7 +708,10 @@ document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
 window.onload = async () => {
-  const { data: { session } } = await sb.auth.getSession();
+  const { data: { session }, error } = await sb.auth.getSession();
+  if (error) {
+    console.error("Session check error:", error);
+  }
 
   if (session) {
     document.getElementById("loginTab").hidden = true;
@@ -729,6 +729,7 @@ window.onload = async () => {
 
   document.getElementById("loginError").innerText = "";
 }
+
 
 
     // Optional: set default date/time for appointments
