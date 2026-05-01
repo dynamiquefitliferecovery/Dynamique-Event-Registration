@@ -334,33 +334,43 @@ tr:hover {
     <button class="primary" onclick="loadPractitioners()">Refresh</button>
   </section>
 
-  <!-- ================= APPOINTMENTS ================= -->
-  <section id="appointmentsTab" hidden>
-    <h2 class="section-title">Appointments</h2>
-    <!-- appointment form -->
-    <!-- ... fields for date, time, client, practitioner, service, payment, totals, remarks ... -->
-    <div class="form-actions">
-      <button class="primary" id="saveAppointmentBtn">Save</button>
-      <button class="primary" id="cancelAppointmentBtn">Cancel</button>
+<!-- ================= APPOINTMENTS ================= -->
+<section id="appointmentsTab" hidden>
+  <h2 class="section-title">Appointments</h2>
+  <!-- appointment form -->
+  <div class="form-grid-2">
+    <div>
+      <label for="a_date">Date</label>
+      <input id="a_date" type="date">
     </div>
-    <!-- appointment table -->
-    <div class="card" style="margin-top:16px">
-      <table>
-       <thead>
-      <tr>
-      <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
-      <th>Practitioner</th><th>Payment</th>
-      <th>Subtotal</th><th>SST</th><th>Total</th><th>Remarks</th>
-      <th>Edit</th><th>Delete</th>
-      </tr>
+    <div>
+      <label for="a_time">Time</label>
+      <input id="a_time" type="time">
+    </div>
+  </div>
+  <!-- ... other fields for client, practitioner, service, payment, totals, remarks ... -->
+  <div class="form-actions">
+    <button class="primary" id="saveAppointmentBtn">Save</button>
+    <button class="primary" id="cancelAppointmentBtn">Cancel</button>
+  </div>
+  <!-- appointment table -->
+  <div class="card" style="margin-top:16px">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+          <th>Practitioner</th><th>Payment</th>
+          <th>Subtotal</th><th>SST</th><th>Total</th><th>Remarks</th>
+          <th>Edit</th><th>Delete</th>
+        </tr>
       </thead>
-        <tbody id="appointmentsTable"></tbody>
-      </table>
-    </div>
-    <button class="primary" onclick="loadAppointments()">Refresh</button>
-  </section>
+      <tbody id="appointmentsTable"></tbody>
+    </table>
+  </div>
+  <button class="primary" onclick="loadAppointments()">Refresh</button>
+</section>
 
-
+  
 <!-- ================= SALES REPORT ================= -->
 <section id="reportsTab" hidden>
   <div class="card">
@@ -380,10 +390,11 @@ tr:hover {
   <div class="card">
     <table>
       <thead>
-        <tr>
-          <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
-          <th>Practitioner</th><th>Payment</th><th>Subtotal</th><th>SST</th><th>Total</th>
-        </tr>
+      <tr>
+      <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+      <th>Practitioner</th><th>Payment</th>
+      <th>Subtotal</th><th>SST</th><th>Total</th><th>Remarks</th>
+      </tr>
       </thead>
       <tbody id="reportDetailTable"></tbody>
     </table>
@@ -652,15 +663,19 @@ document.getElementById("applyReportBtn").onclick = () => {
     const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
     const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
     const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
-    const row = `<tr>
-      <td>${a.start_time.slice(0,10)}</td>
-      <td>${a.start_time.slice(11,16)}</td>
-      <td>${clientName}</td>
-      <td>${serviceName}</td>
-      <td>${practitionerName}</td>
-      <td>${a.payment_method}</td>
-      <td>${a.total.toFixed(2)}</td>
-    </tr>`;
+  const row = `<tr>
+  <td>${a.start_time.slice(0,10)}</td>
+  <td>${a.start_time.slice(11,16)}</td>
+  <td>${clientName}</td>
+  <td>${serviceName}</td>
+  <td>${practitionerName}</td>
+  <td>${a.payment_method}</td>
+  <td>${a.amount.toFixed(2)}</td>
+  <td>${a.sst.toFixed(2)}</td>
+  <td>${a.total.toFixed(2)}</td>
+  <td>${a.remarks || ""}</td>
+</tr>`;
+
     tbody.insertAdjacentHTML("beforeend", row);
   });
 
