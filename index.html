@@ -28,28 +28,29 @@
   display: block;
 }
 
-    header {
-      max-width: 1000px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-around;
-      padding: 14px;
-      background: #111;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+   header {
+  display: flex;
+  justify-content: space-around;   /* spread buttons evenly */
+  background: #000;                /* solid black bar */
+  padding: 10px;
+}
 
-    header button {
-      min-width: 120px;
-      padding: 8px 18px;
-    }
+header button {
+  background: #222;                /* dark background */
+  color: #fff;                     /* white text */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 120px;                /* consistent width */
+}
 
-    header button.active {
-      background: #ff7a00;
-      color: #000;
-      font-weight: 600;
-    }
+header button.active {
+  background: #ff7a00;             /* orange highlight */
+  color: #000;                     /* black text for active */
+  font-weight: 600;
+}
 
     .container {
       max-width: 1000px;
