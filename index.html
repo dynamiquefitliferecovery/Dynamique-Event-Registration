@@ -446,107 +446,6 @@ function formatContact(input) {
   if (v.length > 3) v = v.slice(0,3) + "-" + v.slice(3);
   input.value = v;
 }
-
-/* ================= SALES REPORT LOGIC ================= */
-document.getElementById("applyReportBtn").onclick = () => {
-  const from = reportFrom.value;
-  const to = reportTo.value;
-  const filtered = appointments.filter(a => {
-    const d = a.start_time.slice(0,10);
-    return (!from || d >= from) && (!to || d <= to);
-  });
-
-  // KPIs
-  const totalIncome = filtered.reduce((sum,a) => sum + a.total, 0);
-  const totalSST = filtered.reduce((sum,a) => sum + a.sst, 0);
-  document.getElementById("kpiTotalIncome").textContent = "RM " + totalIncome.toFixed(2);
-  document.getElementById("kpiTotalSST").textContent = "RM " + totalSST.toFixed(2);
-  document.getElementById("kpiTxn").textContent = filtered.length;
-
-  // Table
-  const tbody = document.getElementById("reportDetailTable");
-  tbody.innerHTML = "";
-  filtered.forEach(a => {
-    const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
-    const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
-    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
-    const row = `<tr>
-      <td>${fmtDMY(a.start_time)}</td>
-      <td>${a.start_time.slice(11,16)}</td>
-      <td>${clientName}</td>
-      <td>${serviceName}</td>
-      <td>${practitionerName}</td>
-      <td>${a.payment_method}</td>
-      <td>${a.amount.toFixed(2)}</td>
-      <td>${a.sst.toFixed(2)}</td>
-      <td>${a.total.toFixed(2)}</td>
-    </tr>`;
-    tbody.insertAdjacentHTML("beforeend", row);
-  });
-
-  // Charts
-  new Chart(serviceCountChart, {
-    type: "bar",
-    data: {
-      labels: SERVICES.map(s => s.name),
-      datasets: [{
-        label: "Service Count",
-        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).length),
-        backgroundColor: "#ff7a00"
-      }]
-    }
-  });
-  new Chart(serviceRevenueChart, {
-    type: "pie",
-    data: {
-      labels: SERVICES.map(s => s.name),
-      datasets: [{
-        label: "Service Revenue",
-        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).reduce((sum,a)=>sum+a.total,0)),
-        backgroundColor: ["#ff7a00","#222","#555","#999","#ccc","#e96a00","#444"]
-      }]
-    }
-  });
-  new Chart(paymentRevenueChart, {
-    type: "pie",
-    data: {
-      labels: ["Cash","Card","E‑Wallet"],
-      datasets: [{
-        label: "Payment Revenue",
-        data: ["Cash","Card","E‑Wallet"].map(m => filtered.filter(a => a.payment_method===m).reduce((sum,a)=>sum+a.total,0)),
-        backgroundColor: ["#ff7a00","#222","#555"]
-      }]
-    }
-  });
-  new Chart(ageRevenueChart, {
-    type: "pie",
-    data: {
-      labels: ["<20","20‑29","30‑39","40+"],
-      datasets: [{
-        label: "Revenue by Age",
-        data: [0,0,0,0].map((_,i) => {
-          return filtered.filter(a => {
-            const age = calcAge(clients.find(c=>c.id===a.client_id)?.date_of_birth);
-            if (i===0) return age<20;
-            if (i===1) return age>=20 && age<30;
-            if (i===2) return age>=30 && age<40;
-            if (i===3) return age>=40;
-          }).reduce((sum,a)=>sum+a.total,0);
-        }),
-        backgroundColor: ["#ff7a00","#222","#555","#999"]
-      }]
-    }
-  });
-};
-
-/* ================= EXPORT ================= */
-document.getElementById("exportExcelBtn").onclick = () => {
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.table_to_sheet(document.querySelector("#reportDetailTable").closest("table"));
-  XLSX.utils.book_append_sheet(wb, ws, "SalesReport");
-  XLSX.writeFile(wb, "SalesReport.xlsx");
-};
-
 /* ================= CLIENTS ================= */
 async function loadClients() {
   const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
@@ -717,7 +616,107 @@ async function loadAppointments() {
   </div>
 </section>
 
-/* ================= TAB SWITCHING ================= */
+/* ================= SALES REPORT LOGIC ================= */
+document.getElementById("applyReportBtn").onclick = () => {
+  const from = reportFrom.value;
+  const to = reportTo.value;
+  const filtered = appointments.filter(a => {
+    const d = a.start_time.slice(0,10);
+    return (!from || d >= from) && (!to || d <= to);
+  });
+
+  // KPIs
+  const totalIncome = filtered.reduce((sum,a) => sum + a.total, 0);
+  const totalSST = filtered.reduce((sum,a) => sum + a.sst, 0);
+  kpiTotalIncome.textContent = "RM " + totalIncome.toFixed(2);
+  kpiTotalSST.textContent = "RM " + totalSST.toFixed(2);
+  kpiTxn.textContent = filtered.length;
+
+  // Table
+  const tbody = document.getElementById("reportDetailTable");
+  tbody.innerHTML = "";
+  filtered.forEach(a => {
+    const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
+    const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
+    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
+    const row = `<tr>
+      <td>${a.start_time.slice(0,10)}</td>
+      <td>${a.start_time.slice(11,16)}</td>
+      <td>${clientName}</td>
+      <td>${serviceName}</td>
+      <td>${practitionerName}</td>
+      <td>${a.payment_method}</td>
+      <td>${a.amount.toFixed(2)}</td>
+      <td>${a.sst.toFixed(2)}</td>
+      <td>${a.total.toFixed(2)}</td>
+    </tr>`;
+    tbody.insertAdjacentHTML("beforeend", row);
+  });
+
+  // Charts
+  new Chart(serviceCountChart, {
+    type: "bar",
+    data: {
+      labels: SERVICES.map(s => s.name),
+      datasets: [{
+        label: "Service Count",
+        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).length),
+        backgroundColor: "#ff7a00"
+      }]
+    }
+  });
+  new Chart(serviceRevenueChart, {
+    type: "pie",
+    data: {
+      labels: SERVICES.map(s => s.name),
+      datasets: [{
+        label: "Service Revenue",
+        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).reduce((sum,a)=>sum+a.total,0)),
+        backgroundColor: ["#ff7a00","#222","#555","#999","#ccc","#e96a00","#444"]
+      }]
+    }
+  });
+  new Chart(paymentRevenueChart, {
+    type: "pie",
+    data: {
+      labels: ["Cash","Card","E‑Wallet"],
+      datasets: [{
+        label: "Payment Revenue",
+        data: ["Cash","Card","E‑Wallet"].map(m => filtered.filter(a => a.payment_method===m).reduce((sum,a)=>sum+a.total,0)),
+        backgroundColor: ["#ff7a00","#222","#555"]
+      }]
+    }
+  });
+  new Chart(ageRevenueChart, {
+    type: "pie",
+    data: {
+      labels: ["<20","20‑29","30‑39","40+"],
+      datasets: [{
+        label: "Revenue by Age",
+        data: [0,0,0,0].map((_,i) => {
+          return filtered.filter(a => {
+            const age = calcAge(clients.find(c=>c.id===a.client_id)?.date_of_birth);
+            if (i===0) return age<20;
+            if (i===1) return age>=20 && age<30;
+            if (i===2) return age>=30 && age<40;
+            if (i===3) return age>=40;
+          }).reduce((sum,a)=>sum+a.total,0);
+        }),
+        backgroundColor: ["#ff7a00","#222","#555","#999"]
+      }]
+    }
+  });
+};
+
+/* ================= EXPORT ================= */
+document.getElementById("exportExcelBtn").onclick = () => {
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(document.querySelector("#reportDetailTable").closest("table"));
+  XLSX.utils.book_append_sheet(wb, ws, "SalesReport");
+  XLSX.writeFile(wb, "SalesReport.xlsx");
+};
+
+  /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
   document.querySelectorAll("section").forEach(el => el.hidden = true);
   document.getElementById(tabId).hidden = false;
