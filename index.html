@@ -773,38 +773,52 @@ applyReportBtn.onclick = () => {
   if (ageRevenueChart) ageRevenueChart.destroy();
 
   // create new charts
+function ctx(id) {
+  const el = document.getElementById(id);
+  return el ? el.getContext("2d") : null;
+}
+  
+if (Object.keys(serviceCount).length) {
   serviceCountChart = new Chart(ctx("serviceCountChart"), {
     type: "bar",
     data: {
       labels: Object.keys(serviceCount),
-      datasets: [{ data: Object.values(serviceCount) }]
+      datasets: [{ data: Object.values(serviceCount), label: "Count" }]
     }
   });
+}
 
+if (Object.keys(serviceRevenue).length) {
   serviceRevenueChart = new Chart(ctx("serviceRevenueChart"), {
     type: "pie",
     data: {
       labels: Object.keys(serviceRevenue),
-      datasets: [{ data: Object.values(serviceRevenue) }]
+      datasets: [{ data: Object.values(serviceRevenue), label: "Revenue" }]
     }
   });
+}
 
+if (Object.keys(paymentRevenue).length) {
   paymentRevenueChart = new Chart(ctx("paymentRevenueChart"), {
     type: "pie",
     data: {
       labels: Object.keys(paymentRevenue),
-      datasets: [{ data: Object.values(paymentRevenue) }]
+      datasets: [{ data: Object.values(paymentRevenue), label: "Revenue" }]
     }
   });
+}
 
+if (Object.keys(ageRevenue).length) {
   ageRevenueChart = new Chart(ctx("ageRevenueChart"), {
     type: "pie",
     data: {
       labels: Object.keys(ageRevenue),
-      datasets: [{ data: Object.values(ageRevenue) }]
+      datasets: [{ data: Object.values(ageRevenue), label: "Revenue" }]
     }
   });
-};
+}
+
+ 
 
 // export to Excel
 exportExcelBtn.onclick = () => {
