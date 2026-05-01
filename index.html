@@ -809,7 +809,7 @@ if (Object.keys(ageRevenue).length) {
       datasets: [{ data: Object.values(ageRevenue), label: "Revenue" }]
     }
   });
-}
+};
 
  
 
@@ -912,7 +912,7 @@ document.getElementById("logoutBtn").onclick = async () => {
   practitioners = [];
   appointments = [];
   document.getElementById("clientsTable").innerHTML = "";
-  document.getElementById("practitionersTable").innerHTML = "";
+  document.getElementById("practitionerTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
 
   // clear client form
@@ -940,8 +940,6 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_total.value = "";
 };
 
-
-  
 </script>
 </body>
 </html>
