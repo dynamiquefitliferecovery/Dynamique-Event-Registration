@@ -238,14 +238,19 @@ section[hidden] {
 
 <!-- DASHBOARD (hidden until login) -->
 <header hidden>
-  <button id="tabClients" class="active">Clients</button>
-  <button id="tabPractitioners">Practitioners</button>
-  <button id="tabAppointments">Appointments</button>
-  <button id="tabReports">Sales Report</button>
+  <button id="tabClients" onclick="showTab('clientsTab')" class="active">Clients</button>
+  <button id="tabPractitioners" onclick="showTab('practitionersTab')">Practitioners</button>
+  <button id="tabAppointments" onclick="showTab('appointmentsTab')">Appointments</button>
+  <button id="tabReports" onclick="showTab('reportsTab')">Sales Report</button>
   <button id="logoutBtn">Logout</button>
 </header>
 
 <div class="container" hidden>
+  <section id="clientsTab" hidden>…</section>
+  <section id="practitionersTab" hidden>…</section>
+  <section id="appointmentsTab" hidden>…</section>
+  <section id="reportsTab" hidden>…</section>
+</div>
   <!-- all your dashboard sections go here -->
   
 <!-- ================= CLIENTS ================= -->
