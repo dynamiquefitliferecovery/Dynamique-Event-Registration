@@ -677,15 +677,21 @@ document.getElementById("loginBtn").onclick = async () => {
     return;
   }
 
-  // Hide login, show dashboard
-  document.getElementById("loginTab").hidden = true;
-  document.querySelector(".container").hidden = false;
-  document.getElementById("logoutMessage").hidden = true;
+  // Confirm session exists
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    // Hide login, show dashboard
+    document.getElementById("loginTab").hidden = true;
+    document.querySelector(".container").hidden = false;
+    document.getElementById("logoutMessage").hidden = true;
 
-  // Load data
-  loadClients();
-  loadPractitioners();
-  loadAppointments();
+ // Load data
+    loadClients();
+    loadPractitioners();
+    loadAppointments();
+  } else {
+    document.getElementById("loginError").innerText = "Login failed: no session created.";
+  }
 };
 
 
@@ -711,11 +717,23 @@ document.getElementById("tabAppointments").onclick = ()=>showTab("appointmentsTa
 document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
 /* ================= INITIALIZATION ================= */
-window.onload = () => {
-  document.getElementById("loginTab").hidden = false;
-  document.querySelector(".container").hidden = true;
-  document.getElementById("logoutMessage").hidden = true;
-  document.getElementById("loginError").innerText = "";
+window.onload = async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    // Already logged in
+    document.getElementById("loginTab").hidden = true;
+    document.querySelector(".container").hidden = false;
+    document.getElementById("logoutMessage").hidden = true;
+
+    loadClients();
+    loadPractitioners();
+    loadAppointments();
+  } else {
+    // Show login
+    document.getElementById("loginTab").hidden = false;
+    document.querySelector(".container").hidden = true;
+    document.getElementById("logoutMessage").hidden = true;
+  }
 };
 
 
