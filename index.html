@@ -18,20 +18,19 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
   <style>
-    * { box-sizing: border-box; }
+ * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      font-family: "Montserrat", sans-serif;
-      background: #f4f4f4;
-    }
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  background: #f4f4f4;
+}
 
- 
 header {
   max-width: 1000px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-around; /* spread buttons evenly */
+  justify-content: space-around;
   padding: 14px;
   background: #111;
   position: sticky;
@@ -40,14 +39,8 @@ header {
 }
 
 header button {
-  background: #333;
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  cursor: pointer;
   min-width: 120px;   /* consistent tab width */
-  text-align: center;
+  padding: 8px 18px;
 }
 
 header button.active {
@@ -69,11 +62,6 @@ section[hidden] {
 .card {
   max-width: 900px;   /* consistent form/report width */
   margin: 0 auto 24px;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .section-title {
@@ -82,18 +70,6 @@ section[hidden] {
   margin-bottom: 14px;
   border-bottom: 2px solid #eee;
   padding-bottom: 6px;
-  text-align: center;
-}
-
-.kpi-grid {
-  display: flex;
-  justify-content: space-between;
-  max-width: 900px;   /* same width as card */
-  margin: 0 auto 24px;
-}
-
-.kpi {
-  flex: 1;
   text-align: center;
 }
 
@@ -233,16 +209,6 @@ th {
 
 canvas { max-height: 260px; }
 
-@media (max-width: 900px) {
-  .form-grid-4,
-  .form-grid-3,
-  .form-grid-2,
-  .chart-grid,
-  .kpi-grid {
-    grid-template-columns: 1fr;
-    max-width: 100%;   /* allow full width on small screens */
-  }
-}
 
   </style>
 </head>
@@ -890,20 +856,18 @@ document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 /* INIT */
 window.onload = async () => {
   // hide everything first
-document.querySelector("header").hidden = true;
-document.querySelector(".container").hidden = true;
-document.querySelectorAll("section").forEach(el => el.hidden = true);
-document.getElementById("loginTab").hidden = false;
-
+  document.querySelector("header").hidden = true;
+  document.querySelector(".container").hidden = true;
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
 
   // show only login form
   document.getElementById("loginTab").hidden = false;
 
   // check if already logged in
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    showDashboard();
-  }
+  if (session) showDashboard();
+};
+
 
   // auto‑set appointment date & time
   const now = new Date();
@@ -973,13 +937,14 @@ document.getElementById("logoutBtn").onclick = async () => {
   loginPassword.value = "";
   loginError.textContent = "";
 
-  // clear data arrays + tables
+  // clear arrays + tables
   clients = [];
   practitioners = [];
   appointments = [];
   document.getElementById("clientsTable").innerHTML = "";
   document.getElementById("practitionerTable").innerHTML = "";
   document.getElementById("appointmentsTable").innerHTML = "";
+};
 
   // clear client form
   client_id.value = "";
