@@ -312,6 +312,7 @@ tr:hover {
       </table>
     </div>
     <button class="primary" onclick="loadClients()">Refresh</button>
+    <p id="clientError" style="color:red;"></p>
   </section>
 
   <!-- ================= PRACTITIONERS ================= -->
@@ -345,13 +346,14 @@ tr:hover {
     <!-- appointment table -->
     <div class="card" style="margin-top:16px">
       <table>
-        <thead>
-          <tr>
-            <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
-            <th>Practitioner</th><th>Payment</th><th>Total</th>
-            <th>Edit</th><th>Delete</th>
-          </tr>
-        </thead>
+       <thead>
+      <tr>
+      <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+      <th>Practitioner</th><th>Payment</th>
+      <th>Subtotal</th><th>SST</th><th>Total</th><th>Remarks</th>
+      <th>Edit</th><th>Delete</th>
+      </tr>
+      </thead>
         <tbody id="appointmentsTable"></tbody>
       </table>
     </div>
@@ -450,27 +452,30 @@ function formatContact(input) {
 async function loadClients() {
   const { data, error } = await sb.from("clients").select("*").order("created_at", { ascending: false });
   if (error) {
-    console.error("Error loading clients:", error);
-    return;
-  }
+  console.error("Error loading clients:", error);
+  const errMsg = document.getElementById("clientError");
+  if (errMsg) errMsg.textContent = "Failed to load clients. Please try again.";
+  return;
+}
   clients = data; // update global
 
   // table
   const table = document.querySelector("#clientsTable");
   table.innerHTML = "";
   data.forEach(c => {
-    const row = `<tr>
-      <td>${c.full_name || ""}</td>
-      <td>${c.date_of_birth || ""}</td>
-      <td>${c.gender || ""}</td>
-      <td>${c.citizenship || ""}</td>
-      <td>${c.ic_passport || ""}</td>
-      <td>${c.contact || ""}</td>
-      <td>${c.email || ""}</td>
-      <td class="address-cell">${c.address || ""}</td>
-      <td><button onclick="editClient('${c.id}')" class="small primary">Edit</button></td>
-      <td><button onclick="deleteClient('${c.id}')" class="small danger">Delete</button></td>
-    </tr>`;
+const row = `<tr>
+  <td>${c.full_name || ""}</td>
+  <td>${fmtDMY(c.date_of_birth) || ""}</td>
+  <td>${calcAge(c.date_of_birth) || ""}</td>
+  <td>${c.gender || ""}</td>
+  <td>${c.citizenship || ""}</td>
+  <td>${c.ic_passport || ""}</td>
+  <td>${c.contact || ""}</td>
+  <td>${c.email || ""}</td>
+  <td class="address-cell">${c.address || ""}</td>
+  <td><button type="button" onclick="editClient('${c.id}')" class="small primary">Edit</button></td>
+  <td><button type="button" onclick="deleteClient('${c.id}')" class="small danger">Delete</button></td>
+</tr>`;
     table.insertAdjacentHTML("beforeend", row);
   });
 
@@ -534,19 +539,20 @@ async function loadAppointments() {
     const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
 
     const row = `<tr>
-      <td>${a.start_time.slice(0,10)}</td>
-      <td>${a.start_time.slice(11,16)}</td>
-      <td>${clientName}</td>
-      <td>${serviceName}</td>
-      <td>${practitionerName}</td>
-      <td>${a.payment_method}</td>
-      <td>${a.amount.toFixed(2)}</td>
-      <td>${a.sst.toFixed(2)}</td>
-      <td>${a.total.toFixed(2)}</td>
-      <td>${a.remarks || ""}</td>
-      <td><button onclick="editAppointment('${a.id}')" class="small primary">Edit</button></td>
-      <td><button onclick="deleteAppointment('${a.id}')" class="small danger">Delete</button></td>
-    </tr>`;
+  <td>${a.start_time.slice(0,10)}</td>
+  <td>${a.start_time.slice(11,16)}</td>
+  <td>${clientName}</td>
+  <td>${serviceName}</td>
+  <td>${practitionerName}</td>
+  <td>${a.payment_method}</td>
+  <td>${a.amount.toFixed(2)}</td>
+  <td>${a.sst.toFixed(2)}</td>
+  <td>${a.total.toFixed(2)}</td>
+  <td>${a.remarks || ""}</td>
+  <td><button type="button" onclick="editAppointment('${a.id}')" class="small primary">Edit</button></td>
+  <td><button type="button" onclick="deleteAppointment('${a.id}')" class="small danger">Delete</button></td>
+</tr>`;
+
     table.insertAdjacentHTML("beforeend", row);
   });
 }
@@ -562,8 +568,8 @@ async function loadAppointments() {
     <label for="reportTo">To:</label>
     <input type="date" id="reportTo">
     <div class="form-actions">
-      <button class="primary" id="applyReportBtn">Generate</button>
-      <button class="primary" id="exportExcelBtn">Export Excel</button>
+      <button class="primary" id="applyReportBtn" type="button">Generate</button>
+      <button class="primary" id="exportExcelBtn" type="button">Export Excel</button>
     </div>
   </div>
 
@@ -594,8 +600,6 @@ async function loadAppointments() {
           <th>Service</th>
           <th>Practitioner</th>
           <th>Payment</th>
-          <th>Subtotal</th>
-          <th>SST</th>
           <th>Total</th>
         </tr>
       </thead>
@@ -614,9 +618,16 @@ async function loadAppointments() {
       <canvas id="ageRevenueChart"></canvas>
     </div>
   </div>
-
 </section>
+
 /* ================= SALES REPORT LOGIC ================= */
+
+// Chart instances for cleanup
+let serviceCountChartInstance;
+let serviceRevenueChartInstance;
+let paymentRevenueChartInstance;
+let ageRevenueChartInstance;
+
 document.getElementById("applyReportBtn").onclick = () => {
   const from = reportFrom.value;
   const to = reportTo.value;
@@ -646,15 +657,19 @@ document.getElementById("applyReportBtn").onclick = () => {
       <td>${serviceName}</td>
       <td>${practitionerName}</td>
       <td>${a.payment_method}</td>
-      <td>${a.amount.toFixed(2)}</td>
-      <td>${a.sst.toFixed(2)}</td>
       <td>${a.total.toFixed(2)}</td>
     </tr>`;
     tbody.insertAdjacentHTML("beforeend", row);
   });
 
+  // Destroy old charts
+  if (serviceCountChartInstance) serviceCountChartInstance.destroy();
+  if (serviceRevenueChartInstance) serviceRevenueChartInstance.destroy();
+  if (paymentRevenueChartInstance) paymentRevenueChartInstance.destroy();
+  if (ageRevenueChartInstance) ageRevenueChartInstance.destroy();
+
   // Charts
-  new Chart(serviceCountChart, {
+  serviceCountChartInstance = new Chart(serviceCountChart, {
     type: "bar",
     data: {
       labels: SERVICES.map(s => s.name),
@@ -665,29 +680,35 @@ document.getElementById("applyReportBtn").onclick = () => {
       }]
     }
   });
-  new Chart(serviceRevenueChart, {
+
+  serviceRevenueChartInstance = new Chart(serviceRevenueChart, {
     type: "pie",
     data: {
       labels: SERVICES.map(s => s.name),
       datasets: [{
         label: "Service Revenue",
-        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).reduce((sum,a)=>sum+a.total,0)),
+        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id)
+          .reduce((sum,a)=>sum+a.total,0)),
         backgroundColor: ["#ff7a00","#222","#555","#999","#ccc","#e96a00","#444"]
       }]
     }
   });
-  new Chart(paymentRevenueChart, {
+
+  paymentRevenueChartInstance = new Chart(paymentRevenueChart, {
     type: "pie",
     data: {
       labels: ["Cash","Card","E‑Wallet"],
       datasets: [{
         label: "Payment Revenue",
-        data: ["Cash","Card","E‑Wallet"].map(m => filtered.filter(a => a.payment_method===m).reduce((sum,a)=>sum+a.total,0)),
+        data: ["Cash","Card","E‑Wallet"].map(m =>
+          filtered.filter(a => a.payment_method===m)
+          .reduce((sum,a)=>sum+a.total,0)),
         backgroundColor: ["#ff7a00","#222","#555"]
       }]
     }
   });
-  new Chart(ageRevenueChart, {
+
+  ageRevenueChartInstance = new Chart(ageRevenueChart, {
     type: "pie",
     data: {
       labels: ["<20","20‑29","30‑39","40+"],
@@ -711,7 +732,9 @@ document.getElementById("applyReportBtn").onclick = () => {
 /* ================= EXPORT ================= */
 document.getElementById("exportExcelBtn").onclick = () => {
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.table_to_sheet(document.querySelector("#reportDetailTable").closest("table"));
+  const ws = XLSX.utils.table_to_sheet(
+    document.querySelector("#reportDetailTable").closest("table")
+  );
   XLSX.utils.book_append_sheet(wb, ws, "SalesReport");
   XLSX.writeFile(wb, "SalesReport.xlsx");
 };
