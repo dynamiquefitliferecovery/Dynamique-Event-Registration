@@ -135,6 +135,7 @@
   </section>
 
   <!-- Practitioners -->
+
 <section id="practitionersTab" hidden>
   <h2 class="section-title">Practitioners</h2>
   <div class="card">
@@ -148,10 +149,10 @@
     <table>
       <thead><tr><th>Name</th><th>Delete</th></tr></thead>
       <tbody id="practitionerTable"></tbody>
-      <select id="a_practitioner"></select>
     </table>
   </div>
 </section>
+
 
   <!-- Appointments -->
   <section id="appointmentsTab" hidden>
@@ -385,8 +386,6 @@ function resetClientSave() {
 
 /* ================= PRACTITIONERS ================= */
 
-/* ================= PRACTITIONERS ================= */
-
 // Add practitioner
 document.getElementById("addPractitionerBtn").onclick = async () => {
   const name = document.getElementById("p_name").value.trim();
@@ -410,14 +409,12 @@ document.getElementById("cancelPractitionerBtn").onclick = () => {
 
 // Load practitioners
 async function loadPractitioners() {
-  // Removed order by created_at (since your table only has id + name)
   const { data, error } = await sb.from("practitioners").select("*");
   if (error) {
     console.error("Error loading practitioners:", error);
     return;
   }
-  console.log("Practitioners data:", data); // debug log
-  practitioners = data;
+  console.log("Practitioners data:", data);
 
   // Populate table
   const table = document.getElementById("practitionerTable");
@@ -430,7 +427,7 @@ async function loadPractitioners() {
     table.insertAdjacentHTML("beforeend", row);
   });
 
-  // Populate dropdown for appointments
+  // Populate dropdown
   const pracSelect = document.getElementById("a_practitioner");
   if (pracSelect) {
     pracSelect.innerHTML = "<option value=''>Select Practitioner</option>";
@@ -440,6 +437,7 @@ async function loadPractitioners() {
   }
 }
 
+  
 // Delete practitioner
 async function deletePractitioner(id) {
   const { error } = await sb.from("practitioners").delete().eq("id", id);
