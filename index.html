@@ -868,9 +868,12 @@ document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
 /* INIT */
 window.onload = async () => {
-  // show only login form
+  // hide everything first
   document.querySelector("header").hidden = true;
   document.querySelector(".container").hidden = true;
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
+
+  // show only login form
   document.getElementById("loginTab").hidden = false;
 
   // check if already logged in
@@ -881,18 +884,15 @@ window.onload = async () => {
 
   // auto‑set appointment date & time
   const now = new Date();
-
-  // format YYYY-MM-DD for <input type="date">
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   const dd = String(now.getDate()).padStart(2, "0");
   a_date.value = `${yyyy}-${mm}-${dd}`;
-
-  // format HH:MM for <input type="time">
   const hh = String(now.getHours()).padStart(2, "0");
   const min = String(now.getMinutes()).padStart(2, "0");
   a_time.value = `${hh}:${min}`;
 };
+
 
 /* SHOW DASHBOARD */
 function showDashboard() {
