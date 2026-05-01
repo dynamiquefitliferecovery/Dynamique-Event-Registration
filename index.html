@@ -385,6 +385,8 @@ function resetClientSave() {
 
 /* ================= PRACTITIONERS ================= */
 
+/* ================= PRACTITIONERS ================= */
+
 // Add practitioner
 document.getElementById("addPractitionerBtn").onclick = async () => {
   const name = document.getElementById("p_name").value.trim();
@@ -408,7 +410,7 @@ document.getElementById("cancelPractitionerBtn").onclick = () => {
 
 // Load practitioners
 async function loadPractitioners() {
-  // Remove order by created_at since that column doesn't exist
+  // Removed order by created_at (since your table only has id + name)
   const { data, error } = await sb.from("practitioners").select("*");
   if (error) {
     console.error("Error loading practitioners:", error);
@@ -447,6 +449,7 @@ async function deletePractitioner(id) {
   }
   await loadPractitioners();
 }
+
 
 
  
