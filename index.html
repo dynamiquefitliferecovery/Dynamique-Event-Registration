@@ -1004,11 +1004,10 @@ document.getElementById("logoutBtn").onclick = async () => {
 /* SHOW DASHBOARD */
 function showDashboard() {
   loginTab.hidden = true;
-  document.getElementById("logoutMessage").hidden = true; // hide logout message when logged in
+  document.getElementById("logoutMessage").hidden = true;
   document.querySelector("header").hidden = false;
   document.querySelector(".container").hidden = false;
 
-  // re‑enable tab buttons
   document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
 
   loadClients();
