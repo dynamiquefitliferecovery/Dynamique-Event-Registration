@@ -81,11 +81,17 @@ header button.active {
   margin-bottom: 20px;
 }
 
-
-    
-section[hidden] {
-  display: none;
+/* Force sections to stack vertically and hide cleanly */
+section {
+  display: block;          /* ensures vertical stacking */
+  width: 100%;             /* full width */
+  margin: 0 auto;          /* center if needed */
 }
+
+section[hidden] {
+  display: none !important; /* hidden sections don’t take space */
+}
+
 
 .card {
   max-width: 900px;   /* consistent form/report width */
