@@ -850,6 +850,15 @@ exportExcelBtn.onclick = () => {
   document.getElementById(btnMap[tabId]).classList.add("active");
 }
 
+// attach handlers once, outside the function
+document.getElementById("tabClients").onclick = () => showTab("clientsTab");
+document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
+document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
+document.getElementById("tabReports").onclick = () => showTab("reportsTab");
+
+
+
+
 /* INIT */
 window.onload = async () => {
   // show only login form
