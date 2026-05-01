@@ -20,13 +20,13 @@
   <style>
     * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      font-family: "Montserrat", sans-serif;
-      background: linear-gradient(135deg, #111 0%, #ff7a00 100%);
-      min-height: 100vh;
-      display: block;   /* stack children vertically */
-    }
+ body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  background: #ff7a00;   /* solid orange */
+  min-height: 100vh;
+  display: block;        /* stack children vertically */
+}
 
     header {
       max-width: 1000px;
@@ -911,14 +911,18 @@ document.getElementById("tabAppointments").onclick = () => showTab("appointments
 document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
 /* INIT */
-  window.onload = async () => {
-      document.querySelector("header").hidden = true;
-      document.querySelector(".container").hidden = true;
-      document.querySelectorAll("section").forEach(el => el.hidden = true);
-      document.getElementById("loginTab").hidden = false;
+window.onload = async () => {
+  // Hide header and dashboard initially
+  document.querySelector("header").hidden = true;
+  document.querySelector(".container").hidden = true;
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
+  document.getElementById("loginTab").hidden = false;
 
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) showDashboard();
+  // Check Supabase session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) showDashboard();
+};
+
 
   // auto‑set appointment date & time
   const now = new Date();
@@ -946,23 +950,21 @@ document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
-      await sb.auth.signOut();
-      document.querySelector("header").hidden = true;
-      document.querySelector(".container").hidden = true;
-      document.querySelectorAll("section").forEach(el => el.hidden = true);
-      loginTab.hidden = false;
-      document.getElementById("logoutMessage").hidden = false;
-      document.querySelectorAll("header button").forEach(btn => btn.disabled = true);
-    };
+  await sb.auth.signOut();
+  document.querySelector("header").hidden = true;      // hide header tabs
+  document.querySelector(".container").hidden = true;  // hide dashboard
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
+  document.getElementById("loginTab").hidden = false;  // show login card
+  document.getElementById("logoutMessage").hidden = false; // show logout text
+};
 
-    function showDashboard() {
-      loginTab.hidden = true;
-      document.getElementById("logoutMessage").hidden = true;
-      document.querySelector("header").hidden = false;
-      document.querySelector(".container").hidden = false;
-      document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
-      showTab("clientsTab");
-    }
+function showDashboard() {
+  document.getElementById("loginTab").hidden = true;
+  document.getElementById("logoutMessage").hidden = true;
+  document.querySelector("header").hidden = false;      // show header tabs
+  document.querySelector(".container").hidden = false;  // show dashboard
+  showTab("clientsTab");
+}
 
     function showTab(tabId) {
       document.querySelectorAll("section").forEach(el => el.hidden = true);
