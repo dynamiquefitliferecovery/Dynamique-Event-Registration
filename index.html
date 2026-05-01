@@ -18,91 +18,89 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
   <style>
- * { box-sizing: border-box; }
+    * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  font-family: "Montserrat", sans-serif;
-  background: linear-gradient(135deg, #111 0%, #ff7a00 100%);
-  min-height: 100vh;
-  display: block;   /* stack children vertically */
-}
+    body {
+      margin: 0;
+      font-family: "Montserrat", sans-serif;
+      background: linear-gradient(135deg, #111 0%, #ff7a00 100%);
+      min-height: 100vh;
+      display: block;   /* stack children vertically */
+    }
 
+    header {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      padding: 14px;
+      background: #111;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
+    header button {
+      min-width: 120px;
+      padding: 8px 18px;
+    }
 
+    header button.active {
+      background: #ff7a00;
+      color: #000;
+      font-weight: 600;
+    }
 
-header {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-around;
-  padding: 14px;
-  background: #111;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 24px;
+    }
 
-header button {
-  min-width: 120px;   /* consistent tab width */
-  padding: 8px 18px;
-}
+    .login-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      max-width: 400px;
+      width: 100%;
+      padding: 32px;
+      text-align: center;
+      margin: 60px auto;   /* center horizontally with spacing from top */
+    }
 
-header button.active {
-  background: #ff7a00;
-  color: #000;
-  font-weight: 600;
-}
+    .login-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ff7a00;
+      margin-bottom: 20px;
+    }
 
-.container {
-  max-width: 1000px;  /* same as header */
-  margin: auto;
-  padding: 24px;
-}
+    .login-card p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 20px;
+    }
 
-.login-card {
-  margin: 60px auto;   /* center horizontally with spacing from top */
-}
+    /* Force sections to stack vertically and hide cleanly */
+    section {
+      display: block;
+      width: 100%;
+      margin: 0 auto;
+    }
 
-.login-card h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #ff7a00;
-  margin-bottom: 20px;
-}
-.login-card p {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-/* Force sections to stack vertically and hide cleanly */
-section {
-  display: block;          /* ensures vertical stacking */
-  width: 100%;             /* full width */
-  margin: 0 auto;          /* center if needed */
-}
-
-section[hidden] {
-  display: none !important; /* hidden sections don’t take space */
-}
-
+    section[hidden] {
+      display: none !important;
+    }
 
 .card {
   max-width: 900px;   /* consistent form/report width */
   margin: 0 auto 24px;
 }
 
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 14px;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 6px;
-  text-align: center;
-  max-width: 900px;   /* match form width */
-  margin: 0 auto 14px;
-}
+.section-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; max-width: 900px; margin: 0 auto; }
+    th, td { border-bottom: 1px solid #ddd; padding: 10px; word-wrap: break-word; }
+    th { background: #f0f0f0; }
 
 .form-actions {
   display: flex;
@@ -246,16 +244,8 @@ th {
   font-weight: 700;
 }
 
-.chart-grid {
-  display: grid;
-  grid-template-columns: 1fr;   /* stack charts vertically */
-  gap: 24px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-
-canvas { max-height: 260px; }
+.chart-grid { display: grid; grid-template-columns: 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
+    canvas { max-height: 260px; }
 
 
   </style>
@@ -264,31 +254,47 @@ canvas { max-height: 260px; }
 <body>
 
 <!-- ================= LOGIN ================= -->
-<section id="loginTab">
-  <div class="login-card">
+  <section id="loginTab" class="login-card">
     <h2>Admin Login</h2>
     <p id="logoutMessage" hidden>You’ve been logged out successfully. Please log in again to continue.</p>
-    <input id="loginEmail" type="email" placeholder="Email" />
-    <input id="loginPassword" type="password" placeholder="Password" />
-    <button class="primary" id="loginBtn">Login</button>
-    <div id="loginError" style="color:red; margin-top:10px;"></div> <!-- added -->
+    <input id="loginEmail" type="email" placeholder="Email"><br><br>
+    <input id="loginPassword" type="password" placeholder="Password"><br><br>
+    <button id="loginBtn" class="primary">Login</button>
+    <p id="loginError" style="color:red;"></p>
+  </section>
+
+<!-- Navigation -->
+  <header hidden>
+    <button id="tabClients">Clients</button>
+    <button id="tabPractitioners">Practitioners</button>
+    <button id="tabAppointments">Appointments</button>
+    <button id="tabReports">Sales Report</button>
+    <button id="logoutBtn">Logout</button>
+  </header>
+
+  <!-- Dashboard container -->
+  <div class="container" hidden>
+    <section id="clientsTab" hidden>
+      <h2 class="section-title">Client Registration</h2>
+      <!-- client form + table here -->
+    </section>
+
+    <section id="practitionersTab" hidden>
+      <h2 class="section-title">Practitioners</h2>
+      <!-- practitioner form + table here -->
+    </section>
+
+    <section id="appointmentsTab" hidden>
+      <h2 class="section-title">Appointments</h2>
+      <!-- appointment form + table here -->
+    </section>
+
+    <section id="reportsTab" hidden>
+      <h2 class="section-title">Sales Report</h2>
+      <!-- KPIs + charts here -->
+    </section>
   </div>
-</section>
 
-
-
-<!-- ================= DASHBOARD ================= -->
-<header hidden>
-  <button id="tabClients" class="active">Clients</button>
-  <button id="tabPractitioners">Practitioners</button>
-  <button id="tabAppointments">Appointments</button>
-  <button id="tabReports">Sales Report</button>
-  <button id="logoutBtn">Logout</button>
-</header>
-
-<div class="container" hidden>
-  <!-- Clients, Practitioners, Appointments, Sales Report sections go here -->
-</div>
 
 <!-- ================= CLIENT REGISTRATION ================= -->
 <section id="clientsTab" hidden>
@@ -905,18 +911,14 @@ document.getElementById("tabAppointments").onclick = () => showTab("appointments
 document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
 /* INIT */
-window.onload = async () => {
-  // hide everything first
-  document.querySelector("header").hidden = true;
-  document.querySelector(".container").hidden = true;
-  document.querySelectorAll("section").forEach(el => el.hidden = true);
+  window.onload = async () => {
+      document.querySelector("header").hidden = true;
+      document.querySelector(".container").hidden = true;
+      document.querySelectorAll("section").forEach(el => el.hidden = true);
+      document.getElementById("loginTab").hidden = false;
 
-  // show only login form
-  document.getElementById("loginTab").hidden = false;
-
-  // check if already logged in
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) showDashboard();
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) showDashboard();
 
   // auto‑set appointment date & time
   const now = new Date();
@@ -931,91 +933,58 @@ window.onload = async () => {
 
 
 /* LOGIN */
-document.getElementById("loginBtn").onclick = async () => {
-  const email = loginEmail.value;
-  const password = loginPassword.value;
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  console.log("Login result:", data, error);
-
-  if (error) {
-    loginError.textContent = "Login failed: " + error.message;
-    console.error(error);
-    return;
-  }
-  showDashboard();
-};
+    document.getElementById("loginBtn").onclick = async () => {
+      const email = loginEmail.value;
+      const password = loginPassword.value;
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        loginError.textContent = "Login failed: " + error.message;
+        return;
+      }
+      showDashboard();
+    };
 
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
-  await sb.auth.signOut();
+      await sb.auth.signOut();
+      document.querySelector("header").hidden = true;
+      document.querySelector(".container").hidden = true;
+      document.querySelectorAll("section").forEach(el => el.hidden = true);
+      loginTab.hidden = false;
+      document.getElementById("logoutMessage").hidden = false;
+      document.querySelectorAll("header button").forEach(btn => btn.disabled = true);
+    };
 
-  // hide nav bar + dashboard
-  document.querySelector("header").hidden = true;   // safer than remove()
-  document.querySelector(".container").hidden = true;
+    function showDashboard() {
+      loginTab.hidden = true;
+      document.getElementById("logoutMessage").hidden = true;
+      document.querySelector("header").hidden = false;
+      document.querySelector(".container").hidden = false;
+      document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
+      showTab("clientsTab");
+    }
 
-  // hide all tab sections
-  document.querySelectorAll("section").forEach(el => el.hidden = true);
+    function showTab(tabId) {
+      document.querySelectorAll("section").forEach(el => el.hidden = true);
+      document.getElementById(tabId).hidden = false;
+      document.querySelectorAll("header button").forEach(btn => btn.classList.remove("active"));
+      const btnMap = {
+        clientsTab: "tabClients",
+        practitionersTab: "tabPractitioners",
+        appointmentsTab: "tabAppointments",
+        reportsTab: "tabReports"
+      };
+      document.getElementById(btnMap[tabId]).classList.add("active");
+    }
 
-  // show only login form
-  loginTab.hidden = false;
-  document.getElementById("logoutMessage").hidden = false; // show logout confirmation
-
-  // disable tab buttons while logged out
-  document.querySelectorAll("header button").forEach(btn => btn.disabled = true);
-
-  // clear login form
-  loginEmail.value = "";
-  loginPassword.value = "";
-  loginError.textContent = "";
-
-  // clear arrays + tables
-  clients = [];
-  practitioners = [];
-  appointments = [];
-  document.getElementById("clientsTable").innerHTML = "";
-  document.getElementById("practitionerTable").innerHTML = "";
-  document.getElementById("appointmentsTable").innerHTML = "";
-
-  // clear client form
-  client_id.value = "";
-  c_name.value = "";
-  c_dob.value = "";
-  c_gender.value = "Male";
-  c_citizenship.value = "Malaysian";
-  c_ic.value = "";
-  c_contact.value = "";
-  c_email.value = "";
-  c_address.value = "";
-
-  // clear appointment form
-  appointment_id.value = "";
-  a_date.value = "";
-  a_time.value = "";
-  a_client.value = "";
-  a_service.value = "";
-  a_practitioner.value = "";
-  a_payment.value = "";
-  a_remarks.value = "";
-  a_price.value = "";
-  a_sst.value = "";
-  a_total.value = "";
-};
-
+ 
 /* SHOW DASHBOARD */
-function showDashboard() {
-  loginTab.hidden = true;
-  document.getElementById("logoutMessage").hidden = true;
-  document.querySelector("header").hidden = false;
-  document.querySelector(".container").hidden = false;
+    document.getElementById("tabClients").onclick = () => showTab("clientsTab");
+    document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
+    document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
+    document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
-  document.querySelectorAll("header button").forEach(btn => btn.disabled = false);
 
-  loadClients();
-  loadPractitioners();
-  loadAppointments();
-  showTab("clientsTab");
-}
 
 </script>
 </body>
