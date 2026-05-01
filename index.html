@@ -277,7 +277,6 @@ tr:hover {
   <p id="loginError" style="color:red;"></p>
 </section>
 
-<!-- Navigation -->
 <header hidden>
   <button id="tabClients">Clients</button>
   <button id="tabPractitioners">Practitioners</button>
@@ -327,7 +326,9 @@ tr:hover {
     <!-- practitioner table -->
     <div class="card" style="margin-top:16px">
       <table>
-        <thead><tr><th>Name</th><th>Specialty</th><th>Contact</th><th>Email</th><th>Address</th><th>Edit</th><th>Delete</th></tr></thead>
+        <thead>
+        <tr><th>Name</th><th>Add</th><th>Delete</th></tr>
+        </thead>
         <tbody id="practitionerTable"></tbody>
       </table>
     </div>
@@ -360,13 +361,12 @@ tr:hover {
   <div class="card" style="margin-top:16px">
     <table>
       <thead>
-        <tr>
-          <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
-          <th>Practitioner</th><th>Payment</th>
-          <th>Subtotal</th><th>SST</th><th>Total</th><th>Remarks</th>
-          <th>Edit</th><th>Delete</th>
-        </tr>
-      </thead>
+  <tr>
+    <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+    <th>Practitioner</th><th>Payment</th><th>Total</th><th>Remarks</th>
+    <th>Edit</th><th>Delete</th>
+  </tr>
+</thead>
       <tbody id="appointmentsTable"></tbody>
     </table>
   </div>
@@ -516,14 +516,10 @@ async function loadPractitioners() {
   table.innerHTML = "";
   data.forEach(p => {
     const row = `<tr>
-      <td>${p.name || ""}</td>
-      <td>${p.specialty || ""}</td>
-      <td>${p.contact || ""}</td>
-      <td>${p.email || ""}</td>
-      <td class="address-cell">${p.address || ""}</td>
-      <td><button onclick="editPractitioner('${p.id}')" class="small primary">Edit</button></td>
-      <td><button onclick="deletePractitioner('${p.id}')" class="small danger">Delete</button></td>
-    </tr>`;
+  <td>${p.name || ""}</td>
+  <td><button onclick="editPractitioner('${p.id}')" class="small primary">Add</button></td>
+  <td><button onclick="deletePractitioner('${p.id}')" class="small danger">Delete</button></td>
+</tr>`;
     table.insertAdjacentHTML("beforeend", row);
   });
 
@@ -689,65 +685,89 @@ document.getElementById("applyReportBtn").onclick = () => {
   if (ageRevenueChartInstance) ageRevenueChartInstance.destroy();
 
   // Charts
-  serviceCountChartInstance = new Chart(serviceCountChart, {
-    type: "bar",
-    data: {
-      labels: SERVICES.map(s => s.name),
-      datasets: [{
-        label: "Service Count",
-        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).length),
-        backgroundColor: "#ff7a00"
-      }]
+serviceCountChartInstance = new Chart(serviceCountChart, {
+  type: "bar",
+  data: {
+    labels: SERVICES.map(s => s.name),
+    datasets: [{
+      label: "Service Count",
+      data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id).length),
+      backgroundColor: ["#ff7a00","#007bff","#28a745","#6f42c1","#6c757d","#e96a00","#17a2b8"]
+    }]
+  },
+  options: {
+    plugins: {
+      title: { display: true, text: "Service Count" }
     }
-  });
+  }
+});
 
-  serviceRevenueChartInstance = new Chart(serviceRevenueChart, {
-    type: "pie",
-    data: {
-      labels: SERVICES.map(s => s.name),
-      datasets: [{
-        label: "Service Revenue",
-        data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id)
-          .reduce((sum,a)=>sum+a.total,0)),
-        backgroundColor: ["#ff7a00","#222","#555","#999","#ccc","#e96a00","#444"]
-      }]
+  
+serviceRevenueChartInstance = new Chart(serviceRevenueChart, {
+  type: "pie",
+  data: {
+    labels: SERVICES.map(s => s.name),
+    datasets: [{
+      label: "Service Revenue",
+      data: SERVICES.map(s => filtered.filter(a => a.service_id === s.id)
+        .reduce((sum,a)=>sum+a.total,0)),
+      backgroundColor: ["#ff7a00","#007bff","#28a745","#6f42c1","#6c757d","#e96a00","#17a2b8"]
+    }]
+  },
+  options: {
+    plugins: {
+      title: { display: true, text: "Service Revenue" }
     }
-  });
+  }
+});
 
-  paymentRevenueChartInstance = new Chart(paymentRevenueChart, {
-    type: "pie",
-    data: {
-      labels: ["Cash","Card","E‑Wallet"],
-      datasets: [{
-        label: "Payment Revenue",
-        data: ["Cash","Card","E‑Wallet"].map(m =>
-          filtered.filter(a => a.payment_method===m)
-          .reduce((sum,a)=>sum+a.total,0)),
-        backgroundColor: ["#ff7a00","#222","#555"]
-      }]
+  
+  
+paymentRevenueChartInstance = new Chart(paymentRevenueChart, {
+  type: "pie",
+  data: {
+    labels: ["Cash","Card","E‑Wallet"],
+    datasets: [{
+      label: "Payment Revenue",
+      data: ["Cash","Card","E‑Wallet"].map(m =>
+        filtered.filter(a => a.payment_method===m)
+        .reduce((sum,a)=>sum+a.total,0)),
+      backgroundColor: ["#ff7a00","#007bff","#28a745"] // orange, blue, green
+    }]
+  },
+  options: {
+    plugins: {
+      title: { display: true, text: "Payment Revenue Distribution" }
     }
-  });
+  }
+});
+
 
   ageRevenueChartInstance = new Chart(ageRevenueChart, {
-    type: "pie",
-    data: {
-      labels: ["<20","20‑29","30‑39","40+"],
-      datasets: [{
-        label: "Revenue by Age",
-        data: [0,0,0,0].map((_,i) => {
-          return filtered.filter(a => {
-            const age = calcAge(clients.find(c=>c.id===a.client_id)?.date_of_birth);
-            if (i===0) return age<20;
-            if (i===1) return age>=20 && age<30;
-            if (i===2) return age>=30 && age<40;
-            if (i===3) return age>=40;
-          }).reduce((sum,a)=>sum+a.total,0);
-        }),
-        backgroundColor: ["#ff7a00","#222","#555","#999"]
-      }]
+  type: "pie",
+  data: {
+    labels: ["<20","20‑29","30‑39","40+"],
+    datasets: [{
+      label: "Revenue by Age Group",
+      data: [0,0,0,0].map((_,i) => {
+        return filtered.filter(a => {
+          const age = calcAge(clients.find(c=>c.id===a.client_id)?.date_of_birth);
+          if (i===0) return age<20;
+          if (i===1) return age>=20 && age<30;
+          if (i===2) return age>=30 && age<40;
+          if (i===3) return age>=40;
+        }).reduce((sum,a)=>sum+a.total,0);
+      }),
+      backgroundColor: ["#ff7a00","#007bff","#28a745","#6f42c1"] // orange, blue, green, purple
+    }]
+  },
+  options: {
+    plugins: {
+      title: { display: true, text: "Revenue by Age Group" }
     }
-  });
-};
+  }
+});
+
 
 /* ================= EXPORT ================= */
 document.getElementById("exportExcelBtn").onclick = () => {
@@ -789,7 +809,7 @@ document.getElementById("tabReports").onclick = () => showTab("reportsTab");
 
 /* INIT */
 window.onload = async () => {
-  document.querySelector("header").hidden = true;
+  document.querySelector("header").hidden = true;   // hide header
   document.querySelector(".container").hidden = true;
   document.querySelectorAll("section").forEach(el => el.hidden = true);
   document.getElementById("loginTab").hidden = false;
@@ -797,6 +817,7 @@ window.onload = async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) showDashboard();
 };
+
 
 /* Auto‑set appointment date & time */
 const now = new Date();
@@ -818,7 +839,7 @@ document.getElementById("loginBtn").onclick = async () => {
 /* LOGOUT */
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
-  document.querySelector("header").hidden = true;
+  document.querySelector("header").hidden = true;   // hide header
   document.querySelector(".container").hidden = true;
   document.querySelectorAll("section").forEach(el => el.hidden = true);
   document.getElementById("loginTab").hidden = false;
@@ -827,12 +848,18 @@ document.getElementById("logoutBtn").onclick = async () => {
 
 /* SHOW DASHBOARD */
 function showDashboard() {
+  // hide login + logout messages
   document.getElementById("loginTab").hidden = true;
   document.getElementById("logoutMessage").hidden = true;
-  document.querySelector("header").hidden = false;
+
+  // show dashboard elements
+  document.querySelector("header").hidden = false;   // header only visible here
   document.querySelector(".container").hidden = false;
+
+  // default tab
   showTab("clientsTab");
 }
+
   
 </script>
 </body>
