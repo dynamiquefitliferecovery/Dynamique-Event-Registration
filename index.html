@@ -55,32 +55,37 @@ header button.active {
   font-weight: 600;
 }
 
-
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 24px;
-    }
+.container {
+  max-width: 1000px;   /* match header width */
+  margin: auto;
+  padding: 24px;
+}
 
 section[hidden] {
   display: none;
 }
-    .card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
 
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 6px;
-    }
+.card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+  max-width: 800px;    /* keep form narrower */
+  margin: 0 auto;      /* center the form */
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 6px;
+  text-align: center;  /* optional: center section titles */
+}
+
 
     /* ---------- FORM GRIDS ---------- */
 
@@ -921,11 +926,15 @@ document.getElementById("loginBtn").onclick = async () => {
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
-  // hide everything except login
-  document.querySelector("header").hidden = true;       // hides nav bar
-  document.querySelector(".container").hidden = true;   // hides dashboard container
-  document.querySelectorAll("section").forEach(el => el.hidden = true); // hides all tab sections
-  loginTab.hidden = false;                              // shows login form only
+  // hide nav bar + dashboard
+  document.querySelector("header").hidden = true;       // hides the tab buttons
+  document.querySelector(".container").hidden = true;   // hides dashboard content
+
+  // hide all tab sections
+  document.querySelectorAll("section").forEach(el => el.hidden = true);
+
+  // show only login form
+  loginTab.hidden = false;
 
   // clear login form
   loginEmail.value = "";
@@ -964,7 +973,6 @@ document.getElementById("logoutBtn").onclick = async () => {
   a_sst.value = "";
   a_total.value = "";
 };
-
 
 
 </script>
