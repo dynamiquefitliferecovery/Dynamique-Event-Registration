@@ -911,13 +911,11 @@ document.getElementById("loginBtn").onclick = async () => {
 document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
 
-  // hide dashboard, show login only
-  document.querySelector("header").hidden = true;
-  document.querySelector(".container").hidden = true;
-  loginTab.hidden = false;
-
-  // hide all tab sections
-  document.querySelectorAll("section").forEach(el => el.hidden = true);
+  // hide everything except login
+  document.querySelector("header").hidden = true;       // hides nav bar
+  document.querySelector(".container").hidden = true;   // hides dashboard container
+  document.querySelectorAll("section").forEach(el => el.hidden = true); // hides all tab sections
+  loginTab.hidden = false;                              // shows login form only
 
   // clear login form
   loginEmail.value = "";
