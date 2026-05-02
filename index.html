@@ -1,283 +1,495 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Sports Rehab System</title>
+  <meta charset="UTF-8">
+  <title>Sports Rehab System</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase JS (logic will come later) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/s
+  <style>
+    body{margin:0;font-family:Segoe UI;background:#f4f6f8}
+    .hidden{display:none}
 
-<style>
-body{margin:0;font-family:Segoe UI;background:#f4f6f8}
-.hidden{display:none}
+    /* LOGIN */
+    #loginView{
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:linear-gradient(135deg,#ff9800,#ffd180);
+    }
+    .login-box{
+      background:#fff;
+      padding:30px;
+      width:340px;
+      border-radius:18px;
+      box-shadow:0 12px 30px rgba(0,0,0,.25);
+    }
+    .login-box input{
+      width:100%;
+      padding:12px;
+      margin:8px 0;
+      border-radius:14px;
+      border:1px solid #ddd;
+    }
+    .login-box button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:16px;
+      background:orange;
+      font-weight:600;
+      cursor:pointer;
+    }
 
-/* LOGIN */
-#loginView{
-height:100vh;display:flex;justify-content:center;align-items:center;
-background:linear-gradient(135deg,#ff9800,#ffd180)
-}
-.login-box{
-background:white;padding:30px;width:340px;border-radius:18px;
-box-shadow:0 12px 30px rgba(0,0,0,.25)
-}
-.login-box input{
-width:100%;padding:12px;margin:8px 0;border-radius:14px;border:1px solid #ddd
-}
-.login-box button{
-width:100%;padding:12px;border:none;border-radius:16px;
-background:orange;font-weight:600;cursor:pointer
-}
+    /* APP */
+    header{
+      background:black;
+      padding:12px;
+      display:flex;
+      gap:10px;
+    }
+    header button{
+      background:orange;
+      border:none;
+      padding:10px 14px;
+      border-radius:16px;
+      font-weight:600;
+      cursor:pointer;
+    }
 
-/* APP */
-header{
-background:black;padding:12px;display:flex;gap:10px
-}
-header button{
-background:orange;border:none;padding:10px 14px;
-border-radius:16px;font-weight:600;cursor:pointer
-}
-.container{padding:20px}
-.card{
-background:white;padding:20px;border-radius:20px;
-margin-bottom:20px;box-shadow:0 2px 14px rgba(0,0,0,.08)
-}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-input,select{
-padding:12px;border-radius:14px;border:1px solid #ddd;width:100%
-}
-button.action{
-background:orange;border:none;padding:12px;border-radius:16px;font-weight:600
-}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{padding:10px;border-bottom:1px solid #eee}
-.edit{color:orange;cursor:pointer}
-.total{font-weight:700;font-size:18px}
-</style>
+    .container{padding:20px}
+
+    .card{
+      background:white;
+      padding:20px;
+      border-radius:20px;
+      margin-bottom:20px;
+      box-shadow:0 2px 14px rgba(0,0,0,.08);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    input, select{
+      padding:12px;
+      border-radius:14px;
+      border:1px solid #ddd;
+      width:100%;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:10px;
+    }
+
+    th, td{
+      padding:10px;
+      border-bottom:1px solid #eee;
+      text-align:left;
+    }
+
+    .action{
+      background:orange;
+      border:none;
+      padding:12px;
+      border-radius:16px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .edit{
+      color:orange;
+      cursor:pointer;
+      font-weight:600;
+    }
+
+    .total{
+      font-weight:700;
+      font-size:18px;
+      margin-top:10px;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 <div id="loginView">
   <div class="login-box">
     <h2>Login</h2>
     <input id="email" placeholder="Email">
-    <input id="password" type="password">
-    <button onclick="login()">Login</button>
+    <input id="password" type="password" placeholder="Password">
+    <button>Login</button>
     <p id="err" style="color:red"></p>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 <div id="appView" class="hidden">
 
 <header>
-  <button onclick="tab('clientsTab')">Clients</button>
-  <button onclick="tab('practitionersTab')">Practitioners</button>
-  <button onclick="tab('appointmentsTab')">Appointments</button>
-  <button onclick="tab('reportsTab')">Sales Report</button>
-  <button onclick="logout()">Logout</button>
+  <button>Clients</button>
+  <button>Practitioners</button>
+  <button>Appointments</button>
+  <button>Sales Report</button>
+  <button>Logout</button>
 </header>
 
 <div class="container">
 
-<!-- CLIENTS -->
+<!-- ===== CLIENTS ===== -->
 <section id="clientsTab">
-<div class="card">
-<h3>Client</h3>
-<div class="grid">
-<input id="c_name" placeholder="Full Name">
-<input id="c_dob" type="date">
-<select id="c_gender"><option>Male</option><option>Female</option></select>
-<input id="c_ic" placeholder="IC / Passport (14 chars)">
-<input id="c_contact" placeholder="Contact">
-<input id="c_email" placeholder="Email">
-<input id="c_address" placeholder="Address">
-</div>
-<button class="action" onclick="saveClient()">Save</button>
-</div>
+  <div class="card">
+    <h3>Client</h3>
+    <div class="grid">
+      <input placeholder="Full Name">
+      <input type="date">
+      <select>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+      <input placeholder="IC / Passport (14 characters)">
+      <input placeholder="Contact">
+      <input placeholder="Email">
+      <input placeholder="Address">
+    </div>
+    <button class="action">Save Client</button>
+  </div>
 
-<div class="card">
-<table>
-<tr><th>Name</th><th>IC</th><th></th></tr>
-<tbody id="clientTable"></tbody>
-</table>
-</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>IC / Passport</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- client rows -->
+      </tbody>
+    </table>
+  </div>
 </section>
 
-<!-- PRACTITIONERS -->
+<!-- ===== PRACTITIONERS ===== -->
 <section id="practitionersTab" class="hidden">
-<div class="card">
-<h3>Practitioner</h3>
-<input id="p_name" placeholder="Practitioner Name">
-<button class="action" onclick="addPractitioner()">Add</button>
-<div id="pracList"></div>
-</div>
+  <div class="card">
+    <h3>Practitioner</h3>
+    <input placeholder="Practitioner Name">
+    <button class="action">Add Practitioner</button>
+    <div>
+      <!-- practitioner list -->
+    </div>
+  </div>
 </section>
 
-<!-- APPOINTMENTS -->
+<!-- ===== APPOINTMENTS ===== -->
 <section id="appointmentsTab" class="hidden">
-<div class="card">
-<h3>Appointment</h3>
-<div class="grid">
-<input id="a_date" type="date">
-<input id="a_time" type="time">
-<select id="a_client"></select>
-<select id="a_practitioner"></select>
-<select id="a_service"></select>
-</div>
-<button class="action" onclick="saveAppointment()">Save</button>
-</div>
+  <div class="card">
+    <h3>Appointment</h3>
+    <div class="grid">
+      <input type="date">
+      <input type="time">
+      <select></select> <!-- client -->
+      <select></select> <!-- practitioner -->
+      <select></select> <!-- service -->
+    </div>
+    <button class="action">Save Appointment</button>
+  </div>
 
-<div class="card">
-<table>
-<tr><th>Date</th><th>Client</th><th>Service</th><th>RM</th><th></th></tr>
-<tbody id="apptTable"></tbody>
-</table>
-</div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Service</th>
+          <th>Amount</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- appointment rows -->
+      </tbody>
+    </table>
+  </div>
 </section>
 
-<!-- REPORT -->
+<!-- ===== SALES REPORT ===== -->
 <section id="reportsTab" class="hidden">
-<div class="card">
-<h3>Sales Report</h3>
-<table>
-<tr><th>Date</th><th>Service</th><th>RM</th></tr>
-<tbody id="reportTable"></tbody>
-</table>
-<p class="total">Total: RM <span id="totalSales">0.00</span></p>
-</div>
+  <div class="card">
+    <h3>Sales Report</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Service</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- report rows -->
+      </tbody>
+    </table>
+    <p class="total">Total: RM 0.00</p>
+  </div>
 </section>
 
 </div>
 </div>
 
 <script>
-const sb=supabase.createClient("https://fmwdizyexroiezezitly.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo");
-let editClientId=null, editAppId=null;
+/* ================= SUPABASE ================= */
+const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
 
-/* SESSION */
-(async()=>{
-  const {data:{session}}=await sb.auth.getSession();
-  if(session) openApp();
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ================= GLOBAL STATE ================= */
+let editingClientId = null;
+let editingAppointmentId = null;
+
+/* ================= SESSION CHECK ================= */
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    openApp();
+  }
 })();
 
-function login(){
-  sb.auth.signInWithPassword({email:email.value,password:password.value})
-  .then(({error})=>{
-    if(error) err.innerText=error.message;
-    else openApp();
-  })
+/* ================= AUTH ================= */
+async function login() {
+  err.textContent = "";
+
+  const { error } = await sb.auth.signInWithPassword({
+    email: email.value,
+    password: password.value
+  });
+
+  if (error) {
+    err.textContent = error.message;
+    return;
+  }
+
+  openApp();
 }
-function logout(){sb.auth.signOut();location.reload()}
-function openApp(){
+
+function logout() {
+  sb.auth.signOut();
+  location.reload();
+}
+
+function openApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
   tab("clientsTab");
   loadAll();
 }
-function tab(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+
+/* ================= TABS ================= */
+function tab(id) {
+  document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
+
+  if (id === "reportsTab") loadReport();
 }
 
-/* FORMAT */
-c_ic.oninput=e=>e.target.value=e.target.value.replace(/[^A-Za-z0-9]/g,"").slice(0,14);
+/* ================= FORMATTERS ================= */
+document.querySelector('input[placeholder*="IC"]').oninput = e => {
+  e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, "").slice(0, 14);
+};
 
-/* CLIENTS */
-async function saveClient(){
-  const data={full_name:c_name.value,date_of_birth:c_dob.value,gender:c_gender.value,
-  ic_passport:c_ic.value,contact:c_contact.value,email:c_email.value,address:c_address.value};
-  editClientId
-    ? await sb.from("clients").update(data).eq("id",editClientId)
-    : await sb.from("clients").insert(data);
-  editClientId=null; loadClients();
-}
-async function loadClients(){
-  const {data}=await sb.from("clients").select("*");
-  clientTable.innerHTML=data.map(c=>`
-<tr><td>${c.full_name}</td><td>${c.ic_passport}</td>
-<td class="edit" onclick='editClient(${JSON.stringify(c)})'>Edit</td></tr>`).join("");
-  a_client.innerHTML=data.map(c=>`<option value="${c.id}">${c.full_name}</option>`).join("");
-}
-function editClient(c){
-  editClientId=c.id;
-  c_name.value=c.full_name;c_dob.value=c.date_of_birth||"";c_gender.value=c.gender;
-  c_ic.value=c.ic_passport;c_contact.value=c.contact;c_email.value=c.email;c_address.value=c.address;
-}
+/* ================= CLIENTS ================= */
+async function saveClient() {
+  if (!c_name.value) return alert("Full Name required");
 
-/* PRACTITIONERS */
-async function addPractitioner(){
-  await sb.from("practitioners").insert({name:p_name.value});
-  p_name.value="";loadPractitioners();
-}
-async function loadPractitioners(){
-  const {data}=await sb.from("practitioners").select("*");
-  pracList.innerHTML=data.map(p=>`<div>${p.name}</div>`).join("");
-  a_practitioner.innerHTML=data.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
-}
-
-/* APPOINTMENTS */
-async function saveAppointment(){
-  const data={
-    client_id:a_client.value,
-    practitioner_id:a_practitioner.value,
-    service_id:a_service.value,
-    start_time:`${a_date.value}T${a_time.value}`
+  const payload = {
+    full_name: c_name.value,
+    date_of_birth: document.querySelector('input[type="date"]').value,
+    gender: document.querySelector('select').value,
+    ic_passport: document.querySelector('input[placeholder*="IC"]').value,
+    contact: document.querySelector('input[placeholder="Contact"]').value,
+    email: document.querySelector('input[placeholder="Email"]').value,
+    address: document.querySelector('input[placeholder="Address"]').value
   };
-  editAppId
-    ? await sb.from("appointments").update(data).eq("id",editAppId)
-    : await sb.from("appointments").insert(data);
-  editAppId=null;loadAppointments();
-}
-async function loadAppointments(){
-  const {data}=await sb.from("appointments")
-  .select("*,clients(full_name),services(name,price)");
 
-  apptTable.innerHTML=data.map(a=>`
-<tr>
-<td>${new Date(a.start_time).toLocaleString()}</td>
-<td>${a.clients.full_name}</td>
-<td>${a.services.name}</td>
-<td>${a.services.price}</td>
-<td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
-</tr>`).join("");
+  const res = editingClientId
+    ? await sb.from("clients").update(payload).eq("id", editingClientId)
+    : await sb.from("clients").insert(payload);
+
+  if (res.error) return alert(res.error.message);
+
+  editingClientId = null;
+  clearClientForm();
+  loadClients();
 }
 
-/* REPORT */
-async function loadReport(){
-  const {data}=await sb.from("appointments")
-  .select("start_time,services(name,price)");
-
-  let total=0;
-  reportTable.innerHTML=data.map(r=>{
-    total+=Number(r.services.price);
-    return `<tr><td>${new Date(r.start_time).toLocaleDateString()}</td><td>${r.services.name}</td><td>${r.services.price}</td></tr>`;
-  }).join("");
-  totalSales.innerText=total.toFixed(2);
+function clearClientForm() {
+  document.querySelectorAll("#clientsTab input").forEach(i => i.value = "");
 }
 
-/* LOAD ALL */
-async function loadAll(){
-  await loadClients();
-  await loadPractitioners();
-  const {data:services}=await sb.from("services").select("*");
-  a_service.innerHTML=services.map(s=>`<option value="${s.id}">${s.name} (RM${s.price})</option>`).join("");
-  const now=new Date();
-  a_date.value=now.toISOString().slice(0,10);
-  a_time.value=now.toTimeString().slice(0,5);
+async function loadClients() {
+  const { data } = await sb.from("clients").select("*").order("created_at", { ascending: false });
+
+  const tbody = document.querySelector("#clientsTab tbody");
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td>${c.full_name}</td>
+      <td>${c.ic_passport || ""}</td>
+      <td class="edit" onclick='editClient(${JSON.stringify(c)})'>Edit</td>
+    </tr>
+  `).join("");
+
+  const clientSelect = document.querySelector("#appointmentsTab select");
+  clientSelect.innerHTML = data.map(c =>
+    `<option value="${c.id}">${c.full_name}</option>`
+  ).join("");
+}
+
+function editClient(c) {
+  editingClientId = c.id;
+
+  const inputs = document.querySelectorAll("#clientsTab input");
+  inputs[0].value = c.full_name;
+  inputs[1].value = c.date_of_birth || "";
+  inputs[2].value = c.ic_passport || "";
+  inputs[3].value = c.contact || "";
+  inputs[4].value = c.email || "";
+  inputs[5].value = c.address || "";
+}
+
+/* ================= PRACTITIONERS ================= */
+async function addPractitioner() {
+  const input = document.querySelector("#practitionersTab input");
+  if (!input.value) return;
+
+  await sb.from("practitioners").insert({ name: input.value });
+  input.value = "";
+  loadPractitioners();
+}
+
+async function loadPractitioners() {
+  const { data } = await sb.from("practitioners").select("*");
+
+  document.querySelector("#practitionersTab div:last-child").innerHTML =
+    data.map(p => `<div>${p.name}</div>`).join("");
+
+  const pracSelect = document.querySelectorAll("#appointmentsTab select")[1];
+  pracSelect.innerHTML = data.map(p =>
+    `<option value="${p.id}">${p.name}</option>`
+  ).join("");
+}
+
+/* ================= SERVICES ================= */
+async function loadServices() {
+  const { data } = await sb.from("services").select("*");
+
+  const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
+  serviceSelect.innerHTML = data.map(s =>
+    `<option value="${s.id}">${s.name} (RM ${s.price})</option>`
+  ).join("");
+}
+
+/* ================= APPOINTMENTS ================= */
+async function saveAppointment() {
+  const inputs = document.querySelectorAll("#appointmentsTab input");
+  const selects = document.querySelectorAll("#appointmentsTab select");
+
+  const payload = {
+    start_time: `${inputs[0].value}T${inputs[1].value}`,
+    client_id: selects[0].value,
+    practitioner_id: selects[1].value,
+    service_id: selects[2].value
+  };
+
+  const res = editingAppointmentId
+    ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
+    : await sb.from("appointments").insert(payload);
+
+  if (res.error) return alert(res.error.message);
+
+  editingAppointmentId = null;
   loadAppointments();
-  loadReport();
 }
-function editAppointment(a){
-  editAppId=a.id;
-  const d=new Date(a.start_time);
-  a_date.value=d.toISOString().slice(0,10);
-  a_time.value=d.toTimeString().slice(0,5);
-  a_client.value=a.client_id;
-  a_practitioner.value=a.practitioner_id;
-  a_service.value=a.service_id;
+
+async function loadAppointments() {
+  const { data } = await sb
+    .from("appointments")
+    .select("*, clients(full_name), services(name,price)")
+    .order("start_time", { ascending: false });
+
+  const tbody = document.querySelector("#appointmentsTab tbody");
+  tbody.innerHTML = data.map(a => `
+    <tr>
+      <td>${new Date(a.start_time).toLocaleString()}</td>
+      <td>${a.clients.full_name}</td>
+      <td>${a.services.name}</td>
+      <td>${a.services.price}</td>
+      <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
+    </tr>
+  `).join("");
+}
+
+function editAppointment(a) {
+  editingAppointmentId = a.id;
+
+  const d = new Date(a.start_time);
+  const inputs = document.querySelectorAll("#appointmentsTab input");
+  const selects = document.querySelectorAll("#appointmentsTab select");
+
+  inputs[0].value = d.toISOString().slice(0,10);
+  inputs[1].value = d.toTimeString().slice(0,5);
+  selects[0].value = a.client_id;
+  selects[1].value = a.practitioner_id;
+  selects[2].value = a.service_id;
+
   tab("appointmentsTab");
 }
+
+/* ================= REPORT ================= */
+async function loadReport() {
+  const { data } = await sb
+    .from("appointments")
+    .select("start_time, services(name,price)");
+
+  let total = 0;
+  const tbody = document.querySelector("#reportsTab tbody");
+
+  tbody.innerHTML = data.map(r => {
+    total += Number(r.services.price);
+    return `
+      <tr>
+        <td>${new Date(r.start_time).toLocaleDateString()}</td>
+        <td>${r.services.name}</td>
+        <td>${r.services.price}</td>
+      </tr>
+    `;
+  }).join("");
+
+  document.querySelector(".total").innerHTML =
+    `Total: RM ${total.toFixed(2)}`;
+}
+
+/* ================= LOAD ALL ================= */
+async function loadAll() {
+  await loadClients();
+  await loadPractitioners();
+  await loadServices();
+  await loadAppointments();
+
+  const now = new Date();
+  const inputs = document.querySelectorAll("#appointmentsTab input");
+  inputs[0].value = now.toISOString().slice(0,10);
+  inputs[1].value = now.toTimeString().slice(0,5);
+}
 </script>
+
+    
 </body>
 </html>
