@@ -212,182 +212,225 @@ button {
 <script>
 
 /* ================= SUPABASE ================= */
-const sb = supabase.createClient(
-"https://fmwdizyexroiezezitly.supabase.co",
-"YOUR_KEY"
-);
+const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 /* ================= STATE ================= */
 let clients = [];
 let practitioners = [];
 let appointments = [];
 
+let editingAppointmentId = null;
+
 /* ================= SERVICES ================= */
 const SERVICES = [
-{ id:"SM", name:"Massage", price:45 },
-{ id:"AS", name:"Stretch", price:20 },
-{ id:"PB", name:"Bundle", price:400 }
+  { id:"SM", name:"Sports Massage", price:45 },
+  { id:"RCB", name:"Recovery Boots", price:25 },
+  { id:"AS", name:"Assisted Stretch", price:20 },
+  { id:"PB", name:"Physio Bundle", price:400 }
 ];
 
-/* ================= LOGIN ================= */
-loginBtn.onclick = async () => {
-const { data, error } = await sb.auth.signInWithPassword({
-email: loginEmail.value,
-password: loginPassword.value
-});
-
-if(error){
-loginError.innerText = error.message;
-return;
+/* ================= UI CONTROL ================= */
+function showApp() {
+  document.getElementById("loginTab").style.display = "none";
+  document.getElementById("appContainer").style.display = "block";
 }
 
-loginView.style.display="none";
-appView.style.display="block";
+function showLogin() {
+  document.getElementById("loginTab").style.display = "flex";
+  document.getElementById("appContainer").style.display = "none";
+}
 
-init();
+/* ================= LOGIN ================= */
+document.getElementById("loginBtn").onclick = async () => {
+  const email = loginEmail.value;
+  const password = loginPassword.value;
+
+  const { data, error } = await sb.auth.signInWithPassword({
+    email, password
+  });
+
+  if (error) {
+    loginError.innerText = error.message;
+    return;
+  }
+
+  showApp();
+  initApp();
 };
 
-logoutBtn.onclick = async () => {
-await sb.auth.signOut();
-location.reload();
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = async () => {
+  await sb.auth.signOut();
+  showLogin();
 };
 
 /* ================= INIT ================= */
-async function init(){
-await loadClients();
-await loadPractitioners();
-await loadAppointments();
-setToday();
+async function initApp() {
+  await loadClients();
+  await loadPractitioners();
+  await loadAppointments();
+
+  setToday();
+  showTab("clientsTab");
 }
 
 /* ================= TAB ================= */
-function showTab(id){
-document.querySelectorAll("section").forEach(s=>s.hidden=true);
-document.getElementById(id).hidden=false;
+function showTab(tab) {
+  ["clientsTab","practitionersTab","appointmentsTab","reportsTab"]
+  .forEach(id => document.getElementById(id).hidden = true);
+
+  document.getElementById(tab).hidden = false;
+
+  if (tab === "reportsTab") loadReport();
 }
 
 /* ================= CLIENTS ================= */
-saveClientBtn.onclick = async () => {
+document.getElementById("addClientBtn").onclick = async () => {
+  const client = {
+    full_name: c_name.value,
+    date_of_birth: c_dob.value,
+    gender: c_gender.value,
+    citizenship: c_citizen.value,
+    ic_passport: c_ic.value,
+    contact: c_contact.value,
+    email: c_email.value,
+    address: c_address.value
+  };
 
-await sb.from("clients").insert({
-full_name:c_name.value,
-date_of_birth:c_dob.value,
-gender:c_gender.value,
-citizenship:c_citizen.value,
-ic_passport:c_ic.value,
-contact:c_contact.value,
-email:c_email.value,
-address:c_address.value
-});
+  const { error } = await sb.from("clients").insert(client);
+  if (error) return alert(error.message);
 
-loadClients();
+  loadClients();
 };
 
-async function loadClients(){
-const { data } = await sb.from("clients").select("*");
-clients=data||[];
+async function loadClients() {
+  const { data } = await sb.from("clients").select("*");
+  clients = data || [];
 
-clientsTable.innerHTML="";
-a_client.innerHTML="";
+  clientsTable.innerHTML = clients.map(c => `
+    <tr>
+      <td>${c.full_name}</td>
+      <td>${c.contact}</td>
+    </tr>
+  `).join("");
 
-clients.forEach(c=>{
-clientsTable.innerHTML+=`<tr><td>${c.full_name}</td></tr>`;
-a_client.innerHTML+=`<option value="${c.id}">${c.full_name}</option>`;
-});
+  a_client.innerHTML = clients.map(c =>
+    `<option value="${c.id}">${c.full_name}</option>`
+  ).join("");
 }
 
 /* ================= PRACTITIONERS ================= */
-addPractitionerBtn.onclick = async () => {
-await sb.from("practitioners").insert({name:p_name.value});
-loadPractitioners();
+document.getElementById("addPractitionerBtn").onclick = async () => {
+  const name = p_name.value;
+
+  const { error } = await sb.from("practitioners").insert({ name });
+  if (error) return alert(error.message);
+
+  loadPractitioners();
 };
 
-async function loadPractitioners(){
-const { data } = await sb.from("practitioners").select("*");
-practitioners=data||[];
+async function loadPractitioners() {
+  const { data } = await sb.from("practitioners").select("*");
+  practitioners = data || [];
 
-practitionerTable.innerHTML="";
-a_practitioner.innerHTML="";
+  practitionerTable.innerHTML = practitioners.map(p => `
+    <tr><td>${p.name}</td></tr>
+  `).join("");
 
-practitioners.forEach(p=>{
-practitionerTable.innerHTML+=`<div>${p.name}</div>`;
-a_practitioner.innerHTML+=`<option value="${p.id}">${p.name}</option>`;
-});
+  a_practitioner.innerHTML = practitioners.map(p =>
+    `<option value="${p.id}">${p.name}</option>`
+  ).join("");
 }
 
 /* ================= APPOINTMENTS ================= */
-function setToday(){
-const now=new Date();
-a_date.value=now.toISOString().split("T")[0];
-a_time.value=now.toTimeString().slice(0,5);
+function setToday() {
+  const now = new Date();
+  a_date.value = now.toISOString().slice(0,10);
+  a_time.value = now.toTimeString().slice(0,5);
 }
 
-a_service.onchange = () => {
-const s = SERVICES.find(x=>x.id===a_service.value);
-const amt = s?.price||0;
-const sst = amt*0.06;
-const total = amt+sst;
+a_service.onchange = updateTotal;
+a_client.onchange = updateTotal;
 
-a_amount.innerText=amt.toFixed(2);
-a_sst.innerText=sst.toFixed(2);
-a_total.innerText=total.toFixed(2);
-};
+function updateTotal() {
+  const service = SERVICES.find(s => s.id === a_service.value);
+  const amount = service?.price || 0;
 
+  const client = clients.find(c => c.id === a_client.value);
+
+  let sst = 0;
+  if (client?.citizenship === "Foreigner") sst = amount * 0.06;
+
+  a_amount.value = amount.toFixed(2);
+  a_sst.value = sst.toFixed(2);
+  a_total.value = (amount + sst).toFixed(2);
+}
+
+/* SAVE */
 saveAppointmentBtn.onclick = async () => {
+  const data = {
+    start_time: `${a_date.value}T${a_time.value}`,
+    client_id: a_client.value,
+    practitioner_id: a_practitioner.value,
+    service_id: a_service.value,
+    amount: +a_amount.value,
+    sst: +a_sst.value,
+    total: +a_total.value
+  };
 
-const s = SERVICES.find(x=>x.id===a_service.value);
+  await sb.from("appointments").insert(data);
 
-await sb.from("appointments").insert({
-client_id:a_client.value,
-practitioner_id:a_practitioner.value,
-service_id:s.id,
-start_time:a_date.value+"T"+a_time.value,
-amount:s.price,
-sst:s.price*0.06,
-total:s.price*1.06,
-payment_method:a_payment.value
-});
-
-loadAppointments();
+  loadAppointments();
 };
 
-async function loadAppointments(){
-const { data } = await sb.from("appointments").select("*");
-appointments=data||[];
+async function loadAppointments() {
+  const { data } = await sb.from("appointments").select("*");
+  appointments = data || [];
 
-appointmentsTable.innerHTML="";
-
-appointments.forEach(a=>{
-appointmentsTable.innerHTML+=`
-<tr>
-<td>${a.start_time}</td>
-<td>${a.total}</td>
-</tr>`;
-});
+  appointmentsTable.innerHTML = appointments.map(a => `
+    <tr>
+      <td>${a.start_time}</td>
+      <td>${a.total}</td>
+    </tr>
+  `).join("");
 }
 
 /* ================= REPORT ================= */
-async function loadReport(){
-const { data } = await sb.from("appointments").select("*");
+async function loadReport() {
+  const { data } = await sb.from("appointments").select("*");
 
-const map={};
+  let total = data.reduce((sum, a) => sum + a.total, 0);
 
-data.forEach(a=>{
-if(!map[a.service_id]) map[a.service_id]={total:0};
-map[a.service_id].total+=a.total;
-});
+  salesReportTable.innerHTML = `
+    <tr><td>Total Sales</td><td>${total.toFixed(2)}</td></tr>
+  `;
 
-const labels = Object.keys(map);
-const values = labels.map(x=>map[x].total);
-
-new Chart(document.getElementById("chart"),{
-type:"bar",
-data:{
-labels,
-datasets:[{data:values}]
+  new Chart(salesChart, {
+    type: "bar",
+    data: {
+      labels: ["Sales"],
+      datasets: [{
+        label: "Total",
+        data: [total]
+      }]
+    }
+  });
 }
-});
-}
+
+/* ================= AUTO CHECK SESSION ================= */
+window.onload = async () => {
+  const { data } = await sb.auth.getSession();
+
+  if (data.session) {
+    showApp();
+    initApp();
+  } else {
+    showLogin();
+  }
+};
 
 </script>
 
