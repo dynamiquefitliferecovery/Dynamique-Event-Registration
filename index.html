@@ -323,12 +323,12 @@ async function loadClients() {
 
   if (error) {
     console.error(error);
+    return;
   }
 
   clients = data || [];
 
   const tbody = document.querySelector("#clientsTab tbody");
-
   tbody.innerHTML = clients.map(c => `
     <tr>
       <td>${c.full_name}</td>
@@ -336,32 +336,92 @@ async function loadClients() {
       <td class="edit" onclick='editClient(${JSON.stringify(c)})'>Edit</td>
     </tr>
   `).join("");
+}
+async function saveClient() {
+  const inputs = document.querySelectorAll("#clientsTab input");
+  const selects = document.querySelectorAll("#clientsTab select");
 
-  const clientSelect = document.querySelector("#appointmentsTab select");
-  clientSelect.innerHTML = clients.map(c =>
-    `<option value="${c.id}">${c.full_name}</option>`
-  ).join("");
+  const payload = {
+    full_name: inputs[0].value,
+    date_of_birth: inputs[1].value,
+    gender: selects[0].value,
+    ic_passport: inputs[2].value,
+    contact: inputs[3].value,
+    email: inputs[4].value,
+    address: inputs[5].value
+  };
+
+  if (!payload.full_name) {
+    alert("Full Name is required");
+    return;
+  }
+
+  const res = editingClientId
+    ? await sb.from("clients").update(payload).eq("id", editingClientId)
+    : await sb.from("clients").insert(payload);
+
+  if (res.error) {
+    alert(res.error.message);
+    return;
+  }
+
+  editingClientId = null;
+  inputs.forEach(i => i.value = "");
+  loadClients();
+}
+
+function editClient(c) {
+  editingClientId = c.id;
+
+  const inputs = document.querySelectorAll("#clientsTab input");
+  const selects = document.querySelectorAll("#clientsTab select");
+
+  inputs[0].value = c.full_name || "";
+  inputs[1].value = c.date_of_birth || "";
+  selects[0].value = c.gender || "Male";
+  inputs[2].value = c.ic_passport || "";
+  inputs[3].value = c.contact || "";
+  inputs[4].value = c.email || "";
+  inputs[5].value = c.address || "";
 }
 /* ================= PRACTITIONERS ================= */
 let practitioners = [];
+
+async function addPractitioner() {
+  const input = document.querySelector("#practitionersTab input");
+
+  if (!input.value) {
+    alert("Practitioner name required");
+    return;
+  }
+
+  const res = await sb
+    .from("practitioners")
+    .insert({ name: input.value });
+
+  if (res.error) {
+    alert(res.error.message);
+    return;
+  }
+
+  input.value = "";
+  loadPractitioners();
+}
 
 async function loadPractitioners() {
   const { data, error } = await sb.from("practitioners").select("*");
 
   if (error) {
     console.error(error);
+    return;
   }
 
   practitioners = data || [];
 
   document.querySelector("#practitionersTab div:last-child").innerHTML =
     practitioners.map(p => `<div>${p.name}</div>`).join("");
-
-  const pracSelect = document.querySelectorAll("#appointmentsTab select")[1];
-  pracSelect.innerHTML = practitioners.map(p =>
-    `<option value="${p.id}">${p.name}</option>`
-  ).join("");
 }
+
 
 /* ================= SERVICES ================= */
 let services = [];
@@ -518,28 +578,32 @@ function editAppointment(a) {
 
 /* ================= REPORT ================= */
 async function loadReport() {
-  const { data } = await sb
+  const { data, error } = await sb
     .from("appointments")
-    .select("start_time, services(name,price)");
+    .select("start_time, total, services(name)");
 
-  let total = 0;
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  let totalAmount = 0;
   const tbody = document.querySelector("#reportsTab tbody");
 
   tbody.innerHTML = data.map(r => {
-    total += Number(r.services.price);
+    totalAmount += Number(r.total || 0);
     return `
       <tr>
         <td>${new Date(r.start_time).toLocaleDateString()}</td>
-        <td>${r.services.name}</td>
-        <td>${r.services.price}</td>
+        <td>${r.services?.name || ""}</td>
+        <td>${Number(r.total || 0).toFixed(2)}</td>
       </tr>
     `;
   }).join("");
 
-  document.querySelector(".total").innerHTML =
-    `Total: RM ${total.toFixed(2)}`;
+  document.querySelector(".total").innerText =
+    `Total: RM ${totalAmount.toFixed(2)}`;
 }
-
 /* ================= LOAD ALL ================= */
 async function loadAll() {
   await loadClients();
@@ -548,9 +612,9 @@ async function loadAll() {
 
   fillAppointmentDropdowns();
   setAppointmentDefaults();
+  calculateCharges();
   loadAppointments();
 }
-
 
 </script>
 
