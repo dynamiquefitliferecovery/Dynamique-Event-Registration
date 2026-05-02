@@ -8,10 +8,14 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body { margin:0; font-family:Segoe UI; background:#f5f6f8; }
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:#f4f6f8;
+}
 
 /* LOGIN */
-#loginView {
+#loginView{
   height:100vh;
   display:flex;
   justify-content:center;
@@ -19,18 +23,26 @@ body { margin:0; font-family:Segoe UI; background:#f5f6f8; }
   background:linear-gradient(135deg,#ff9800,#ffc107);
 }
 
-.login-box {
+.login-box{
   background:white;
   padding:30px;
   border-radius:12px;
   width:320px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border:1px solid #ddd;
+  border-radius:8px;
 }
 
 /* APP */
-#appView { display:none; }
+#appView{display:none;}
 
-header {
+header{
   background:#111;
   color:white;
   padding:10px;
@@ -38,7 +50,7 @@ header {
   gap:10px;
 }
 
-header button {
+header button{
   background:#ff9800;
   border:none;
   padding:8px 12px;
@@ -46,9 +58,9 @@ header button {
   cursor:pointer;
 }
 
-.content { padding:20px; }
+.content{padding:20px;}
 
-.card {
+.card{
   background:white;
   padding:18px;
   border-radius:12px;
@@ -56,27 +68,20 @@ header button {
   box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
-.grid {
+.grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
 
-input, select {
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  width:100%;
-}
-
-button {
+button{
   padding:10px;
   border:none;
   border-radius:8px;
   cursor:pointer;
 }
 
-.primary { background:#ff9800; color:black; }
+.primary{background:#ff9800;color:black;}
 </style>
 </head>
 
@@ -89,7 +94,7 @@ button {
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
     <button class="primary" id="loginBtn">Login</button>
-    <div id="loginError" style="color:red;margin-top:10px;"></div>
+    <div id="loginError" style="color:red;"></div>
   </div>
 </section>
 
@@ -131,7 +136,9 @@ button {
 
 <div class="card">
 <h3>Client List</h3>
-<table><tbody id="clientsTable"></tbody></table>
+<table>
+<tbody id="clientsTable"></tbody>
+</table>
 </div>
 </section>
 
@@ -178,8 +185,10 @@ button {
 </div>
 
 <div class="card">
-<h3>List</h3>
-<table><tbody id="appointmentsTable"></tbody></table>
+<h3>Appointments</h3>
+<table>
+<tbody id="appointmentsTable"></tbody>
+</table>
 </div>
 </section>
 
@@ -187,11 +196,15 @@ button {
 <section id="reportsTab" hidden>
 <div class="card">
 <h3>Sales Report</h3>
+
 <button class="primary" onclick="loadReport()">Generate</button>
 
 <canvas id="chart"></canvas>
 
-<table><tbody id="reportTable"></tbody></table>
+<table>
+<tbody id="reportTable"></tbody>
+</table>
+
 </div>
 </section>
 
@@ -200,24 +213,28 @@ button {
 
 <script>
 
-/* SUPABASE */
+/* ================= SUPABASE ================= */
 const sb = supabase.createClient(
 "https://fmwdizyexroiezezitly.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
 );
 
-/* STATE */
-let clients=[], practitioners=[], appointments=[];
-let chartInstance=null;
+/* ================= STATE ================= */
+let clients=[];
+let practitioners=[];
+let appointments=[];
 
-/* LOGIN */
-loginBtn.onclick = async () => {
+/* ================= LOGIN ================= */
+document.getElementById("loginBtn").onclick = async () => {
   const { data, error } = await sb.auth.signInWithPassword({
     email: loginEmail.value,
     password: loginPassword.value
   });
 
-  if (error) return loginError.innerText = error.message;
+  if(error){
+    loginError.innerText = error.message;
+    return;
+  }
 
   loginView.style.display="none";
   appView.style.display="block";
@@ -225,29 +242,31 @@ loginBtn.onclick = async () => {
   init();
 };
 
-/* LOGOUT */
-logoutBtn.onclick = async () => {
+/* ================= LOGOUT ================= */
+document.getElementById("logoutBtn").onclick = async () => {
   await sb.auth.signOut();
   location.reload();
 };
 
-/* INIT */
+/* ================= INIT ================= */
 async function init(){
   await loadClients();
   await loadPractitioners();
   await loadAppointments();
   setToday();
+  loadServices();
   showTab("clientsTab");
 }
 
-/* TAB */
+/* ================= TAB ================= */
 function showTab(id){
   ["clientsTab","practitionersTab","appointmentsTab","reportsTab"]
   .forEach(x=>document.getElementById(x).hidden=true);
+
   document.getElementById(id).hidden=false;
 }
 
-/* CLIENTS */
+/* ================= CLIENTS ================= */
 saveClientBtn.onclick = async () => {
   await sb.from("clients").insert({
     full_name:c_name.value,
@@ -267,15 +286,16 @@ async function loadClients(){
   const { data } = await sb.from("clients").select("*");
   clients=data||[];
 
-  clientsTable.innerHTML=clients.map(c=>`
-<tr><td>${c.full_name}</td><td>${c.contact}</td></tr>
-`).join("");
+  clientsTable.innerHTML=clients.map(c=>
+`<tr><td>${c.full_name}</td><td>${c.contact}</td></tr>`
+).join("");
 
   a_client.innerHTML=clients.map(c=>
-`<option value="${c.id}">${c.full_name}</option>`).join("");
+`<option value="${c.id}">${c.full_name}</option>`
+).join("");
 }
 
-/* PRACTITIONERS */
+/* ================= PRACTITIONERS ================= */
 addPractitionerBtn.onclick = async () => {
   await sb.from("practitioners").insert({ name:p_name.value });
   loadPractitioners();
@@ -286,21 +306,28 @@ async function loadPractitioners(){
   practitioners=data||[];
 
   practitionerTable.innerHTML=practitioners.map(p=>
-`<div>${p.name}</div>`).join("");
+`<div>${p.name}</div>`
+).join("");
 
   a_practitioner.innerHTML=practitioners.map(p=>
-`<option value="${p.id}">${p.name}</option>`).join("");
+`<option value="${p.id}">${p.name}</option>`
+).join("");
 }
 
-/* APPOINTMENTS */
+/* ================= SERVICES ================= */
 const SERVICES=[
 { id:"SM",name:"Massage",price:45 },
-{ id:"AS",name:"Stretch",price:20 }
+{ id:"AS",name:"Stretch",price:20 },
+{ id:"PB",name:"Physio",price:400 }
 ];
 
-a_service.innerHTML = SERVICES.map(s=>
-`<option value="${s.id}">${s.name}</option>`).join("");
+function loadServices(){
+  a_service.innerHTML=SERVICES.map(s=>
+`<option value="${s.id}">${s.name}</option>`
+).join("");
+}
 
+/* ================= APPOINTMENTS ================= */
 function setToday(){
   const d=new Date();
   a_date.value=d.toISOString().slice(0,10);
@@ -317,7 +344,7 @@ function update(){
   const c=clients.find(x=>x.id===a_client.value);
   const sst=c?.citizenship==="Foreigner"?amt*0.06:0;
 
-  a_amount.innerText=amt;
+  a_amount.innerText=amt.toFixed(2);
   a_sst.innerText=sst.toFixed(2);
   a_total.innerText=(amt+sst).toFixed(2);
 }
@@ -341,28 +368,36 @@ async function loadAppointments(){
   appointments=data||[];
 
   appointmentsTable.innerHTML=appointments.map(a=>
-`<tr><td>${a.start_time}</td><td>${a.total}</td></tr>`).join("");
+`<tr><td>${a.start_time}</td><td>${a.total}</td></tr>`
+).join("");
 }
 
-/* REPORT */
+/* ================= REPORT ================= */
+let chartInstance=null;
+
 async function loadReport(){
   const { data }=await sb.from("appointments").select("*");
 
   const total=data.reduce((s,a)=>s+(a.total||0),0);
 
-  reportTable.innerHTML=`<tr><td>Total</td><td>${total}</td></tr>`;
+  reportTable.innerHTML=
+`<tr><td>Total Sales</td><td>${total.toFixed(2)}</td></tr>`;
 
   if(chartInstance) chartInstance.destroy();
 
   chartInstance=new Chart(chart,{
     type:"bar",
-    data:{ labels:["Sales"], datasets:[{ data:[total] }] }
+    data:{
+      labels:["Sales"],
+      datasets:[{ data:[total] }]
+    }
   });
 }
 
-/* AUTO CHECK */
+/* ================= AUTO SESSION ================= */
 window.onload=async()=>{
   const { data }=await sb.auth.getSession();
+
   if(data.session){
     loginView.style.display="none";
     appView.style.display="block";
