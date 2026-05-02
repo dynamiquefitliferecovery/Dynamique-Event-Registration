@@ -393,7 +393,32 @@ function openApp() {
   tab("clientsTab");
   loadAll();
 }
+/* ================= TABS ================= */
+function tab(id) {
+  // Hide all sections
+  document.querySelectorAll("section")
+    .forEach(section => section.classList.add("hidden"));
 
+  // Show selected section
+  const target = document.getElementById(id);
+  if (!target) {
+    console.error("tab(): section not found:", id);
+    return;
+  }
+
+  target.classList.remove("hidden");
+
+  // Init Appointments tab
+  if (id === "appointmentsTab") {
+    fillAppointmentDropdowns();
+    initServiceDropdown();
+  }
+
+  // Init Reports tab
+  if (id === "reportsTab") {
+    loadReport();
+  }
+}
 
 /* ================= FORMATTERS ================= */
 document.addEventListener("input", e => {
