@@ -404,13 +404,13 @@ function tab(id) {
 
 /* ================= FORMATTERS ================= */
 document.addEventListener("input", e => {
-  if (e.target.matches('input[placeholder*="IC"]')) {
-    let v = e.target.value.replace(/\D/g, "").slice(0,14);
+  if (e.target.matches('input[placeholder*="IC"], input[placeholder*="Passport"]')) {
+    let v = e.target.value.replace(/\D/g, "").slice(0, 12);
 
-    if (v.length > 12) {
-      v = v.replace(/(\d{6})(\d{6})(\d{0,2})/, "$1-$2-$3");
+    if (v.length > 8) {
+      v = v.replace(/(\d{6})(\d{2})(\d{0,4})/, "$1-$2-$3");
     } else if (v.length > 6) {
-      v = v.replace(/(\d{6})(\d{0,6})/, "$1-$2");
+      v = v.replace(/(\d{6})(\d{0,2})/, "$1-$2");
     }
 
     e.target.value = v;
@@ -418,11 +418,15 @@ document.addEventListener("input", e => {
 });
 
 function formatIc(v = "") {
-  return v ? v.replace(/(.{6})(.{2})(.{6})/, "$1-$2-$3") : "";
+  return v
+    ? v.replace(/(\d{6})(\d{2})(\d{4})/, "$1-$2-$3")
+    : "";
 }
 
 function formatContact(v = "") {
-  return v ? v.replace(/(\d{3})(\d{3,4})(\d{4})/, "$1-$2-$3") : "";
+  return v
+    ? v.replace(/(\d{3})(\d{3,4})(\d{4})/, "$1-$2-$3")
+    : "";
 }
   
 /* ================= CLIENTS ================= */
@@ -524,9 +528,9 @@ async function deleteClient(id) {
     return;
   }
 
-  loadClients();
+  alert("Client deleted");
+  await loadClients();
 }
-
 
 
 
@@ -576,12 +580,20 @@ async function loadPractitioners() {
 async function deletePractitioner(id) {
   if (!confirm("Delete practitioner?")) return;
 
-  const { error } = await sb.from("practitioners").delete().eq("id", id);
-  if (error) return alert(error.message);
+  const { error } = await sb
+    .from("practitioners")
+    .delete()
+    .eq("id", id);
 
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Practitioner deleted");
   loadPractitioners();
 }
-  
+
 /* ================= SERVICES ================= */
 let services = [];
 
@@ -621,23 +633,21 @@ function setAppointmentDefaults() {
 /* fill dropdowns */
 function fillAppointmentDropdowns() {
   apptClient.innerHTML = clients.map(c =>
-    `<option value="${c.id}">${c.full_name}</option>`
-  ).join("");
-
-  apptPractitioner.innerHTML = practitioners.map(p =>
+    `<.innerHTML = practitioners.map(p =>    `<option value="${c.id}">${c.full_name}</option>`
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
 
   if (!apptService.options.length) {
     apptService.innerHTML = services.map(s =>
-      `<option value="${s.id}"
-              data-price="${s.price}"
-              data-sst="${s.sst}">
+      `<option value="${s.id}" data-price="${s.price}" data-sst="${s.sst}">
         ${s.code} – ${s.name} (RM ${s.price})
       </option>`
     ).join("");
   }
 }
+  ).join("");
+
+
 
 /* calculate amount / SST */
 function calculateCharges() {
@@ -804,11 +814,12 @@ async function loadReport() {
 }
 /* ================= LOAD ALL ================= */
 async function loadAll() {
-  await loadClients();
-  await loadPractitioners();
-  await loadServices();
+ await loadClients();
+await loadPractitioners();
+await loadServices();
 
-  fillAppointmentDropdowns();
+// ✅ only fill client & practitioner here
+fillAppointmentDropdowns();
   setAppointmentDefaults();
   calculateCharges();
   loadAppointments();
