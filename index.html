@@ -619,8 +619,6 @@ async function loadServices() {
   `).join("");
 }
 
- 
-
 /* ================= APPOINTMENTS ================= */
 
 /* defaults */
@@ -630,8 +628,9 @@ function setAppointmentDefaults() {
   apptTime.value = now.toTimeString().slice(0, 5);
 }
 
-/* fill dropdowns */
+/* fill dropdowns (CLIENT + PRACTITIONER ONLY) */
 function fillAppointmentDropdowns() {
+
   // Clients
   apptClient.innerHTML = clients.map(c =>
     `<option value="${c.id}">${c.full_name}</option>`
@@ -640,16 +639,6 @@ function fillAppointmentDropdowns() {
   // Practitioners
   apptPractitioner.innerHTML = practitioners.map(p =>
     `<option value="${p.id}">${p.name}</option>`
-  ).join("");
-
-  // Services (required for charge calculation)
-  apptService.innerHTML = services.map(s =>
-    `<option
-      value="${s.id}"
-      data-price="${s.price}"
-      data-sst="${s.sst}">
-      ${s.code} – ${s.name} (RM ${s.price})
-    </option>`
   ).join("");
 }
 
@@ -674,9 +663,10 @@ function calculateCharges() {
   apptTotal.value = total.toFixed(2);
 }
 
-/* wire events immediately */
+/* wire events */
 apptService.onchange = calculateCharges;
 apptClient.onchange = calculateCharges;
+
 
 /* save */
 async function saveAppointment() {
