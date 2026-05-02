@@ -206,6 +206,14 @@
       <select id="apptClient"></select>
       <select id="apptPractitioner"></select>
       <select id="apptService"></select>
+      <select id="apptPayment">
+  <option value="">Select Payment</option>
+  <option value="Cash">Cash</option>
+  <option value="Card">Card</option>
+  <option value="Online">Online</option>
+</select>
+
+<input id="apptRemarks" placeholder="Remarks (optional)">
 
       <input id="apptAmount" placeholder="Amount (RM)" readonly>
       <input id="apptSST" placeholder="SST (RM)" readonly>
@@ -473,14 +481,6 @@ function fillAppointmentDropdowns() {
   apptPractitioner.innerHTML = practitioners.map(p =>
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
-
-  apptService.innerHTML = services.map(s =>
-    `<option value="${s.id}"
-            data-price="${s.price}"
-            data-sst="${s.sst}">
-      ${s.name} (RM ${s.price})
-    </option>`
-  ).join("");
 }
 
 /* calculate amount / SST */
@@ -516,16 +516,23 @@ document.addEventListener("DOMContentLoaded", () => {
 async function saveAppointment() {
   if (!apptDate.value || !apptTime.value)
     return alert("Date and time required");
+if (!apptPayment.value) {
+  alert("Please select a payment method");
+  return;
+}
+  
 
   const payload = {
-    start_time: `${apptDate.value}T${apptTime.value}`,
-    client_id: apptClient.value,
-    practitioner_id: apptPractitioner.value,
-    service_id: apptService.value,
-    amount: Number(apptAmount.value),
-    sst: Number(apptSST.value),
-    total: Number(apptTotal.value)
-  };
+  start_time: `${apptDate.value}T${apptTime.value}`,
+  client_id: apptClient.value,
+  practitioner_id: apptPractitioner.value,
+  service_id: apptService.value,
+  payment_method: apptPayment.value || null, // ✅ NEW
+  remarks: apptRemarks.value || null,         // ✅ NEW
+  amount: Number(apptAmount.value),
+  sst: Number(apptSST.value),
+  total: Number(apptTotal.value)
+};
 
   const res = editingAppointmentId
     ? await sb.from("appointments")
@@ -580,6 +587,8 @@ function editAppointment(a) {
   apptClient.value = a.client_id;
   apptPractitioner.value = a.practitioner_id;
   apptService.value = a.service_id;
+  apptPayment.value = a.payment_method || "";
+apptRemarks.value = a.remarks || "";
 
   calculateCharges();
   tab("appointmentsTab");
