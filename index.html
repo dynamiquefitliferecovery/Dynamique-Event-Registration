@@ -6,6 +6,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 body{
@@ -20,7 +21,7 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background:linear-gradient(135deg, orange, #ffcc80);
+  background:linear-gradient(135deg,#ff9800,#ffcc80);
 }
 
 .login-box{
@@ -28,8 +29,8 @@ body{
   padding:30px;
   border-radius:12px;
   width:320px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
   text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 /* APP */
@@ -38,9 +39,9 @@ body{
 header{
   background:black;
   color:white;
-  padding:10px;
   display:flex;
   gap:10px;
+  padding:10px;
 }
 
 header button{
@@ -69,8 +70,8 @@ header button{
 
 input,select{
   padding:8px;
-  border-radius:6px;
   border:1px solid #ddd;
+  border-radius:6px;
 }
 
 button{
@@ -130,18 +131,16 @@ td,th{
 <div class="grid">
 <input id="c_name" placeholder="Name">
 <input id="c_dob" type="date">
-<input id="c_age" placeholder="Age" readonly>
-
 <input id="c_ic" placeholder="IC">
 <input id="c_contact" placeholder="Contact">
 <input id="c_email" placeholder="Email">
+<input id="c_address" placeholder="Address">
 </div>
 
 <button class="primary" onclick="saveClient()">Save</button>
 </div>
 
 <div class="card">
-<h3>Client List</h3>
 <table>
 <thead>
 <tr>
@@ -168,8 +167,9 @@ td,th{
 
 <!-- APPOINTMENTS -->
 <div id="appointmentsTab" hidden>
+
 <div class="card">
-<h3>Appointments</h3>
+<h3>Appointment</h3>
 
 <div class="grid">
 <input id="a_date" type="date">
@@ -178,7 +178,6 @@ td,th{
 <select id="a_client"></select>
 <select id="a_practitioner"></select>
 <select id="a_service"></select>
-
 <select id="a_payment">
 <option>Cash</option>
 <option>Card</option>
@@ -197,31 +196,44 @@ td,th{
 <table>
 <thead>
 <tr>
-<th>Date</th><th>Client</th><th>Service</th><th>Practitioner</th><th>Payment</th><th>Total</th>
+<th>Date</th>
+<th>Client</th>
+<th>Practitioner</th>
+<th>Service</th>
+<th>Payment</th>
+<th>Amount</th>
+<th>SST</th>
+<th>Total</th>
+<th>Edit</th>
 </tr>
 </thead>
 <tbody id="appointmentTable"></tbody>
 </table>
 </div>
+
 </div>
 
 <!-- REPORT -->
 <div id="reportsTab" hidden>
+
 <div class="card">
 <h3>Reports</h3>
 
 <input type="date" id="start">
 <input type="date" id="end">
 
-<button class="primary" onclick="loadReport()">Generate</button>
-<button onclick="exportCSV()">Export CSV</button>
+<button class="primary" onclick="generateReport()">Generate</button>
+<button onclick="exportExcel()">Export Excel</button>
 
-<canvas id="barChart"></canvas>
-<canvas id="pieChart"></canvas>
+<div style="display:flex;gap:20px;margin-top:20px;">
+<canvas id="barChart" style="width:45%;height:250px;"></canvas>
+<canvas id="pieChart" style="width:45%;height:250px;"></canvas>
+</div>
 
 <table>
 <tbody id="reportTable"></tbody>
 </table>
+
 </div>
 </div>
 
@@ -238,16 +250,18 @@ const sb = supabase.createClient(
 
 /* STATE */
 let clients=[], practitioners=[], appointments=[];
+let editClientId=null;
+let editAppointmentId=null;
 
-/* SERVICES (FULL RESTORED) */
+/* SERVICES */
 const SERVICES=[
-{id:"SM",name:"Sports Massage",price:45},
-{id:"RCB",name:"Recovery Boots",price:25},
-{id:"AS",name:"Assisted Stretch",price:20},
-{id:"PB",name:"Physio Bundle",price:400},
-{id:"PKP",name:"Performance Kickstart",price:261},
-{id:"SMFT",name:"Trial Massage",price:189},
-{id:"QF15",name:"Quick Fix",price:15}
+{id:"SM",name:"Massage",price:45},
+{id:"RCB",name:"Boots",price:25},
+{id:"AS",name:"Stretch",price:20},
+{id:"PB",name:"Bundle",price:400},
+{id:"PKP",name:"Kickstart",price:261},
+{id:"SMFT",name:"Trial",price:189},
+{id:"QF15",name:"Quick",price:15}
 ];
 
 /* LOGIN */
@@ -256,14 +270,19 @@ const {error}=await sb.auth.signInWithPassword({
 email:email.value,
 password:password.value
 });
-if(error){loginError.innerText=error.message;return;}
 
-document.getElementById("loginView").style.display="none";
-document.getElementById("appView").style.display="block";
+if(error){
+loginError.innerText=error.message;
+return;
+}
+
+loginView.style.display="none";
+appView.style.display="block";
 
 init();
 }
 
+/* LOGOUT */
 async function logout(){
 await sb.auth.signOut();
 location.reload();
@@ -274,35 +293,42 @@ async function init(){
 await loadClients();
 await loadPractitioners();
 await loadAppointments();
-
 setToday();
 fillServices();
 }
 
 /* TAB */
-function showTab(id){
+function showTab(t){
 ["clientsTab","practitionersTab","appointmentsTab","reportsTab"]
-.forEach(x=>document.getElementById(x).hidden=true);
-
-document.getElementById(id).hidden=false;
+.forEach(i=>document.getElementById(i).hidden=true);
+document.getElementById(t).hidden=false;
 }
 
-/* CLIENTS */
+/* CLIENT */
 async function saveClient(){
+
 let ic=c_ic.value.replace(/\D/g,"");
 if(ic.length>6)ic=ic.slice(0,6)+"-"+ic.slice(6,8)+"-"+ic.slice(8);
 
 let contact=c_contact.value.replace(/\D/g,"");
 if(contact.length>3)contact=contact.slice(0,3)+"-"+contact.slice(3);
 
-const client={
+const obj={
 full_name:c_name.value,
 dob:c_dob.value,
 age:calcAge(c_dob.value),
-ic,contact,email:c_email.value
+ic,contact,
+email:c_email.value,
+address:c_address.value
 };
 
-await sb.from("clients").insert(client);
+if(editClientId){
+await sb.from("clients").update(obj).eq("id",editClientId);
+editClientId=null;
+}else{
+await sb.from("clients").insert(obj);
+}
+
 loadClients();
 }
 
@@ -330,7 +356,23 @@ a_client.innerHTML=clients.map(c=>
 `<option value="${c.id}">${c.full_name}</option>`).join("");
 }
 
-/* PRACTITIONERS */
+function editClient(id){
+const c=clients.find(x=>x.id===id);
+c_name.value=c.full_name;
+c_dob.value=c.dob;
+c_ic.value=c.ic;
+c_contact.value=c.contact;
+c_email.value=c.email;
+c_address.value=c.address;
+editClientId=id;
+}
+
+async function deleteClient(id){
+await sb.from("clients").delete().eq("id",id);
+loadClients();
+}
+
+/* PRACTITIONER */
 async function addPractitioner(){
 await sb.from("practitioners").insert({name:p_name.value});
 loadPractitioners();
@@ -359,10 +401,10 @@ a_service.innerHTML=SERVICES.map(s=>
 `<option value="${s.id}">${s.name}</option>`).join("");
 }
 
-a_service.onchange=update;
-a_client.onchange=update;
+a_service.onchange=calc;
+a_client.onchange=calc;
 
-function update(){
+function calc(){
 let s=SERVICES.find(x=>x.id===a_service.value);
 let amt=s?.price||0;
 let c=clients.find(x=>x.id===a_client.value);
@@ -374,7 +416,18 @@ a_total.innerText=(amt+sst).toFixed(2);
 }
 
 async function saveAppointment(){
-await sb.from("appointments").insert({
+if(editAppointmentId){
+await sb.from("appointments").update(getApp()).eq("id",editAppointmentId);
+editAppointmentId=null;
+}else{
+await sb.from("appointments").insert(getApp());
+}
+
+loadAppointments();
+}
+
+function getApp(){
+return {
 start_time:`${a_date.value}T${a_time.value}`,
 client_id:a_client.value,
 practitioner_id:a_practitioner.value,
@@ -382,9 +435,7 @@ service_id:a_service.value,
 amount:+a_amount.innerText,
 sst:+a_sst.innerText,
 total:+a_total.innerText
-});
-
-loadAppointments();
+};
 }
 
 async function loadAppointments(){
@@ -394,52 +445,56 @@ appointments=data||[];
 appointmentTable.innerHTML=appointments.map(a=>
 `<tr>
 <td>${a.start_time}</td>
-<td>${a.client_id}</td>
+<td>${clients.find(c=>c.id===a.client_id)?.full_name}</td>
+<td>${practitioners.find(p=>p.id===a.practitioner_id)?.name}</td>
 <td>${a.service_id}</td>
-<td>${a.practitioner_id}</td>
+<td>${a.payment_method||""}</td>
+<td>${a.amount}</td>
+<td>${a.sst}</td>
 <td>${a.total}</td>
+<td><button onclick="editAppointment('${a.id}')">Edit</button></td>
 </tr>`).join("");
 }
 
 /* REPORT */
-async function loadReport(){
+async function generateReport(){
 let {data}=await sb.from("appointments").select("*");
 
-let total=data.reduce((s,a)=>s+a.total,0);
+let serviceMap={}, ageMap={};
 
-reportTable.innerHTML=`<tr><td>Total</td><td>${total}</td></tr>`;
+data.forEach(a=>{
+serviceMap[a.service_id]=(serviceMap[a.service_id]||0)+a.total;
 
-new Chart(barChart,{
-type:"bar",
-data:{labels:["Sales"],datasets:[{data:[total]}]}
+let age=clients.find(c=>c.id===a.client_id)?.age||0;
+let g=age<18?"0-18":age<30?"19-30":age<45?"31-45":age<60?"46-60":"60+";
+ageMap[g]=(ageMap[g]||0)+a.total;
 });
 
-new Chart(pieChart,{
-type:"pie",
-data:{labels:["Sales"],datasets:[{data:[total]}]}
-});
+new Chart(barChart,{type:"bar",data:{labels:Object.keys(serviceMap),datasets:[{data:Object.values(serviceMap)}]}});
+
+new Chart(pieChart,{type:"pie",data:{labels:Object.keys(ageMap),datasets:[{data:Object.values(ageMap)}]}});
+
+reportTable.innerHTML=`<tr><td>Total Records</td><td>${data.length}</td></tr>`;
 }
 
-function exportCSV(){
-let csv="Total\n";
-appointments.forEach(a=>csv+=a.total+"\n");
+/* EXPORT EXCEL */
+function exportExcel(){
 
-let blob=new Blob([csv]);
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="report.csv";
-a.click();
-}
+let rows=appointments.map(a=>({
+Date:a.start_time,
+Client:clients.find(c=>c.id===a.client_id)?.full_name,
+Service:a.service_id,
+Amount:a.amount,
+SST:a.sst,
+Total:a.total
+}));
 
-/* AUTO */
-window.onload=async()=>{
-let {data}=await sb.auth.getSession();
-if(data.session){
-document.getElementById("loginView").style.display="none";
-document.getElementById("appView").style.display="block";
-init();
+let ws=XLSX.utils.json_to_sheet(rows);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"Appointments");
+
+XLSX.writeFile(wb,"report.xlsx");
 }
-};
 
 </script>
 </body>
