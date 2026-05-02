@@ -394,14 +394,6 @@ function openApp() {
 }
 
 
-/* ================= TABS ================= */
-function tab(id) {
-  document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-
-  if (id === "reportsTab") loadReport();
-}
-
 /* ================= FORMATTERS ================= */
 document.addEventListener("input", e => {
   if (e.target.matches('input[placeholder*="IC"], input[placeholder*="Passport"]')) {
@@ -593,7 +585,8 @@ async function deletePractitioner(id) {
   loadPractitioners();
 }
 
-<!-- ================= SERVICES ================= -->
+/* ================= SERVICES ================= */
+
 let services = [];
 
 async function loadServices() {
@@ -608,8 +601,10 @@ async function loadServices() {
   }
 
   services = data || [];
+}
+  function initServiceDropdown() {
+  if (!services.length) return;
 
-  // Populate SERVICE dropdown (ONLY PLACE THIS HAPPENS)
   apptService.innerHTML = services.map(s => `
     <option
       value="${s.id}"
@@ -619,12 +614,12 @@ async function loadServices() {
     </option>
   `).join("");
 
-  // Optional: auto-select first service
-  if (apptService.options.length > 0) {
-    apptService.selectedIndex = 0;
-  }
-}
+  // ✅ Ensure default selection
+  apptService.selectedIndex = 0;
 
+  // ✅ Trigger calculation once initialized
+  calculateCharges();
+}
 /* ================= APPOINTMENTS ================= */
 
 /* defaults */
@@ -646,6 +641,22 @@ function fillAppointmentDropdowns() {
   apptPractitioner.innerHTML = practitioners.map(p =>
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
+}
+  function tab(id) {
+  document.querySelectorAll("section")
+    .forEach(s => s.classList.add("hidden"));
+
+  document.getElementById(id)
+    .classList.remove("hidden");
+
+  if (id === "appointmentsTab") {
+    fillAppointmentDropdowns();  // clients + practitioners
+    initServiceDropdown();       // ✅ services AFTER tab visible
+  }
+
+  if (id === "reportsTab") {
+    loadReport();
+  }
 }
 
 /* calculate amount / SST */
@@ -809,14 +820,11 @@ async function loadReport() {
 }
 /* ================= LOAD ALL ================= */
 async function loadAll() {
- await loadClients();
-await loadPractitioners();
-await loadServices();
+  await loadClients();
+  await loadPractitioners();
+  await loadServices();   // data only
 
-// ✅ only fill client & practitioner here
-fillAppointmentDropdowns();
   setAppointmentDefaults();
-  calculateCharges();
   loadAppointments();
 }
 
