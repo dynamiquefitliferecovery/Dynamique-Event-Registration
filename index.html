@@ -5,7 +5,7 @@
   <title>Sports Rehab System</title>
 
   <!-- Supabase JS (logic will come later) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/s
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body{margin:0;font-family:Segoe UI;background:#f4f6f8}
     .hidden{display:none}
@@ -124,7 +124,7 @@
     <h2>Login</h2>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-    <button>Login</button>
+    <button onclick="login()">Login</button>
     <p id="err" style="color:red"></p>
   </div>
 </div>
@@ -133,11 +133,11 @@
 <div id="appView" class="hidden">
 
 <header>
-  <button>Clients</button>
-  <button>Practitioners</button>
-  <button>Appointments</button>
-  <button>Sales Report</button>
-  <button>Logout</button>
+  <button onclick="tab('clientsTab')">Clients</button>
+<button onclick="tab('practitionersTab')">Practitioners</button>
+<button onclick="tab('appointmentsTab')">Appointments</button>
+<button onclick="tab('reportsTab')">Sales Report</button>
+<button onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
@@ -158,7 +158,7 @@
       <input placeholder="Email">
       <input placeholder="Address">
     </div>
-    <button class="action">Save Client</button>
+    <button class="action" onclick="saveClient()">Save Client</button>
   </div>
 
   <div class="card">
@@ -182,7 +182,7 @@
   <div class="card">
     <h3>Practitioner</h3>
     <input placeholder="Practitioner Name">
-    <button class="action">Add Practitioner</button>
+    <button class="action" onclick="addPractitioner()">Add Practitioner</button>
     <div>
       <!-- practitioner list -->
     </div>
@@ -191,16 +191,24 @@
 
 <!-- ===== APPOINTMENTS ===== -->
 <section id="appointmentsTab" class="hidden">
+
   <div class="card">
     <h3>Appointment</h3>
+
     <div class="grid">
-      <input type="date">
-      <input type="time">
-<select onchange="calculateCharges()"></select>  <!-- client -->
-<select></select>                                <!-- practitioner -->
-<select onchange="calculateCharges()"></select>  <!-- service -->
+      <input id="apptDate" type="date">
+      <input id="apptTime" type="time">
+
+      <select id="apptClient"></select>
+      <select id="apptPractitioner"></select>
+      <select id="apptService"></select>
+
+      <input id="apptAmount" placeholder="Amount (RM)" readonly>
+      <input id="apptSST" placeholder="SST (RM)" readonly>
+      <input id="apptTotal" placeholder="Total (RM)" readonly>
     </div>
-    <button class="action">Save Appointment</button>
+
+    <button class="action" onclick="saveAppointment()">Save Appointment</button>
   </div>
 
   <div class="card">
@@ -210,15 +218,14 @@
           <th>Date</th>
           <th>Client</th>
           <th>Service</th>
-          <th>Amount</th>
+          <th>Total (RM)</th>
           <th></th>
         </tr>
       </thead>
-      <tbody>
-        <!-- appointment rows -->
-      </tbody>
+      <tbody id="apptTable"></tbody>
     </table>
   </div>
+
 </section>
 
 <!-- ===== SALES REPORT ===== -->
@@ -389,25 +396,88 @@ async function loadServices() {
 
   services = data || [];
 
-const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
-serviceSelect.addEventListener("change", calculateCharges);
+  const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
 
-const clientSelect = document.querySelectorAll("#appointmentsTab select")[0];
-clientSelect.addEventListener("change", calculateCharges);
+  serviceSelect.innerHTML = services.map(s => `
+    <option 
+      value="${s.id}"
+      data-price="${s.price}"
+      data-foreigner-sst="${s.foreigner_sst}">
+      ${s.name} (RM ${s.price})
+    </option>
+  `).join("");
 
+  // Attach calculation listeners
+  serviceSelect.addEventListener("change", calculateCharges);
+  const clientSelect = document.querySelectorAll("#appointmentsTab select")[0];
+  clientSelect.addEventListener("change", calculateCharges);
+}
 /* ================= APPOINTMENTS ================= */
+let editingAppointmentId = null;
+
+/* defaults */
+function setAppointmentDefaults() {
+  const now = new Date();
+  apptDate.value = now.toISOString().slice(0, 10);
+  apptTime.value = now.toTimeString().slice(0, 5);
+}
+
+/* load dropdowns */
+function fillAppointmentDropdowns() {
+  apptClient.innerHTML = clients.map(c =>
+    `<option value="${c.id}">${c.full_name}</option>`
+  ).join("");
+
+  apptPractitioner.innerHTML = practitioners.map(p =>
+    `<option value="${p.id}">${p.name}</option>`
+  ).join("");
+
+  apptService.innerHTML = services.map(s =>
+    `<option 
+       value="${s.id}"
+       data-price="${s.price}"
+       data-foreigner-sst="${s.foreigner_sst}">
+       ${s.name} (RM ${s.price})
+     </option>`
+  ).join("");
+}
+
+/* charge calculation */
+function calculateCharges() {
+  if (!apptService.value || !apptClient.value) return;
+
+  const price = Number(apptService.selectedOptions[0].dataset.price);
+  const sstRequired =
+    apptService.selectedOptions[0].dataset.foreignerSst === "true";
+
+  const client = clients.find(c => c.id === apptClient.value);
+  const isForeigner = client?.citizenship === "Foreigner";
+
+  const sst = (sstRequired && isForeigner) ? price * 0.06 : 0;
+  const total = price + sst;
+
+  apptAmount.value = price.toFixed(2);
+  apptSST.value = sst.toFixed(2);
+  apptTotal.value = total.toFixed(2);
+}
+
+/* events */
+apptService.onchange = calculateCharges;
+apptClient.onchange = calculateCharges;
+
+/* save */
 async function saveAppointment() {
-  const inputs = document.querySelectorAll("#appointmentsTab input");
-  const selects = document.querySelectorAll("#appointmentsTab select");
+  if (!apptDate.value || !apptTime.value)
+    return alert("Date and time required");
 
   const payload = {
-    start_time: `${inputs[0].value}T${inputs[1].value}`,
-    client_id: selects[0].value,
-    practitioner_id: selects[1].value,
-    service_id: selects[2].value,
-    amount: Number(document.getElementById("apptAmount").value),
-    sst: Number(document.getElementById("apptSST").value),
-    total: Number(document.getElementById("apptTotal").value)
+    start_time: `${apptDate.value}T${apptTime.value}`,
+    client_id: apptClient.value,
+    practitioner_id: apptPractitioner.value,
+    service_id: apptService.value,
+    amount: Number(apptAmount.value),
+    sst: Number(apptSST.value),
+    total: Number(apptTotal.value)
   };
 
   const res = editingAppointmentId
@@ -419,54 +489,48 @@ async function saveAppointment() {
   editingAppointmentId = null;
   loadAppointments();
 }
+
+/* list */
 async function loadAppointments() {
   const { data, error } = await sb
     .from("appointments")
     .select(`
-  id,
-  start_time,
-  client_id,
-  practitioner_id,
-  service_id,
-  amount,
-  sst,
-  total,
-  clients(full_name),
-  services(name)
-`)
+      id,
+      start_time,
+      total,
+      client_id,
+      practitioner_id,
+      service_id,
+      clients(full_name),
+      services(name)
+    `)
     .order("start_time", { ascending: false });
 
-  if (error) {
-    console.error(error);
-  }
+  if (error) return console.error(error);
 
-  const rows = data || [];
-
-  const tbody = document.querySelector("#appointmentsTab tbody");
-
-  tbody.innerHTML = rows.map(a => `
+  apptTable.innerHTML = data.map(a => `
     <tr>
       <td>${new Date(a.start_time).toLocaleString()}</td>
-      <td>${a.clients?.full_name || ""}</td>
-      <td>${a.services?.name || ""}</td>
-      <td>RM ${Number(a.total).toFixed(2)}</td>
+      <td>${a.clients.full_name}</td>
+      <td>${a.services.name}</td>
+      <td>${Number(a.total).toFixed(2)}</td>
+      <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
     </tr>
   `).join("");
 }
 
+/* edit */
 function editAppointment(a) {
   editingAppointmentId = a.id;
 
   const d = new Date(a.start_time);
-  const inputs = document.querySelectorAll("#appointmentsTab input");
-  const selects = document.querySelectorAll("#appointmentsTab select");
+  apptDate.value = d.toISOString().slice(0, 10);
+  apptTime.value = d.toTimeString().slice(0, 5);
+  apptClient.value = a.client_id;
+  apptPractitioner.value = a.practitioner_id;
+  apptService.value = a.service_id;
 
-  inputs[0].value = d.toISOString().slice(0,10);
-  inputs[1].value = d.toTimeString().slice(0,5);
-  selects[0].value = a.client_id;
-  selects[1].value = a.practitioner_id;
-  selects[2].value = a.service_id;
-
+  calculateCharges();
   tab("appointmentsTab");
 }
 
@@ -499,7 +563,11 @@ async function loadAll() {
   await loadClients();
   await loadPractitioners();
   await loadServices();
-  await loadAppointments();
+
+  fillAppointmentDropdowns();
+  setAppointmentDefaults();
+  loadAppointments();
+}
 
   const now = new Date();
   const inputs = document.querySelectorAll("#appointmentsTab input");
