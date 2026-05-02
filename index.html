@@ -448,6 +448,19 @@ function formatContact(v = "") {
 }
 
 
+/* ================= HELPER FUNCTION ================= */
+function calculateAge(dob) {function calculateAge(d) return "";
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+  
 /* ================= CLIENTS ================= */
 let clients = [];
 
@@ -467,10 +480,8 @@ async function loadClients() {
   const tbody = document.getElementById("clientsTable");
 
 
-tbody.innerHTML = clients.map(c => `
-  <tr>
-    <td>${c.full_name}</td>
-    <td>${c.date_of_birth || ""}</td>
+tbody.innerHTML = clients.map(c => `}</td>
+    <td>${c.date_of_birth || ""} (${calculateAge(c.date_of_birth)} yrs)</td>
     <td>${c.gender || ""}</td>
     <td>${c.citizenship || ""}</td>
     <td>${formatIc(c.ic_passport)}</td>
@@ -482,7 +493,8 @@ tbody.innerHTML = clients.map(c => `
     </td>
   </tr>
 `).join("");
-}
+  <tr>
+
 async function saveClient() {
   const inputs = document.querySelectorAll("#clientsTab input");
   const selects = document.querySelectorAll("#clientsTab select");
@@ -667,16 +679,20 @@ function fillAppointmentDropdowns() {
 function initServiceDropdown() {
   if (!services.length) return;
 
-  apptService.innerHTML = `
-  <option value="">Select Service</option>
-  ${services.map(s => `
-    <option value="${s.id}"
-      data-price="${s.price}"
-      data-sst="${s.sst}">
-      ${s.code} – ${s.name} (RM ${Number(s.price).toFixed(2)})
-    </option>
-  `).join("")}
-`;
+  apptService.innerHTML = "";
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = "Select Service";
+  apptService.appendChild(defaultOpt);
+
+  services.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.dataset.price = s.price;
+    opt.dataset.sst = s.sst;
+    opt.textContent = `${s.code} – ${s.name} (RM ${Number(s.price).toFixed(2)})`;
+    apptService.appendChild(opt);
+  });
 }
 
 /* calculate amount / SST */
