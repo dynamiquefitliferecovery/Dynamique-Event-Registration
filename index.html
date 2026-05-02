@@ -389,21 +389,30 @@ function resetClientSave() {
 
 /* ================= PRACTITIONERS ================= */
 
+let practitioners = [];
+let editingPractitionerId = null;
+
+/* LOAD */
 async function loadPractitioners() {
   const { data, error } = await sb.from("practitioners").select("*");
 
   if (error) {
-    console.error("Load practitioners error:", error);
+    console.error("Practitioners load error:", error);
     return;
   }
 
   practitioners = data;
 
-  // TABLE
+  renderPractitionersTable();
+  renderPractitionerDropdown();
+}
+
+/* RENDER TABLE */
+function renderPractitionersTable() {
   const table = document.getElementById("practitionerTable");
   table.innerHTML = "";
 
-  data.forEach(p => {
+  practitioners.forEach(p => {
     table.insertAdjacentHTML("beforeend", `
       <tr>
         <td>${p.name || ""}</td>
@@ -415,31 +424,28 @@ async function loadPractitioners() {
       </tr>
     `);
   });
+}
 
-  // DROPDOWN (appointments)
+/* DROPDOWN (Appointments) */
+function renderPractitionerDropdown() {
   const select = document.getElementById("a_practitioner");
+  if (!select) return;
+
   select.innerHTML = `<option value="">Select Practitioner</option>`;
 
-  data.forEach(p => {
+  practitioners.forEach(p => {
     select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
   });
 }
 
-/* ADD PRACTITIONER */
+/* ADD */
 document.getElementById("addPractitionerBtn").onclick = async () => {
   const name = document.getElementById("p_name").value.trim();
-
-  if (!name) {
-    alert("Enter practitioner name");
-    return;
-  }
+  if (!name) return alert("Enter practitioner name");
 
   const { error } = await sb.from("practitioners").insert({ name });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
   document.getElementById("p_name").value = "";
   loadPractitioners();
@@ -456,16 +462,14 @@ async function deletePractitioner(id) {
 
   const { error } = await sb.from("practitioners").delete().eq("id", id);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
   loadPractitioners();
 }
 
 /* ================= APPOINTMENTS ================= */
 
+let appointments = [];
 let editingAppointmentId = null;
 
 /* AUTO DATE TIME */
@@ -475,7 +479,7 @@ function setCurrentDateTime() {
   document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 }
 
-/* CALCULATE TOTALS */
+/* TOTAL CALC */
 function updateTotals() {
   const service = SERVICES.find(s =>
     s.id === document.getElementById("a_service").value
@@ -506,7 +510,7 @@ function updateTotals() {
 document.getElementById("a_service").onchange = updateTotals;
 document.getElementById("a_client").onchange = updateTotals;
 
-/* SAVE (INSERT / UPDATE) */
+/* SAVE (CREATE / UPDATE) */
 document.getElementById("saveAppointmentBtn").onclick = async () => {
 
   const service = SERVICES.find(s =>
@@ -514,17 +518,12 @@ document.getElementById("saveAppointmentBtn").onclick = async () => {
   );
 
   const appointment = {
-    start_time:
-      document.getElementById("a_date").value +
-      "T" +
-      document.getElementById("a_time").value,
-
+    start_time: `${document.getElementById("a_date").value}T${document.getElementById("a_time").value}`,
     client_id: document.getElementById("a_client").value,
     practitioner_id: document.getElementById("a_practitioner").value,
     service_id: service?.id,
     payment_method: document.getElementById("a_payment").value,
     remarks: document.getElementById("a_remarks").value,
-
     amount: parseFloat(document.getElementById("a_amount").value) || 0,
     sst: parseFloat(document.getElementById("a_sst").value) || 0,
     total: parseFloat(document.getElementById("a_total").value) || 0
@@ -537,27 +536,23 @@ document.getElementById("saveAppointmentBtn").onclick = async () => {
       .from("appointments")
       .update(appointment)
       .eq("id", editingAppointmentId));
-
-    editingAppointmentId = null;
   } else {
     ({ error } = await sb
       .from("appointments")
       .insert(appointment));
   }
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
-  resetAppointmentForm();
+  editingAppointmentId = null;
+
   loadAppointments();
+  setCurrentDateTime();
+  clearAppointmentForm();
 };
 
-/* RESET FORM */
-function resetAppointmentForm() {
-  setCurrentDateTime();
-
+/* CLEAR FORM */
+function clearAppointmentForm() {
   ["a_client","a_practitioner","a_service","a_payment","a_remarks"]
     .forEach(id => document.getElementById(id).value = "");
 
@@ -572,25 +567,25 @@ async function loadAppointments() {
     .order("start_time", { ascending: false });
 
   if (error) {
-    console.error(error);
+    console.error("Appointments load error:", error);
     return;
   }
 
   appointments = data;
 
+  renderAppointmentsTable();
+}
+
+/* TABLE */
+function renderAppointmentsTable() {
   const table = document.getElementById("appointmentsTable");
   table.innerHTML = "";
 
-  data.forEach(a => {
+  appointments.forEach(a => {
 
-    const clientName =
-      clients.find(c => c.id === a.client_id)?.full_name || "";
-
-    const practitionerName =
-      practitioners.find(p => p.id === a.practitioner_id)?.name || "";
-
-    const serviceName =
-      SERVICES.find(s => s.id === a.service_id)?.name || "";
+    const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
+    const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
+    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
 
     table.insertAdjacentHTML("beforeend", `
       <tr>
@@ -599,20 +594,16 @@ async function loadAppointments() {
         <td>${clientName}</td>
         <td>${serviceName}</td>
         <td>${practitionerName}</td>
-        <td>${a.payment_method}</td>
+        <td>${a.payment_method || ""}</td>
         <td>${a.amount?.toFixed(2) || "0.00"}</td>
         <td>${a.sst?.toFixed(2) || "0.00"}</td>
         <td>${a.total?.toFixed(2) || "0.00"}</td>
         <td>${a.remarks || ""}</td>
         <td>
-          <button class="small primary" onclick="editAppointment('${a.id}')">
-            Edit
-          </button>
+          <button class="small primary" onclick="editAppointment('${a.id}')">Edit</button>
         </td>
         <td>
-          <button class="small danger" onclick="deleteAppointment('${a.id}')">
-            Delete
-          </button>
+          <button class="small danger" onclick="deleteAppointment('${a.id}')">Delete</button>
         </td>
       </tr>
     `);
@@ -646,14 +637,10 @@ async function deleteAppointment(id) {
     .delete()
     .eq("id", id);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
   loadAppointments();
 }
-
 /* ================= SALES REPORT ================= */
 let salesChartInstance = null;
 let latestReport = {};
@@ -722,32 +709,93 @@ document.getElementById("exportExcelBtn").onclick = () => {
 
 
 
+
 /* ================= LOGIN ================= */
+
+function showAppUI() {
+  document.getElementById("loginTab").hidden = true;
+  document.querySelector(".container").hidden = false;
+  document.getElementById("logoutMessage").hidden = true;
+}
+
+function showLoginUI() {
+  document.getElementById("loginTab").hidden = false;
+  document.querySelector(".container").hidden = true;
+  document.getElementById("logoutMessage").hidden = true;
+}
+
+/* LOGIN */
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
 
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  const { data, error } = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
   if (error) {
     document.getElementById("loginError").innerText = error.message;
-    console.error("Login error:", error);
+    console.error(error);
     return;
   }
 
   if (data.session) {
-    document.getElementById("loginTab").hidden = true;
-    document.querySelector(".container").hidden = false;
-    document.getElementById("logoutMessage").hidden = true;
+    showAppUI();
 
     loadClients();
     loadPractitioners();
     loadAppointments();
-  } else {
-    document.getElementById("loginError").innerText = "Login failed: no session created.";
-    console.error("No session returned:", data);
+
+    setCurrentDateTime();
+    updateTotals();
   }
 };
 
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick = async () => {
+  await sb.auth.signOut();
+
+  document.getElementById("logoutMessage").hidden = false;
+  showLoginUI();
+};
+
+/* TAB SWITCHING */
+function showTab(tabId) {
+  ["clientsTab","practitionersTab","appointmentsTab","reportsTab"]
+    .forEach(id => document.getElementById(id).hidden = true);
+
+  document.getElementById(tabId).hidden = false;
+
+  if (tabId === "reportsTab") loadSalesReport();
+}
+
+document.getElementById("tabClients").onclick = () => showTab("clientsTab");
+document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
+document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
+document.getElementById("tabReports").onclick = () => showTab("reportsTab");
+
+/* INITIAL LOAD */
+window.onload = async () => {
+  const { data: { session }, error } = await sb.auth.getSession();
+
+  if (error) console.error(error);
+
+  if (session) {
+    showAppUI();
+
+    loadClients();
+    loadPractitioners();
+    loadAppointments();
+
+    setCurrentDateTime();
+    updateTotals();
+  } else {
+    showLoginUI();
+  }
+
+  document.getElementById("loginError").innerText = "";
+};
 /* ================= TAB SWITCHING ================= */
 function showTab(tabId) {
   ["clientsTab","practitionersTab","appointmentsTab","reportsTab"].forEach(id=>{
