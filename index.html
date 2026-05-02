@@ -4,147 +4,116 @@
 <meta charset="UTF-8">
 <title>Dynamique Sports Rehab Centre</title>
 
-<style>
-body { margin:0; font-family:Segoe UI; background:orange; }
-
-header {
-  background:black;
-  color:white;
-  padding:10px;
-  display:flex;
-  gap:10px;
-}
-
-header button {
-  background:orange;
-  border:none;
-  padding:8px 12px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.container { padding:20px; }
-
-.card {
-  background:white;
-  padding:20px;
-  border-radius:8px;
-  margin-bottom:20px;
-}
-
-.section-title {
-  font-size:18px;
-  font-weight:bold;
-  border-bottom:2px solid orange;
-}
-
-.form-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-input, select {
-  padding:8px;
-  width:100%;
-}
-
-button.primary { background:orange; }
-button.danger { background:black; color:white; }
-
-table {
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-
-th, td {
-  border:1px solid #ddd;
-  padding:8px;
-}
-
-th { background:black; color:white; }
-
-#loginScreen, #logoutScreen {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-
-.loginBox {
-  background:white;
-  padding:30px;
-  width:300px;
-  text-align:center;
-  border-radius:8px;
-}
-</style>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<style>
+body { background: orange; font-family: Segoe UI; margin:0; }
+.container { padding:20px; }
+.card { background:white; padding:20px; margin-bottom:20px; border-radius:8px; }
+header { background:black; color:white; padding:10px; display:flex; gap:10px; }
+header button { background:orange; border:none; padding:8px; cursor:pointer; }
+
+input, select { width:100%; padding:8px; margin:5px 0; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ddd; padding:6px; }
+th { background:black; color:white; }
+</style>
 </head>
+
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen">
-  <div class="loginBox">
+<section id="loginTab">
+  <div class="card">
     <h2>Login</h2>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
     <button id="loginBtn">Login</button>
-    <p id="loginError"></p>
+    <div id="loginError"></div>
   </div>
-</div>
+</section>
 
-<div id="logoutScreen" hidden>
-  <div class="loginBox">Logged out</div>
-</div>
-
-<!-- APP -->
 <div class="container" hidden>
 
 <header>
-<button onclick="showTab('clients')">Clients</button>
-<button onclick="showTab('practitioners')">Practitioners</button>
-<button onclick="showTab('appointments')">Appointments</button>
-<button onclick="showTab('reports')">Reports</button>
-<button id="logoutBtn">Logout</button>
+  <button onclick="showTab('clientsTab')">Clients</button>
+  <button onclick="showTab('practitionersTab')">Practitioners</button>
+  <button onclick="showTab('appointmentsTab')">Appointments</button>
+  <button onclick="showTab('reportsTab')">Reports</button>
+  <button id="logoutBtn">Logout</button>
 </header>
 
 <!-- CLIENTS -->
-<section id="clients">
-<h2 class="section-title">Clients</h2>
-
+<section id="clientsTab">
 <div class="card">
-<div class="form-grid">
+<h2>Clients</h2>
 
 <input id="c_name" placeholder="Name">
 <input id="c_dob" type="date">
 <input id="c_age" readonly>
-<select id="c_gender">
-<option>Male</option><option>Female</option>
-</select>
-<select id="c_citizen">
-<option>Malaysian</option><option>Foreigner</option>
-</select>
+<select id="c_gender"><option>Male</option><option>Female</option></select>
+<select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select>
 <input id="c_ic" placeholder="IC">
 <input id="c_contact" placeholder="Contact">
 <input id="c_email" placeholder="Email">
 <input id="c_address" placeholder="Address">
 
-</div>
-
-<button id="saveClient" class="primary">Save</button>
-<button onclick="clearClient()" class="danger">Cancel</button>
+<button id="saveClientBtn">Save</button>
 
 <table>
 <thead>
 <tr><th>Name</th><th>Action</th></tr>
 </thead>
-<tbody id="clientTable"></tbody>
+<tbody id="clientsTable"></tbody>
 </table>
+</div>
+</section>
+
+<!-- PRACTITIONERS -->
+<section id="practitionersTab" hidden>
+<div class="card">
+<h2>Practitioners</h2>
+<input id="p_name">
+<button id="addPractitionerBtn">Add</button>
+
+<table>
+<tbody id="practitionerTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- APPOINTMENTS -->
+<section id="appointmentsTab" hidden>
+<div class="card">
+<h2>Appointments</h2>
+
+<input id="a_date" type="date">
+<input id="a_time" type="time">
+<select id="a_client"></select>
+<select id="a_practitioner"></select>
+<select id="a_service"></select>
+<select id="a_payment">
+<option>Cash</option><option>Card</option>
+</select>
+
+<input id="a_amount" readonly>
+<input id="a_sst" readonly>
+<input id="a_total" readonly>
+
+<button id="saveAppointmentBtn">Save</button>
+
+<table>
+<tbody id="appointmentsTable"></tbody>
+</table>
+</div>
+</section>
+
+<!-- REPORT -->
+<section id="reportsTab" hidden>
+<div class="card">
+<h2>Sales Report</h2>
+<canvas id="salesChart"></canvas>
 </div>
 </section>
 
@@ -152,140 +121,182 @@ th { background:black; color:white; }
 
 <script>
 
-/* ================= SUPABASE ================= */
+/* ================= SAFE GLOBALS ================= */
 const sb = supabase.createClient(
 "https://fmwdizyexroiezezitly.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
 );
 
-/* ================= STATE ================= */
 let clients = [];
-let editClientId = null;
+let practitioners = [];
+let appointments = [];
+
+let editingClientId = null;
+let editingAppointmentId = null;
+
+/* ================= SERVICES ================= */
+const SERVICES = [
+{ id:"SM", name:"Massage", price:45 },
+{ id:"AS", name:"Stretch", price:20 }
+];
+
+/* ================= TAB ================= */
+function showTab(id){
+document.querySelectorAll("section").forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
+}
 
 /* ================= LOGIN ================= */
-loginBtn.onclick = async () => {
+document.getElementById("loginBtn").onclick = async () => {
+const email = loginEmail.value;
+const password = loginPassword.value;
 
 const { data, error } = await sb.auth.signInWithPassword({
-email: email.value,
-password: password.value
+email, password
 });
 
-if (error) return loginError.innerText = error.message;
+if(error){
+loginError.innerText = error.message;
+return;
+}
 
-loginScreen.hidden = true;
+document.getElementById("loginTab").hidden = true;
 document.querySelector(".container").hidden = false;
 
 loadClients();
-showTab("clients");
+loadPractitioners();
+loadAppointments();
+showTab("clientsTab");
 };
 
 /* ================= LOGOUT ================= */
-logoutBtn.onclick = async () => {
+document.getElementById("logoutBtn").onclick = async () => {
 await sb.auth.signOut();
 location.reload();
 };
 
-/* ================= TABS ================= */
-function showTab(id){
-["clients"].forEach(t=>{
-document.getElementById(t).hidden = true;
-});
-document.getElementById(id).hidden = false;
-}
+/* ================= CLIENTS ================= */
+document.getElementById("saveClientBtn").onclick = async () => {
 
-/* ================= CLIENT ================= */
-function calcAge(dob){
-if(!dob) return "";
-return new Date().getFullYear() - new Date(dob).getFullYear();
-}
-
-c_dob.onchange = () => {
-c_age.value = calcAge(c_dob.value);
+const client = {
+full_name: c_name.value,
+date_of_birth: c_dob.value,
+gender: c_gender.value,
+citizenship: c_citizen.value,
+ic_passport: c_ic.value,
+contact: c_contact.value,
+email: c_email.value,
+address: c_address.value
 };
 
-function clearClient(){
-editClientId = null;
-saveClient.innerText = "Save";
-
-c_name.value="";
-c_dob.value="";
-c_age.value="";
-c_gender.value="Male";
-c_citizen.value="Malaysian";
-c_ic.value="";
-c_contact.value="";
-c_email.value="";
-c_address.value="";
-}
-
-saveClient.onclick = async () => {
-
-const obj = {
-full_name:c_name.value,
-date_of_birth:c_dob.value,
-gender:c_gender.value,
-citizenship:c_citizen.value,
-ic_passport:c_ic.value,
-contact:c_contact.value,
-email:c_email.value,
-address:c_address.value
-};
-
-let error;
-
-if(editClientId){
-({error} = await sb.from("clients").update(obj).eq("id",editClientId));
+if(editingClientId){
+await sb.from("clients").update(client).eq("id",editingClientId);
+editingClientId=null;
 }else{
-({error} = await sb.from("clients").insert(obj));
+await sb.from("clients").insert(client);
 }
 
-if(error) return alert(error.message);
-
-clearClient();
 loadClients();
 };
 
 async function loadClients(){
-
 const { data } = await sb.from("clients").select("*");
+clients = data || [];
 
-clients = data;
+clientsTable.innerHTML="";
+a_client.innerHTML="";
 
-clientTable.innerHTML = "";
-
-data.forEach(c=>{
-clientTable.innerHTML += `
+clients.forEach(c=>{
+clientsTable.innerHTML+=`
 <tr>
 <td>${c.full_name}</td>
-<td>
-<button onclick="editClient('${c.id}')">Edit</button>
-<button onclick="deleteClient('${c.id}')">Delete</button>
-</td>
+<td><button onclick="editClient('${c.id}')">Edit</button></td>
+</tr>`;
+
+a_client.innerHTML+=`<option value="${c.id}">${c.full_name}</option>`;
+});
+}
+
+window.editClient = (id)=>{
+const c = clients.find(x=>x.id===id);
+editingClientId = id;
+
+c_name.value=c.full_name;
+c_dob.value=c.date_of_birth;
+c_gender.value=c.gender;
+c_citizen.value=c.citizenship;
+c_ic.value=c.ic_passport;
+c_contact.value=c.contact;
+c_email.value=c.email;
+c_address.value=c.address;
+};
+
+/* ================= PRACTITIONERS ================= */
+document.getElementById("addPractitionerBtn").onclick = async () => {
+await sb.from("practitioners").insert({ name:p_name.value });
+loadPractitioners();
+};
+
+async function loadPractitioners(){
+const { data } = await sb.from("practitioners").select("*");
+practitioners = data || [];
+
+practitionerTable.innerHTML="";
+a_practitioner.innerHTML="";
+
+practitioners.forEach(p=>{
+practitionerTable.innerHTML+=`
+<tr><td>${p.name}</td></tr>`;
+
+a_practitioner.innerHTML+=`
+<option value="${p.id}">${p.name}</option>`;
+});
+}
+
+/* ================= APPOINTMENTS ================= */
+document.getElementById("saveAppointmentBtn").onclick = async () => {
+
+const service = SERVICES[0];
+
+const a = {
+start_time: a_date.value+"T"+a_time.value,
+client_id: a_client.value,
+practitioner_id: a_practitioner.value,
+amount: service.price,
+sst: service.price*0.06,
+total: service.price*1.06
+};
+
+await sb.from("appointments").insert(a);
+loadAppointments();
+};
+
+async function loadAppointments(){
+const { data } = await sb.from("appointments").select("*");
+appointments = data || [];
+
+appointmentsTable.innerHTML="";
+
+appointments.forEach(a=>{
+appointmentsTable.innerHTML+=`
+<tr>
+<td>${a.start_time}</td>
+<td>${a.total}</td>
 </tr>`;
 });
 }
 
-function editClient(id){
-const c = clients.find(x=>x.id===id);
+/* ================= INIT ================= */
+window.onload = async () => {
+const { data } = await sb.auth.getSession();
 
-editClientId = id;
-
-c_name.value = c.full_name;
-c_dob.value = c.date_of_birth;
-c_gender.value = c.gender;
-c_citizen.value = c.citizenship;
-c_ic.value = c.ic_passport;
-c_contact.value = c.contact;
-c_email.value = c.email;
-c_address.value = c.address;
-
-saveClient.innerText = "Update";
-}
-
-async function deleteClient(id){
-await sb.from("clients").delete().eq("id",id);
+if(data.session){
+document.querySelector(".container").hidden=false;
 loadClients();
+loadPractitioners();
+loadAppointments();
 }
+};
 
 </script>
 </body>
