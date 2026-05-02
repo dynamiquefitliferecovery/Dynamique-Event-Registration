@@ -3,299 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <title>Sports Rehab System</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 body{margin:0;font-family:Segoe UI;background:#f4f6f8}
-.hidden{display:none}
-
-/* LOGIN */
-#loginView{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:linear-gradient(135deg,#ff9800,#ffd180);
-}
-
-.login-box{
-background:#fff;
-padding:30px;
-border-radius:12px;
-width:320px;
-box-shadow:0 10px 25px rgba(0,0,0,.2);
-}
-
-.login-box input,button{
-width:100%;
-padding:10px;
-margin:8px 0;
-border-radius:8px;
-border:1px solid #ddd;
-}
-
-button{background:orange;border:none;cursor:pointer}
-
-/* APP */
 header{
-background:#000;
-padding:10px;
-display:flex;
-gap:10px;
+background:#111;color:#fff;
+display:flex;gap:10px;padding:10px
 }
-
-header button{background:orange;border-radius:6px}
-
+header button{background:#ff9800;border:none;padding:8px 12px;border-radius:6px;color:#000}
 .container{padding:20px}
 .card{
-background:#fff;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-box-shadow:0 2px 10px rgba(0,0,0,.08);
+background:#fff;padding:20px;border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:20px
 }
-
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-
-table{width:100%;border-collapse:collapse;margin-top:10px}
-td,th{padding:8px;border:1px solid #eee}
-small{color:#888}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+input,select,textarea{
+padding:8px;border-radius:6px;border:1px solid #ddd;width:100%
+}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #eee;padding:8px;text-align:left}
+th{background:#fafafa}
+button.small{padding:4px 6px;font-size:12px}
+canvas{max-height:300px}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<section id="loginView">
-  <div class="login-box">
-    <h2>Login</h2>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <p id="err" style="color:red"></p>
-  </div>
-</section>
-
-<!-- APP -->
-<div id="appView" class="hidden">
-
 <header>
-  <button onclick="showTab('clients')">Clients</button>
-  <button onclick="showTab('practitioners')">Practitioners</button>
-  <button onclick="showTab('appointments')">Appointments</button>
-  <button onclick="logout()">Logout</button>
+<button onclick="showTab('clients')">Clients</button>
+<button onclick="showTab('pract')">Practitioners</button>
+<button onclick="showTab('appt')">Appointments</button>
+<button onclick="showTab('report')">Reports</button>
 </header>
 
 <div class="container">
 
 <!-- CLIENTS -->
-<section id="clients">
-<div class="card">
-<h3>Register Client</h3>
+<section id="clients" class="card">
+<h3>Client Registration</h3>
 <div class="grid">
 <input id="c_name" placeholder="Full Name">
 <select id="c_gender"><option>Male</option><option>Female</option></select>
+<input id="c_dob" type="date">
 <select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select>
 <input id="c_ic" placeholder="IC / Passport">
 <input id="c_contact" placeholder="Contact">
 <input id="c_email" placeholder="Email">
 <input id="c_address" placeholder="Address">
 </div>
-<button onclick="saveClient()">Save Client</button>
-<small id="clientMsg"></small>
-</div>
+<button onclick="saveClient()">Save</button>
 
-<div class="card">
 <h3>Client List</h3>
 <table>
-<thead><tr><th>Name</th><th>IC / Passport</th></tr></thead>
+<thead>
+<tr>
+<th>Name</th><th>IC</th><th>Gender</th><th>Age</th>
+<th>Contact</th><th>Address</th><th>Email</th><th>Action</th>
+</tr>
+</thead>
 <tbody id="clientTable"></tbody>
 </table>
-</div>
 </section>
 
-<!-- PRACTITIONERS -->
-<section id="practitioners" class="hidden">
-<div class="card">
+<!-- PRACT -->
+<section id="pract" class="card" hidden>
 <h3>Practitioners</h3>
-<input id="p_name" placeholder="Practitioner Name">
-<button onclick="addPractitioner()">Add</button>
+<input id="p_name" placeholder="Name">
+<button onclick="addPrac()">Add</button>
 <div id="pracList"></div>
-</div>
 </section>
 
-<!-- APPOINTMENTS -->
-<section id="appointments" class="hidden">
-<div class="card">
-<h3>New Appointment</h3>
+<!-- APPOINTMENT -->
+<section id="appt" class="card" hidden>
+<h3>Appointment</h3>
 <div class="grid">
 <input id="a_date" type="date">
 <input id="a_time" type="time">
 <select id="a_client"></select>
 <select id="a_prac"></select>
+<select id="a_service" onchange="calcTotal()"></select>
+<input id="amount" readonly placeholder="Amount">
+<input id="sst" readonly placeholder="SST">
+<input id="total" readonly placeholder="Total">
 </div>
-<button onclick="saveAppointment()">Save Appointment</button>
-<small id="appMsg"></small>
-</div>
+<textarea id="remark" placeholder="Remark"></textarea>
+<button onclick="saveAppt()">Save</button>
 
-<div class="card">
 <h3>Appointments</h3>
 <table>
 <thead>
-<tr><th>Date</th><th>Client</th><th>Practitioner</th></tr>
+<tr>
+<th>Date</th><th>Time</th><th>Client</th><th>Service</th>
+<th>Amount</th><th>SST</th><th>Total</th><th>Practitioner</th>
+</tr>
 </thead>
-<tbody id="appTable"></tbody>
+<tbody id="apptTable"></tbody>
 </table>
-</div>
+</section>
+
+<!-- REPORT -->
+<section id="report" class="card" hidden>
+<h3>Reports</h3>
+<input type="date" id="repDate">
+<button onclick="generateReport()">Generate</button>
+<button onclick="exportExcel()">Export Excel</button>
+
+<p id="repSummary"></p>
+
+<canvas id="serviceChart"></canvas>
+<canvas id="ageChart"></canvas>
+<canvas id="revenueChart"></canvas>
 </section>
 
 </div>
-</div>
 
 <script>
-const sb = supabase.createClient(
-  "https://fmwdizyexroiezezitly.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
-);
+const sb = supabase.createClient("https://fmwdizyexroiezezitly.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo");
 
-let clients=[], practitioners=[], appointments=[];
+let services=[],clients=[],appointments=[];
 
-/* SESSION */
-(async()=>{
-  const { data:{session} } = await sb.auth.getSession();
-  if(session) openApp();
-})();
-
-/* AUTH */
-async function login(){
-  err.textContent="";
-  const { error } = await sb.auth.signInWithPassword({
-    email:email.value,
-    password:password.value
-  });
-  if(error) return err.textContent=error.message;
-  openApp();
-}
-
-function logout(){
-  sb.auth.signOut();
-  location.reload();
-}
-
-function openApp(){
-  loginView.classList.add("hidden");
-  appView.classList.remove("hidden");
-  loadAll();
-}
-
-/* UI */
+/* UTILS */
 function showTab(id){
-  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-}
-
-/* FORMATTERS */
-c_ic.oninput=e=>{
-  let v=e.target.value.replace(/\D/g,"");
-  if(v.length>6)v=v.slice(0,6)+"-"+v.slice(6);
-  if(v.length>13)v=v.slice(0,13);
-  e.target.value=v;
-}
-
-c_contact.oninput=e=>{
-  let v=e.target.value.replace(/\D/g,"");
-  if(v.length>3)v=v.slice(0,3)+"-"+v.slice(3,10);
-  e.target.value=v;
-}
-
-/* LOAD ALL */
-async function loadAll(){
-  await Promise.all([loadClients(),loadPractitioners(),loadAppointments()]);
+document.querySelectorAll("section").forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
 }
 
 /* CLIENTS */
 async function saveClient(){
-  if(!c_name.value) return alert("Name required");
-
-  const { error } = await sb.from("clients").insert({
-    full_name:c_name.value,
-    gender:c_gender.value,
-    citizenship:c_citizen.value,
-    ic_passport:c_ic.value,
-    contact:c_contact.value,
-    email:c_email.value,
-    address:c_address.value
-  });
-
-  if(error) return alert(error.message);
-  clientMsg.textContent="Client saved ✔";
-  loadClients();
+await sb.from("clients").insert({
+full_name:c_name.value,gender:c_gender.value,dob:c_dob.value,
+citizenship:c_citizen.value,ic_passport:c_ic.value,
+contact:c_contact.value,email:c_email.value,address:c_address.value
+});
+loadClients();
 }
-
 async function loadClients(){
-  const { data,error } = await sb.from("clients").select("*").order("created_at",{ascending:false});
-  if(error) return;
-  clients=data||[];
-
-  clientTable.innerHTML=clients.map(c=>`
-    <tr><td>${c.full_name}</td><td>${c.ic_passport||""}</td></tr>
-  `).join("");
-
-  a_client.innerHTML=clients.map(c=>`
-    <option value="${c.id}">${c.full_name}</option>
-  `).join("");
+let {data}=await sb.from("clients").select("*");
+clients=data||[];
+clientTable.innerHTML=clients.map(c=>{
+let age=new Date().getFullYear()-new Date(c.dob).getFullYear();
+return `<tr>
+<td>${c.full_name}</td><td>${c.ic_passport}</td>
+<td>${c.gender}</td><td>${age}</td>
+<td>${c.contact}</td><td>${c.address}</td><td>${c.email}</td>
+<td><button class="small" onclick="delClient('${c.id}')">Delete</button></td>
+</tr>`;
+}).join("");
+a_client.innerHTML=clients.map(c=>`<option value="${c.id}" data-cit="${c.citizenship}">${c.full_name}</option>`).join("");
+}
+async function delClient(id){
+await sb.from("clients").delete().eq("id",id);
+loadClients();
 }
 
-/* PRACTITIONERS */
-async function addPractitioner(){
-  if(!p_name.value) return;
-  await sb.from("practitioners").insert({name:p_name.value});
-  p_name.value="";
-  loadPractitioners();
+/* PRACT */
+async function addPrac(){
+await sb.from("practitioners").insert({name:p_name.value});
+loadPrac();
+}
+async function loadPrac(){
+let {data}=await sb.from("practitioners").select("*");
+pracList.innerHTML=data.map(p=>`${p.name} <button onclick="delPrac('${p.id}')">X</button>`).join("<br>");
+a_prac.innerHTML=data.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+}
+async function delPrac(id){
+await sb.from("practitioners").delete().eq("id",id);
+loadPrac();
 }
 
-async function loadPractitioners(){
-  const { data } = await sb.from("practitioners").select("*");
-  practitioners=data||[];
-
-  pracList.innerHTML=practitioners.map(p=>`<div>${p.name}</div>`).join("");
-
-  a_prac.innerHTML=practitioners.map(p=>`
-    <option value="${p.id}">${p.name}</option>
-  `).join("");
+/* SERVICES */
+async function loadServices(){
+let {data}=await sb.from("services").select("*");
+services=data;
+a_service.innerHTML=data.map(s=>`<option value="${s.id}" data-price="${s.price}" data-sst="${s.foreigner_sst}">${s.name}</option>`).join("");
 }
 
-/* APPOINTMENTS */
-async function saveAppointment(){
-  if(!a_date.value||!a_time.value) return alert("Date & time required");
-
-  const { error } = await sb.from("appointments").insert({
-    start_time:`${a_date.value}T${a_time.value}`,
-    client_id:a_client.value,
-    practitioner_id:a_prac.value
-  });
-
-  if(error) return alert(error.message);
-  appMsg.textContent="Appointment saved ✔";
-  loadAppointments();
+/* APPOINTMENT */
+function calcTotal(){
+let s=a_service.selectedOptions[0];
+let price=Number(s.dataset.price);
+let isSST=s.dataset.sst==="true" && a_client.selectedOptions[0].dataset.cit==="Foreigner";
+let sstVal=isSST?price*0.06:0;
+amount.value=price.toFixed(2);
+sst.value=sstVal.toFixed(2);
+total.value=(price+sstVal).toFixed(2);
+}
+async function saveAppt(){
+await sb.from("appointments").insert({
+start_time:`${a_date.value}T${a_time.value}`,
+client_id:a_client.value,
+practitioner_id:a_prac.value,
+service_id:a_service.value,
+amount:amount.value,sst:sst.value,total:total.value,
+remark:remark.value
+});
+loadAppt();
+}
+async function loadAppt(){
+let {data}=await sb.from("appointments")
+.select(`*,clients(full_name),services(name),practitioners(name)`);
+appointments=data;
+apptTable.innerHTML=data.map(a=>{
+let d=new Date(a.start_time);
+return `<tr>
+<td>${d.toLocaleDateString()}</td>
+<td>${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+<td>${a.clients.full_name}</td>
+<td>${a.services.name}</td>
+<td>${a.amount}</td>
+<td>${a.sst}</td>
+<td>${a.total}</td>
+<td>${a.practitioners.name}</td>
+</tr>`;
+}).join("");
 }
 
-async function loadAppointments(){
-  const { data } = await sb
-    .from("appointments")
-    .select("*, clients(full_name), practitioners(name)")
-    .order("start_time",{ascending:false});
-
-  appointments=data||[];
-
-  appTable.innerHTML=appointments.map(a=>`
-    <tr>
-    <td>${new Date(a.start_time).toLocaleString()}</td>
-    <td>${a.clients.full_name}</td>
-    <td>${a.practitioners.name}</td>
-    </tr>
-  `).join("");
+/* REPORT */
+function generateReport(){
+let sum=appointments.reduce((t,a)=>t+Number(a.total),0);
+repSummary.innerText="Total Revenue: RM "+sum.toFixed(2);
+drawCharts();
 }
+function drawCharts(){
+new Chart(serviceChart,{
+type:'pie',
+data:{
+labels:[...new Set(appointments.map(a=>a.services.name))],
+datasets:[{data:appointments.map(a=>a.total),backgroundColor:['#ff9800','#03a9f4','#4caf50']}]
+}});
+}
+function exportExcel(){
+let ws=XLSX.utils.json_to_sheet(appointments);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"Report");
+XLSX.writeFile(wb,"report.xlsx");
+}
+
+/* INIT */
+(async()=>{
+loadClients();loadPrac();loadServices();loadAppt();
+let n=new Date();
+a_date.value=n.toISOString().slice(0,10);
+a_time.value=n.toTimeString().slice(0,5);
+})();
 </script>
+
 </body>
 </html>
