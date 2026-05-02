@@ -443,7 +443,7 @@ let services = [];
 async function loadServices() {
   const { data, error } = await sb
     .from("services")
-    .select("id, name, price, sst");
+    .select("id, code, name, price, sst");
 
   if (error) {
     console.error("loadServices error:", error);
@@ -452,16 +452,17 @@ async function loadServices() {
 
   services = data || [];
 
-  // ✅ Populate service dropdown here
+  // IMPORTANT: value = s.id (BIGINT), NOT s.code
   apptService.innerHTML = services.map(s => `
     <option
       value="${s.id}"
       data-price="${s.price}"
       data-sst="${s.sst}">
-      ${s.name} (RM ${s.price})
+      ${s.code} – ${s.name} (RM ${s.price})
     </option>
   `).join("");
 }
+
  
 /* ================= APPOINTMENTS ================= */
 
@@ -551,15 +552,17 @@ async function loadAppointments() {
   const { data, error } = await sb
     .from("appointments")
     .select(`
-      id,
-      start_time,
-      total,
-      client_id,
-      practitioner_id,
-      service_id,
-      clients(full_name),
-      services(name)
-    `)
+  id,
+  start_time,
+  total,
+  client_id,
+  practitioner_id,
+  service_id,
+  payment_method,
+  remarks,
+  clients(full_name),
+  services(name)
+`)
     .order("start_time", { ascending: false });
 
   if (error) return console.error(error);
