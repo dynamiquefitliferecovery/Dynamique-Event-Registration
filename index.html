@@ -8,11 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-  margin:0;
-  font-family:Segoe UI;
-  background:#f4f6f8;
-}
+body { margin:0; font-family:Segoe UI; background:#f5f6f8; }
 
 /* LOGIN */
 #loginView {
@@ -20,7 +16,7 @@ body {
   display:flex;
   justify-content:center;
   align-items:center;
-  background:linear-gradient(135deg, orange, #ffcc80);
+  background:linear-gradient(135deg,#ff9800,#ffc107);
 }
 
 .login-box {
@@ -28,16 +24,14 @@ body {
   padding:30px;
   border-radius:12px;
   width:320px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
 
 /* APP */
-#appView {
-  display:none;
-}
+#appView { display:none; }
 
 header {
-  background:black;
+  background:#111;
   color:white;
   padding:10px;
   display:flex;
@@ -45,45 +39,44 @@ header {
 }
 
 header button {
-  background:orange;
+  background:#ff9800;
   border:none;
-  padding:8px 10px;
-  cursor:pointer;
+  padding:8px 12px;
   border-radius:6px;
+  cursor:pointer;
 }
 
-.content {
-  padding:20px;
-}
+.content { padding:20px; }
 
 .card {
   background:white;
-  padding:20px;
+  padding:18px;
   border-radius:12px;
-  margin-bottom:20px;
+  margin-bottom:15px;
   box-shadow:0 2px 10px rgba(0,0,0,0.08);
 }
 
 .grid {
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:12px;
+  gap:10px;
 }
 
 input, select {
   padding:10px;
   border:1px solid #ddd;
   border-radius:8px;
+  width:100%;
 }
 
 button {
-  padding:10px 12px;
+  padding:10px;
   border:none;
   border-radius:8px;
   cursor:pointer;
 }
 
-.primary { background:orange; }
+.primary { background:#ff9800; color:black; }
 </style>
 </head>
 
@@ -95,8 +88,8 @@ button {
     <h2>Login</h2>
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button id="loginBtn" class="primary">Login</button>
-    <div id="loginError"></div>
+    <button class="primary" id="loginBtn">Login</button>
+    <div id="loginError" style="color:red;margin-top:10px;"></div>
   </div>
 </section>
 
@@ -119,11 +112,15 @@ button {
 <h3>Clients</h3>
 
 <div class="grid">
-<input id="c_name" placeholder="Full Name">
+<input id="c_name" placeholder="Name">
 <input id="c_dob" type="date">
-<select id="c_gender"><option>Male</option><option>Female</option></select>
-<select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select>
-<input id="c_ic" placeholder="IC / Passport">
+<select id="c_gender">
+<option>Male</option><option>Female</option>
+</select>
+<select id="c_citizen">
+<option>Malaysian</option><option>Foreigner</option>
+</select>
+<input id="c_ic" placeholder="IC">
 <input id="c_contact" placeholder="Contact">
 <input id="c_email" placeholder="Email">
 <input id="c_address" placeholder="Address">
@@ -134,9 +131,7 @@ button {
 
 <div class="card">
 <h3>Client List</h3>
-<table>
-<tbody id="clientsTable"></tbody>
-</table>
+<table><tbody id="clientsTable"></tbody></table>
 </div>
 </section>
 
@@ -144,7 +139,6 @@ button {
 <section id="practitionersTab" hidden>
 <div class="card">
 <h3>Practitioners</h3>
-
 <input id="p_name" placeholder="Name">
 <button class="primary" id="addPractitionerBtn">Add</button>
 </div>
@@ -166,8 +160,8 @@ button {
 
 <select id="a_client"></select>
 <select id="a_practitioner"></select>
-
 <select id="a_service"></select>
+
 <select id="a_payment">
 <option>Cash</option>
 <option>Card</option>
@@ -184,10 +178,8 @@ button {
 </div>
 
 <div class="card">
-<h3>Appointment List</h3>
-<table>
-<tbody id="appointmentsTable"></tbody>
-</table>
+<h3>List</h3>
+<table><tbody id="appointmentsTable"></tbody></table>
 </div>
 </section>
 
@@ -195,14 +187,11 @@ button {
 <section id="reportsTab" hidden>
 <div class="card">
 <h3>Sales Report</h3>
-
 <button class="primary" onclick="loadReport()">Generate</button>
 
 <canvas id="chart"></canvas>
 
-<table>
-<tbody id="reportTable"></tbody>
-</table>
+<table><tbody id="reportTable"></tbody></table>
 </div>
 </section>
 
@@ -211,224 +200,173 @@ button {
 
 <script>
 
-/* ================= SUPABASE ================= */
-const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* SUPABASE */
+const sb = supabase.createClient(
+"https://fmwdizyexroiezezitly.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
+);
 
+/* STATE */
+let clients=[], practitioners=[], appointments=[];
+let chartInstance=null;
 
-/* ================= STATE ================= */
-let clients = [];
-let practitioners = [];
-let appointments = [];
-
-let editingAppointmentId = null;
-
-/* ================= SERVICES ================= */
-const SERVICES = [
-  { id:"SM", name:"Sports Massage", price:45 },
-  { id:"RCB", name:"Recovery Boots", price:25 },
-  { id:"AS", name:"Assisted Stretch", price:20 },
-  { id:"PB", name:"Physio Bundle", price:400 }
-];
-
-/* ================= UI CONTROL ================= */
-function showApp() {
-  document.getElementById("loginTab").style.display = "none";
-  document.getElementById("appContainer").style.display = "block";
-}
-
-function showLogin() {
-  document.getElementById("loginTab").style.display = "flex";
-  document.getElementById("appContainer").style.display = "none";
-}
-
-/* ================= LOGIN ================= */
-document.getElementById("loginBtn").onclick = async () => {
-  const email = loginEmail.value;
-  const password = loginPassword.value;
-
+/* LOGIN */
+loginBtn.onclick = async () => {
   const { data, error } = await sb.auth.signInWithPassword({
-    email, password
+    email: loginEmail.value,
+    password: loginPassword.value
   });
 
-  if (error) {
-    loginError.innerText = error.message;
-    return;
-  }
+  if (error) return loginError.innerText = error.message;
 
-  showApp();
-  initApp();
+  loginView.style.display="none";
+  appView.style.display="block";
+
+  init();
 };
 
-/* ================= LOGOUT ================= */
-document.getElementById("logoutBtn").onclick = async () => {
+/* LOGOUT */
+logoutBtn.onclick = async () => {
   await sb.auth.signOut();
-  showLogin();
+  location.reload();
 };
 
-/* ================= INIT ================= */
-async function initApp() {
+/* INIT */
+async function init(){
   await loadClients();
   await loadPractitioners();
   await loadAppointments();
-
   setToday();
   showTab("clientsTab");
 }
 
-/* ================= TAB ================= */
-function showTab(tab) {
+/* TAB */
+function showTab(id){
   ["clientsTab","practitionersTab","appointmentsTab","reportsTab"]
-  .forEach(id => document.getElementById(id).hidden = true);
-
-  document.getElementById(tab).hidden = false;
-
-  if (tab === "reportsTab") loadReport();
+  .forEach(x=>document.getElementById(x).hidden=true);
+  document.getElementById(id).hidden=false;
 }
 
-/* ================= CLIENTS ================= */
-document.getElementById("addClientBtn").onclick = async () => {
-  const client = {
-    full_name: c_name.value,
-    date_of_birth: c_dob.value,
-    gender: c_gender.value,
-    citizenship: c_citizen.value,
-    ic_passport: c_ic.value,
-    contact: c_contact.value,
-    email: c_email.value,
-    address: c_address.value
-  };
-
-  const { error } = await sb.from("clients").insert(client);
-  if (error) return alert(error.message);
+/* CLIENTS */
+saveClientBtn.onclick = async () => {
+  await sb.from("clients").insert({
+    full_name:c_name.value,
+    date_of_birth:c_dob.value,
+    gender:c_gender.value,
+    citizenship:c_citizen.value,
+    ic_passport:c_ic.value,
+    contact:c_contact.value,
+    email:c_email.value,
+    address:c_address.value
+  });
 
   loadClients();
 };
 
-async function loadClients() {
+async function loadClients(){
   const { data } = await sb.from("clients").select("*");
-  clients = data || [];
+  clients=data||[];
 
-  clientsTable.innerHTML = clients.map(c => `
-    <tr>
-      <td>${c.full_name}</td>
-      <td>${c.contact}</td>
-    </tr>
-  `).join("");
+  clientsTable.innerHTML=clients.map(c=>`
+<tr><td>${c.full_name}</td><td>${c.contact}</td></tr>
+`).join("");
 
-  a_client.innerHTML = clients.map(c =>
-    `<option value="${c.id}">${c.full_name}</option>`
-  ).join("");
+  a_client.innerHTML=clients.map(c=>
+`<option value="${c.id}">${c.full_name}</option>`).join("");
 }
 
-/* ================= PRACTITIONERS ================= */
-document.getElementById("addPractitionerBtn").onclick = async () => {
-  const name = p_name.value;
-
-  const { error } = await sb.from("practitioners").insert({ name });
-  if (error) return alert(error.message);
-
+/* PRACTITIONERS */
+addPractitionerBtn.onclick = async () => {
+  await sb.from("practitioners").insert({ name:p_name.value });
   loadPractitioners();
 };
 
-async function loadPractitioners() {
+async function loadPractitioners(){
   const { data } = await sb.from("practitioners").select("*");
-  practitioners = data || [];
+  practitioners=data||[];
 
-  practitionerTable.innerHTML = practitioners.map(p => `
-    <tr><td>${p.name}</td></tr>
-  `).join("");
+  practitionerTable.innerHTML=practitioners.map(p=>
+`<div>${p.name}</div>`).join("");
 
-  a_practitioner.innerHTML = practitioners.map(p =>
-    `<option value="${p.id}">${p.name}</option>`
-  ).join("");
+  a_practitioner.innerHTML=practitioners.map(p=>
+`<option value="${p.id}">${p.name}</option>`).join("");
 }
 
-/* ================= APPOINTMENTS ================= */
-function setToday() {
-  const now = new Date();
-  a_date.value = now.toISOString().slice(0,10);
-  a_time.value = now.toTimeString().slice(0,5);
+/* APPOINTMENTS */
+const SERVICES=[
+{ id:"SM",name:"Massage",price:45 },
+{ id:"AS",name:"Stretch",price:20 }
+];
+
+a_service.innerHTML = SERVICES.map(s=>
+`<option value="${s.id}">${s.name}</option>`).join("");
+
+function setToday(){
+  const d=new Date();
+  a_date.value=d.toISOString().slice(0,10);
+  a_time.value=d.toTimeString().slice(0,5);
 }
 
-a_service.onchange = updateTotal;
-a_client.onchange = updateTotal;
+a_service.onchange=update;
+a_client.onchange=update;
 
-function updateTotal() {
-  const service = SERVICES.find(s => s.id === a_service.value);
-  const amount = service?.price || 0;
+function update(){
+  const s=SERVICES.find(x=>x.id===a_service.value);
+  const amt=s?.price||0;
 
-  const client = clients.find(c => c.id === a_client.value);
+  const c=clients.find(x=>x.id===a_client.value);
+  const sst=c?.citizenship==="Foreigner"?amt*0.06:0;
 
-  let sst = 0;
-  if (client?.citizenship === "Foreigner") sst = amount * 0.06;
-
-  a_amount.value = amount.toFixed(2);
-  a_sst.value = sst.toFixed(2);
-  a_total.value = (amount + sst).toFixed(2);
+  a_amount.innerText=amt;
+  a_sst.innerText=sst.toFixed(2);
+  a_total.innerText=(amt+sst).toFixed(2);
 }
 
-/* SAVE */
 saveAppointmentBtn.onclick = async () => {
-  const data = {
-    start_time: `${a_date.value}T${a_time.value}`,
-    client_id: a_client.value,
-    practitioner_id: a_practitioner.value,
-    service_id: a_service.value,
-    amount: +a_amount.value,
-    sst: +a_sst.value,
-    total: +a_total.value
-  };
-
-  await sb.from("appointments").insert(data);
+  await sb.from("appointments").insert({
+    start_time:`${a_date.value}T${a_time.value}`,
+    client_id:a_client.value,
+    practitioner_id:a_practitioner.value,
+    service_id:a_service.value,
+    amount:+a_amount.innerText,
+    sst:+a_sst.innerText,
+    total:+a_total.innerText
+  });
 
   loadAppointments();
 };
 
-async function loadAppointments() {
-  const { data } = await sb.from("appointments").select("*");
-  appointments = data || [];
+async function loadAppointments(){
+  const { data }=await sb.from("appointments").select("*");
+  appointments=data||[];
 
-  appointmentsTable.innerHTML = appointments.map(a => `
-    <tr>
-      <td>${a.start_time}</td>
-      <td>${a.total}</td>
-    </tr>
-  `).join("");
+  appointmentsTable.innerHTML=appointments.map(a=>
+`<tr><td>${a.start_time}</td><td>${a.total}</td></tr>`).join("");
 }
 
-/* ================= REPORT ================= */
-async function loadReport() {
-  const { data } = await sb.from("appointments").select("*");
+/* REPORT */
+async function loadReport(){
+  const { data }=await sb.from("appointments").select("*");
 
-  let total = data.reduce((sum, a) => sum + a.total, 0);
+  const total=data.reduce((s,a)=>s+(a.total||0),0);
 
-  salesReportTable.innerHTML = `
-    <tr><td>Total Sales</td><td>${total.toFixed(2)}</td></tr>
-  `;
+  reportTable.innerHTML=`<tr><td>Total</td><td>${total}</td></tr>`;
 
-  new Chart(salesChart, {
-    type: "bar",
-    data: {
-      labels: ["Sales"],
-      datasets: [{
-        label: "Total",
-        data: [total]
-      }]
-    }
+  if(chartInstance) chartInstance.destroy();
+
+  chartInstance=new Chart(chart,{
+    type:"bar",
+    data:{ labels:["Sales"], datasets:[{ data:[total] }] }
   });
 }
 
-/* ================= AUTO CHECK SESSION ================= */
-window.onload = async () => {
-  const { data } = await sb.auth.getSession();
-
-  if (data.session) {
-    showApp();
-    initApp();
-  } else {
-    showLogin();
+/* AUTO CHECK */
+window.onload=async()=>{
+  const { data }=await sb.auth.getSession();
+  if(data.session){
+    loginView.style.display="none";
+    appView.style.display="block";
+    init();
   }
 };
 
