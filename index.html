@@ -2,55 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dynamique Sports Rehab Centre</title>
+<title>Sports Rehab System</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body { margin:0; font-family:Segoe UI; background:orange; }
-.container { padding:20px; }
-.card { background:white; padding:20px; margin-bottom:20px; border-radius:10px; }
+body {
+  margin:0;
+  font-family:Segoe UI;
+  background:#f4f6f8;
+}
+
+/* LOGIN */
+#loginView {
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg, orange, #ffcc80);
+}
+
+.login-box {
+  background:white;
+  padding:30px;
+  border-radius:12px;
+  width:320px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* APP */
+#appView {
+  display:none;
+}
 
 header {
-background:black; color:white;
-padding:10px; display:flex; gap:10px;
+  background:black;
+  color:white;
+  padding:10px;
+  display:flex;
+  gap:10px;
 }
 
 header button {
-background:orange; border:none; padding:8px;
-cursor:pointer; font-weight:bold;
+  background:orange;
+  border:none;
+  padding:8px 10px;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+.content {
+  padding:20px;
+}
+
+.card {
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
 input, select {
-width:100%; padding:8px; margin:5px 0;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
 }
 
-table { width:100%; border-collapse:collapse; }
-th, td { border:1px solid #ddd; padding:6px; }
-th { background:black; color:white; }
-
-.login {
-display:flex; justify-content:center; align-items:center;
-height:100vh;
+button {
+  padding:10px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
+
+.primary { background:orange; }
 </style>
 </head>
 
 <body>
 
 <!-- LOGIN -->
-<section id="loginTab" class="login">
-<div class="card">
-<h2>Login</h2>
-<input id="loginEmail" placeholder="Email">
-<input id="loginPassword" type="password" placeholder="Password">
-<button id="loginBtn">Login</button>
-<div id="loginError"></div>
-</div>
+<section id="loginView">
+  <div class="login-box">
+    <h2>Login</h2>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button id="loginBtn" class="primary">Login</button>
+    <div id="loginError"></div>
+  </div>
 </section>
 
-<div class="container" hidden>
+<!-- APP -->
+<div id="appView">
 
 <header>
 <button onclick="showTab('clientsTab')">Clients</button>
@@ -60,23 +111,29 @@ height:100vh;
 <button id="logoutBtn">Logout</button>
 </header>
 
+<div class="content">
+
 <!-- CLIENTS -->
 <section id="clientsTab">
 <div class="card">
-<h2>Clients</h2>
+<h3>Clients</h3>
 
-<input id="c_name" placeholder="Name">
+<div class="grid">
+<input id="c_name" placeholder="Full Name">
 <input id="c_dob" type="date">
 <select id="c_gender"><option>Male</option><option>Female</option></select>
 <select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select>
+<input id="c_ic" placeholder="IC / Passport">
+<input id="c_contact" placeholder="Contact">
+<input id="c_email" placeholder="Email">
+<input id="c_address" placeholder="Address">
+</div>
 
-<input id="c_ic">
-<input id="c_contact">
-<input id="c_email">
-<input id="c_address">
+<button class="primary" id="saveClientBtn">Save Client</button>
+</div>
 
-<button id="saveClientBtn">Save</button>
-
+<div class="card">
+<h3>Client List</h3>
 <table>
 <tbody id="clientsTable"></tbody>
 </table>
@@ -86,54 +143,70 @@ height:100vh;
 <!-- PRACTITIONERS -->
 <section id="practitionersTab" hidden>
 <div class="card">
-<h2>Practitioners</h2>
+<h3>Practitioners</h3>
 
-<input id="p_name">
-<button id="addPractitionerBtn">Add</button>
+<input id="p_name" placeholder="Name">
+<button class="primary" id="addPractitionerBtn">Add</button>
+</div>
 
-<table>
-<tbody id="practitionerTable"></tbody>
-</table>
+<div class="card">
+<h3>List</h3>
+<div id="practitionerTable"></div>
 </div>
 </section>
 
 <!-- APPOINTMENTS -->
 <section id="appointmentsTab" hidden>
 <div class="card">
-<h2>Appointments</h2>
+<h3>Appointments</h3>
 
-<select id="a_client"></select>
-<select id="a_practitioner"></select>
-<select id="a_service"></select>
-
+<div class="grid">
 <input id="a_date" type="date">
 <input id="a_time" type="time">
 
+<select id="a_client"></select>
+<select id="a_practitioner"></select>
+
+<select id="a_service"></select>
 <select id="a_payment">
 <option>Cash</option>
 <option>Card</option>
 </select>
+</div>
 
-<input id="a_amount" readonly>
-<input id="a_sst" readonly>
-<input id="a_total" readonly>
+<div class="card">
+<p>Amount: <b id="a_amount">0</b></p>
+<p>SST: <b id="a_sst">0</b></p>
+<p>Total: <b id="a_total">0</b></p>
+</div>
 
-<button id="saveAppointmentBtn">Save</button>
+<button class="primary" id="saveAppointmentBtn">Save</button>
+</div>
 
+<div class="card">
+<h3>Appointment List</h3>
 <table>
 <tbody id="appointmentsTable"></tbody>
 </table>
 </div>
 </section>
 
-<!-- REPORT -->
+<!-- REPORTS -->
 <section id="reportsTab" hidden>
 <div class="card">
-<h2>Sales Report</h2>
-<canvas id="salesChart"></canvas>
+<h3>Sales Report</h3>
+
+<button class="primary" onclick="loadReport()">Generate</button>
+
+<canvas id="chart"></canvas>
+
+<table>
+<tbody id="reportTable"></tbody>
+</table>
 </div>
 </section>
 
+</div>
 </div>
 
 <script>
@@ -141,31 +214,23 @@ height:100vh;
 /* ================= SUPABASE ================= */
 const sb = supabase.createClient(
 "https://fmwdizyexroiezezitly.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
+"YOUR_KEY"
 );
 
-/* ================= GLOBALS (FIXED ONCE ONLY) ================= */
+/* ================= STATE ================= */
 let clients = [];
 let practitioners = [];
 let appointments = [];
-let editingClientId = null;
 
-/* ================= SERVICES (RESTORED) ================= */
+/* ================= SERVICES ================= */
 const SERVICES = [
-{ id:"SM", name:"Sports Massage", price:45 },
+{ id:"SM", name:"Massage", price:45 },
 { id:"AS", name:"Stretch", price:20 },
-{ id:"PB", name:"Physio Bundle", price:400 }
+{ id:"PB", name:"Bundle", price:400 }
 ];
 
-/* ================= TAB ================= */
-function showTab(id){
-document.querySelectorAll("section").forEach(s=>s.hidden=true);
-document.getElementById(id).hidden=false;
-}
-
 /* ================= LOGIN ================= */
-document.getElementById("loginBtn").onclick = async () => {
-
+loginBtn.onclick = async () => {
 const { data, error } = await sb.auth.signInWithPassword({
 email: loginEmail.value,
 password: loginPassword.value
@@ -176,14 +241,13 @@ loginError.innerText = error.message;
 return;
 }
 
-document.getElementById("loginTab").hidden = true;
-document.querySelector(".container").hidden = false;
+loginView.style.display="none";
+appView.style.display="block";
 
 init();
 };
 
-/* ================= LOGOUT ================= */
-document.getElementById("logoutBtn").onclick = async () => {
+logoutBtn.onclick = async () => {
 await sb.auth.signOut();
 location.reload();
 };
@@ -193,13 +257,19 @@ async function init(){
 await loadClients();
 await loadPractitioners();
 await loadAppointments();
-showTab("clientsTab");
+setToday();
+}
+
+/* ================= TAB ================= */
+function showTab(id){
+document.querySelectorAll("section").forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
 }
 
 /* ================= CLIENTS ================= */
-document.getElementById("saveClientBtn").onclick = async () => {
+saveClientBtn.onclick = async () => {
 
-const client = {
+await sb.from("clients").insert({
 full_name:c_name.value,
 date_of_birth:c_dob.value,
 gender:c_gender.value,
@@ -208,97 +278,73 @@ ic_passport:c_ic.value,
 contact:c_contact.value,
 email:c_email.value,
 address:c_address.value
-};
-
-if(editingClientId){
-await sb.from("clients").update(client).eq("id",editingClientId);
-editingClientId=null;
-}else{
-await sb.from("clients").insert(client);
-}
+});
 
 loadClients();
 };
 
 async function loadClients(){
 const { data } = await sb.from("clients").select("*");
-clients = data || [];
+clients=data||[];
 
 clientsTable.innerHTML="";
 a_client.innerHTML="";
 
 clients.forEach(c=>{
-clientsTable.innerHTML+=`
-<tr>
-<td>${c.full_name}</td>
-<td><button onclick="editClient('${c.id}')">Edit</button></td>
-</tr>`;
-
+clientsTable.innerHTML+=`<tr><td>${c.full_name}</td></tr>`;
 a_client.innerHTML+=`<option value="${c.id}">${c.full_name}</option>`;
 });
 }
 
-window.editClient = (id)=>{
-const c = clients.find(x=>x.id===id);
-editingClientId=id;
-
-c_name.value=c.full_name;
-c_dob.value=c.date_of_birth;
-c_gender.value=c.gender;
-c_citizen.value=c.citizenship;
-c_ic.value=c.ic_passport;
-c_contact.value=c.contact;
-c_email.value=c.email;
-c_address.value=c.address;
-};
-
 /* ================= PRACTITIONERS ================= */
-document.getElementById("addPractitionerBtn").onclick = async () => {
-await sb.from("practitioners").insert({ name:p_name.value });
+addPractitionerBtn.onclick = async () => {
+await sb.from("practitioners").insert({name:p_name.value});
 loadPractitioners();
 };
 
 async function loadPractitioners(){
 const { data } = await sb.from("practitioners").select("*");
-practitioners = data || [];
+practitioners=data||[];
 
 practitionerTable.innerHTML="";
 a_practitioner.innerHTML="";
 
 practitioners.forEach(p=>{
-practitionerTable.innerHTML+=`<tr><td>${p.name}</td></tr>`;
+practitionerTable.innerHTML+=`<div>${p.name}</div>`;
 a_practitioner.innerHTML+=`<option value="${p.id}">${p.name}</option>`;
 });
 }
 
-/* ================= APPOINTMENTS (SST RESTORED) ================= */
-document.getElementById("a_service").onchange = updateTotals;
-
-function updateTotals(){
-
-const service = SERVICES.find(s=>s.id===a_service.value);
-const amount = service?.price || 0;
-
-let sst = amount * 0.06;
-let total = amount + sst;
-
-a_amount.value = amount.toFixed(2);
-a_sst.value = sst.toFixed(2);
-a_total.value = total.toFixed(2);
+/* ================= APPOINTMENTS ================= */
+function setToday(){
+const now=new Date();
+a_date.value=now.toISOString().split("T")[0];
+a_time.value=now.toTimeString().slice(0,5);
 }
 
-document.getElementById("saveAppointmentBtn").onclick = async () => {
+a_service.onchange = () => {
+const s = SERVICES.find(x=>x.id===a_service.value);
+const amt = s?.price||0;
+const sst = amt*0.06;
+const total = amt+sst;
 
-const service = SERVICES.find(s=>s.id===a_service.value);
+a_amount.innerText=amt.toFixed(2);
+a_sst.innerText=sst.toFixed(2);
+a_total.innerText=total.toFixed(2);
+};
+
+saveAppointmentBtn.onclick = async () => {
+
+const s = SERVICES.find(x=>x.id===a_service.value);
 
 await sb.from("appointments").insert({
 client_id:a_client.value,
 practitioner_id:a_practitioner.value,
-service_id:service.id,
+service_id:s.id,
 start_time:a_date.value+"T"+a_time.value,
-amount:service.price,
-sst:service.price*0.06,
-total:service.price*1.06,
+amount:s.price,
+sst:s.price*0.06,
+total:s.price*1.06,
 payment_method:a_payment.value
 });
 
@@ -320,15 +366,30 @@ appointmentsTable.innerHTML+=`
 });
 }
 
-/* ================= LOAD AFTER LOGIN ================= */
-window.onload = async () => {
-const { data } = await sb.auth.getSession();
-if(data.session){
-document.querySelector(".container").hidden=false;
-init();
+/* ================= REPORT ================= */
+async function loadReport(){
+const { data } = await sb.from("appointments").select("*");
+
+const map={};
+
+data.forEach(a=>{
+if(!map[a.service_id]) map[a.service_id]={total:0};
+map[a.service_id].total+=a.total;
+});
+
+const labels = Object.keys(map);
+const values = labels.map(x=>map[x].total);
+
+new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{
+labels,
+datasets:[{data:values}]
 }
-};
+});
+}
 
 </script>
+
 </body>
 </html>
