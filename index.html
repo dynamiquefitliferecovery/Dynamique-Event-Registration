@@ -8,22 +8,22 @@
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body{margin:0;font-family:Segoe UI;background:#f4f6f8}
-    .hidden{display:none}
 
-    #loginView {
+.hidden {
+  */  display: none;
+  
+#loginView{
   height: 100vh;
   background: linear-gradient(135deg,#ff9800,#ffd180);
 }
 
-#loginView:not(.hidden) {
+/* only show login when NOT hidden */
+#loginView:not(.hidden){
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.hidden {
-  display: none;
-}
     .login-box{
       background:#fff;
       padding:30px;
