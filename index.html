@@ -482,6 +482,16 @@ function fillAppointmentDropdowns() {
   apptPractitioner.innerHTML = practitioners.map(p =>
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
+
+  if (!apptService.options.length) {
+    apptService.innerHTML = services.map(s =>
+      `<option value="${s.id}"
+              data-price="${s.price}"
+              data-sst="${s.sst}">
+        ${s.code} – ${s.name} (RM ${s.price})
+      </option>`
+    ).join("");
+  }
 }
 
 /* calculate amount / SST */
@@ -489,6 +499,7 @@ function calculateCharges() {
   if (!apptService.value || !apptClient.value) return;
 
   const selectedService = apptService.selectedOptions[0];
+  if (!selectedService) return; // ✅ DEFENSIVE FIX
 
   const price = Number(selectedService.dataset.price);
   const serviceHasSST = selectedService.dataset.sst === "true";
@@ -506,6 +517,7 @@ function calculateCharges() {
   apptSST.value = sst.toFixed(2);
   apptTotal.value = total.toFixed(2);
 }
+
 
 /* events */
 document.addEventListener("DOMContentLoaded", () => {
@@ -551,7 +563,7 @@ if (!apptPayment.value) {
 async function loadAppointments() {
   const { data, error } = await sb
     .from("appointments")
-    .select(`
+  .select(`
   id,
   start_time,
   total,
@@ -561,7 +573,7 @@ async function loadAppointments() {
   payment_method,
   remarks,
   clients(full_name),
-  services:services!appointments_service_id_fkey(name)
+  service:services!appointments_service_id_fkey(name)
 `)
     .order("start_time", { ascending: false });
 
@@ -571,7 +583,7 @@ async function loadAppointments() {
     <tr>
       <td>${new Date(a.start_time).toLocaleString()}</td>
       <td>${a.clients.full_name}</td>
-      <td>${a.services?.name || "—"}</td>
+      <td>${a.service?.name || "—"}</td>
       <td>${Number(a.total).toFixed(2)}</td>
       <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
     </tr>
@@ -604,7 +616,7 @@ async function loadReport() {
     .select(`
   start_time,
   total,
-  services:services!appointments_service_id_fkey(name)
+  service:services!appointments_service_id_fkey(name)
 `)
 
   if (error) {
@@ -620,7 +632,7 @@ async function loadReport() {
     return `
       <tr>
         <td>${new Date(r.start_time).toLocaleDateString()}</td>
-        <td>${r.services?.name || ""}</td>
+        <td>${r.service?.name || ""}</td>
         <td>${Number(r.total || 0).toFixed(2)}</td>
       </tr>
     `;
