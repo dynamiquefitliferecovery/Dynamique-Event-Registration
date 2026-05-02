@@ -305,13 +305,17 @@ async function login() {
     password: passwordInput.value
   });
 
+  console.log("Auth response:", data, error);
+
   if (error) {
     errEl.textContent = error.message;
-    console.error("Login error:", error);
     return;
   }
 
-  console.log("Login success:", data);
+  // ✅ THIS IS WHAT WAS MISSING
+  if (data.session) {
+    openApp();
+  }
 }
 
  
