@@ -620,6 +620,7 @@ async function loadServices() {
 }
 
  
+
 /* ================= APPOINTMENTS ================= */
 
 /* defaults */
@@ -640,32 +641,32 @@ function fillAppointmentDropdowns() {
   apptPractitioner.innerHTML = practitioners.map(p =>
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
-}
 
-  apptPractitioner.innerHTML = practitioners.map(p =>
-    `<option value="${p.id}">${p.name}</option>`
-  ).join("");
-
+  // Services (required for charge calculation)
   apptService.innerHTML = services.map(s =>
-
+    `<option
+      value="${s.id}"
+      data-price="${s.price}"
+      data-sst="${s.sst}">
+      ${s.code} – ${s.name} (RM ${s.price})
+    </option>`
+  ).join("");
+}
 
 /* calculate amount / SST */
 function calculateCharges() {
   if (!apptService.value || !apptClient.value) return;
 
   const selectedService = apptService.selectedOptions[0];
-  if (!selectedService) return; // ✅ DEFENSIVE FIX
+  if (!selectedService) return;
 
   const price = Number(selectedService.dataset.price);
   const serviceHasSST = selectedService.dataset.sst === "true";
 
-  const client = clients.find(c => c.id === apptClient.value);
+  const client = clients.find(c => String(c.id) === String(apptClient.value));
   const isForeigner = client?.citizenship === "Foreigner";
 
-  const sst = (serviceHasSST && isForeigner)
-    ? price * 0.06
-    : 0;
-
+  const sst = (serviceHasSST && isForeigner) ? price * 0.06 : 0;
   const total = price + sst;
 
   apptAmount.value = price.toFixed(2);
@@ -673,42 +674,42 @@ function calculateCharges() {
   apptTotal.value = total.toFixed(2);
 }
 
+/* wire events immediately */
+apptService.onchange = calculateCharges;
+apptClient.onchange = calculateCharges;
 
-/* events */
-document.addEventListener("DOMContentLoaded", () => {
-  apptService.onchange = calculateCharges;
-  apptClient.onchange = calculateCharges;
-});
-  
 /* save */
 async function saveAppointment() {
-  if (!apptDate.value || !apptTime.value)
-    return alert("Date and time required");
-if (!apptPayment.value) {
-  alert("Please select a payment method");
-  return;
-}
-  
+  if (!apptDate.value || !apptTime.value) {
+    alert("Date and time required");
+    return;
+  }
+
+  if (!apptPayment.value) {
+    alert("Please select a payment method");
+    return;
+  }
 
   const payload = {
-  start_time: `${apptDate.value}T${apptTime.value}`,
-  client_id: apptClient.value,
-  practitioner_id: apptPractitioner.value,
-  service_id: apptService.value,
-  payment_method: apptPayment.value || null, // ✅ NEW
-  remarks: apptRemarks.value || null,         // ✅ NEW
-  amount: Number(apptAmount.value),
-  sst: Number(apptSST.value),
-  total: Number(apptTotal.value)
-};
+    start_time: `${apptDate.value}T${apptTime.value}`,
+    client_id: apptClient.value,
+    practitioner_id: apptPractitioner.value,
+    service_id: apptService.value,
+    payment_method: apptPayment.value,
+    remarks: apptRemarks.value || null,
+    amount: Number(apptAmount.value),
+    sst: Number(apptSST.value),
+    total: Number(apptTotal.value)
+  };
 
   const res = editingAppointmentId
-    ? await sb.from("appointments")
-        .update(payload)
-        .eq("id", editingAppointmentId)
+    ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
     : await sb.from("appointments").insert(payload);
 
-  if (res.error) return alert(res.error.message);
+  if (res.error) {
+    alert(res.error.message);
+    return;
+  }
 
   editingAppointmentId = null;
   loadAppointments();
@@ -749,9 +750,7 @@ async function loadAppointments() {
       <td>${Number(a.total).toFixed(2)}</td>
       <td>${a.payment_method || ""}</td>
       <td>${a.remarks || ""}</td>
-      <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>
-        Edit
-      </td>
+      <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
     </tr>
   `).join("");
 }
@@ -769,7 +768,7 @@ function editAppointment(a) {
   apptPractitioner.value = a.practitioner_id;
   apptService.value = a.service_id;
   apptPayment.value = a.payment_method || "";
-apptRemarks.value = a.remarks || "";
+  apptRemarks.value = a.remarks || "";
 
   calculateCharges();
   tab("appointmentsTab");
