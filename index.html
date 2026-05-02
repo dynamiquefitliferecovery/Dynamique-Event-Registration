@@ -196,9 +196,9 @@
     <div class="grid">
       <input type="date">
       <input type="time">
-      <select></select> <!-- client -->
-      <select></select> <!-- practitioner -->
-      <select></select> <!-- service -->
+<select onchange="calculateCharges()"></select>  <!-- client -->
+<select></select>                                <!-- practitioner -->
+<select onchange="calculateCharges()"></select>  <!-- service -->
     </div>
     <button class="action">Save Appointment</button>
   </div>
@@ -306,39 +306,23 @@ document.querySelector('input[placeholder*="IC"]').oninput = e => {
 };
 
 /* ================= CLIENTS ================= */
-async function saveClient() {
-  if (!c_name.value) return alert("Full Name required");
-
-  const payload = {
-    full_name: c_name.value,
-    date_of_birth: document.querySelector('input[type="date"]').value,
-    gender: document.querySelector('select').value,
-    ic_passport: document.querySelector('input[placeholder*="IC"]').value,
-    contact: document.querySelector('input[placeholder="Contact"]').value,
-    email: document.querySelector('input[placeholder="Email"]').value,
-    address: document.querySelector('input[placeholder="Address"]').value
-  };
-
-  const res = editingClientId
-    ? await sb.from("clients").update(payload).eq("id", editingClientId)
-    : await sb.from("clients").insert(payload);
-
-  if (res.error) return alert(res.error.message);
-
-  editingClientId = null;
-  clearClientForm();
-  loadClients();
-}
-
-function clearClientForm() {
-  document.querySelectorAll("#clientsTab input").forEach(i => i.value = "");
-}
+let clients = [];
 
 async function loadClients() {
-  const { data } = await sb.from("clients").select("*").order("created_at", { ascending: false });
+  const { data, error } = await sb
+    .from("clients")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+  }
+
+  clients = data || [];
 
   const tbody = document.querySelector("#clientsTab tbody");
-  tbody.innerHTML = data.map(c => `
+
+  tbody.innerHTML = clients.map(c => `
     <tr>
       <td>${c.full_name}</td>
       <td>${c.ic_passport || ""}</td>
@@ -347,54 +331,69 @@ async function loadClients() {
   `).join("");
 
   const clientSelect = document.querySelector("#appointmentsTab select");
-  clientSelect.innerHTML = data.map(c =>
+  clientSelect.innerHTML = clients.map(c =>
     `<option value="${c.id}">${c.full_name}</option>`
   ).join("");
 }
-
-function editClient(c) {
-  editingClientId = c.id;
-
-  const inputs = document.querySelectorAll("#clientsTab input");
-  inputs[0].value = c.full_name;
-  inputs[1].value = c.date_of_birth || "";
-  inputs[2].value = c.ic_passport || "";
-  inputs[3].value = c.contact || "";
-  inputs[4].value = c.email || "";
-  inputs[5].value = c.address || "";
-}
-
 /* ================= PRACTITIONERS ================= */
-async function addPractitioner() {
-  const input = document.querySelector("#practitionersTab input");
-  if (!input.value) return;
-
-  await sb.from("practitioners").insert({ name: input.value });
-  input.value = "";
-  loadPractitioners();
-}
+let practitioners = [];
 
 async function loadPractitioners() {
-  const { data } = await sb.from("practitioners").select("*");
+  const { data, error } = await sb.from("practitioners").select("*");
+
+  if (error) {
+    console.error(error);
+  }
+
+  practitioners = data || [];
 
   document.querySelector("#practitionersTab div:last-child").innerHTML =
-    data.map(p => `<div>${p.name}</div>`).join("");
+    practitioners.map(p => `<div>${p.name}</div>`).join("");
 
   const pracSelect = document.querySelectorAll("#appointmentsTab select")[1];
-  pracSelect.innerHTML = data.map(p =>
+  pracSelect.innerHTML = practitioners.map(p =>
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
 }
+function calculateCharges() {
+  const selects = document.querySelectorAll("#appointmentsTab select");
 
-/* ================= SERVICES ================= */
-async function loadServices() {
-  const { data } = await sb.from("services").select("*");
+  const clientSelect = selects[0];
+  const serviceSelect = selects[2];
 
-  const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
-  serviceSelect.innerHTML = data.map(s =>
-    `<option value="${s.id}">${s.name} (RM ${s.price})</option>`
-  ).join("");
+  if (!serviceSelect.value || !clientSelect.value) return;
+
+  const selectedService = serviceSelect.selectedOptions[0];
+  const price = Number(selectedService.dataset.price || 0);
+  const sstRequired = selectedService.dataset.foreignerSst === "true";
+
+  const client = clients.find(c => c.id === clientSelect.value);
+  const isForeigner = client?.citizenship === "Foreigner";
+
+  const sst = (sstRequired && isForeigner) ? price * 0.06 : 0;
+  const total = price + sst;
+
+  document.getElementById("apptAmount").value = price.toFixed(2);
+  document.getElementById("apptSST").value = sst.toFixed(2);
+  document.getElementById("apptTotal").value = total.toFixed(2);
 }
+/* ================= SERVICES ================= */
+let services = [];
+
+async function loadServices() {
+  const { data, error } = await sb.from("services").select("*");
+
+  if (error) {
+    console.error(error);
+  }
+
+  services = data || [];
+
+const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
+serviceSelect.addEventListener("change", calculateCharges);
+
+const clientSelect = document.querySelectorAll("#appointmentsTab select")[0];
+clientSelect.addEventListener("change", calculateCharges);
 
 /* ================= APPOINTMENTS ================= */
 async function saveAppointment() {
@@ -405,7 +404,10 @@ async function saveAppointment() {
     start_time: `${inputs[0].value}T${inputs[1].value}`,
     client_id: selects[0].value,
     practitioner_id: selects[1].value,
-    service_id: selects[2].value
+    service_id: selects[2].value,
+    amount: Number(document.getElementById("apptAmount").value),
+    sst: Number(document.getElementById("apptSST").value),
+    total: Number(document.getElementById("apptTotal").value)
   };
 
   const res = editingAppointmentId
@@ -417,21 +419,37 @@ async function saveAppointment() {
   editingAppointmentId = null;
   loadAppointments();
 }
-
 async function loadAppointments() {
-  const { data } = await sb
+  const { data, error } = await sb
     .from("appointments")
-    .select("*, clients(full_name), services(name,price)")
+    .select(`
+  id,
+  start_time,
+  client_id,
+  practitioner_id,
+  service_id,
+  amount,
+  sst,
+  total,
+  clients(full_name),
+  services(name)
+`)
     .order("start_time", { ascending: false });
 
+  if (error) {
+    console.error(error);
+  }
+
+  const rows = data || [];
+
   const tbody = document.querySelector("#appointmentsTab tbody");
-  tbody.innerHTML = data.map(a => `
+
+  tbody.innerHTML = rows.map(a => `
     <tr>
       <td>${new Date(a.start_time).toLocaleString()}</td>
-      <td>${a.clients.full_name}</td>
-      <td>${a.services.name}</td>
-      <td>${a.services.price}</td>
-      <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
+      <td>${a.clients?.full_name || ""}</td>
+      <td>${a.services?.name || ""}</td>
+      <td>RM ${Number(a.total).toFixed(2)}</td>
     </tr>
   `).join("");
 }
