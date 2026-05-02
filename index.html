@@ -593,13 +593,14 @@ async function deletePractitioner(id) {
   loadPractitioners();
 }
 
-/* ================= SERVICES ================= */
+<!-- ================= SERVICES ================= -->
 let services = [];
 
 async function loadServices() {
   const { data, error } = await sb
     .from("services")
-    .select("id, code, name, price, sst");
+    .select("id, code, name, price, sst")
+    .order("code");
 
   if (error) {
     console.error("loadServices error:", error);
@@ -608,15 +609,20 @@ async function loadServices() {
 
   services = data || [];
 
-  // IMPORTANT: value = s.id (BIGINT), NOT s.code
+  // Populate SERVICE dropdown (ONLY PLACE THIS HAPPENS)
   apptService.innerHTML = services.map(s => `
     <option
       value="${s.id}"
       data-price="${s.price}"
       data-sst="${s.sst}">
-      ${s.code} – ${s.name} (RM ${s.price})
+      ${s.code} – ${s.name} (RM ${Number(s.price).toFixed(2)})
     </option>
   `).join("");
+
+  // Optional: auto-select first service
+  if (apptService.options.length > 0) {
+    apptService.selectedIndex = 0;
+  }
 }
 
 /* ================= APPOINTMENTS ================= */
