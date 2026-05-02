@@ -293,20 +293,23 @@ let editingAppointmentId = null;
 
 /* ================= AUTH ================= */
 async function login() {
-  err.textContent = "";
+  console.log("Login clicked");
 
-  const { error } = await sb.auth.signInWithPassword({
+  const { data, error } = await sb.auth.signInWithPassword({
     email: email.value,
     password: password.value
   });
 
+  console.log("Auth response:", data, error);
+
   if (error) {
-    err.textContent = error.message;
+    alert(error.message); // 🔴 FORCE SHOW
     return;
   }
 
-openApp(); // ✅ KEEP THIS
+  openApp();
 }
+
   
 function logout() {
   sb.auth.signOut();
