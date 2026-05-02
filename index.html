@@ -24,6 +24,12 @@
   background: linear-gradient(135deg,#ff9800,#ffd180);
 }
 
+#loginView {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
 #loginView:not(.hidden) {
   display: flex;
   justify-content: center;
@@ -398,17 +404,21 @@ function tab(id) {
 
 /* ================= FORMATTERS ================= */
 document.addEventListener("input", e => {
-  if (
-    e.target.matches('input[placeholder*="IC"], input[placeholder*="Passport"]')
-  ) {
-    e.target.value = e.target.value
-      .replace(/[^A-Za-z0-9]/g, "")
-      .slice(0, 14);
+  if (e.target.matches('input[placeholder*="IC"]')) {
+    let v = e.target.value.replace(/\D/g, "").slice(0,14);
+
+    if (v.length > 12) {
+      v = v.replace(/(\d{6})(\d{6})(\d{0,2})/, "$1-$2-$3");
+    } else if (v.length > 6) {
+      v = v.replace(/(\d{6})(\d{0,6})/, "$1-$2");
+    }
+
+    e.target.value = v;
   }
 });
 
 function formatIc(v = "") {
-  return v ? v.replace(/(.{6})(.{6})(.{2})/, "$1-$2-$3") : "";
+  return v ? v.replace(/(.{6})(.{2})(.{6})/, "$1-$2-$3") : "";
 }
 
 function formatContact(v = "") {
