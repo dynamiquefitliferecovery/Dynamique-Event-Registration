@@ -330,11 +330,21 @@ function logout() {
 
   console.log("openApp function exists:", typeof openApp);
 function openApp() {
-  loginView.classList.add("hidden");
-  appView.classList.remove("hidden");
+  const loginViewEl = document.getElementById("loginView");
+  const appViewEl = document.getElementById("appView");
+
+  if (!loginViewEl || !appViewEl) {
+    console.error("loginView or appView not found");
+    return;
+  }
+
+  loginViewEl.classList.add("hidden");
+  appViewEl.classList.remove("hidden");
+
   tab("clientsTab");
   loadAll();
 }
+
 
 /* ================= TABS ================= */
 function tab(id) {
