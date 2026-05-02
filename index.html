@@ -264,6 +264,7 @@
 </div>
 
 <script>
+  console.log("JS loaded");
 /* ================= SUPABASE ================= */
 const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
@@ -293,29 +294,33 @@ let editingAppointmentId = null;
 
 /* ================= AUTH ================= */
 async function login() {
-  console.log("Login clicked");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const errEl = document.getElementById("err");
+
+  errEl.textContent = "";
 
   const { data, error } = await sb.auth.signInWithPassword({
-    email: email.value,
-    password: password.value
+    email: emailInput.value,
+    password: passwordInput.value
   });
 
-  console.log("Auth response:", data, error);
-
   if (error) {
-    alert(error.message); // 🔴 FORCE SHOW
+    errEl.textContent = error.message;
+    console.error("Login error:", error);
     return;
   }
 
-  openApp();
+  console.log("Login success:", data);
 }
 
-  
+ 
 function logout() {
   sb.auth.signOut();
   location.reload();
 }
 
+  console.log("openApp function exists:", typeof openApp);
 function openApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
