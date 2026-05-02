@@ -207,17 +207,6 @@
 
 </div>
 
-<!-- Login -->
-<section id="loginTab">
-  <h2>Login</h2>
-  <input id="loginEmail" placeholder="Email">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button id="loginBtn">Login</button>
-  <div id="loginError"></div>
-</section>
-
-<div id="logoutMessage" hidden>Logged out successfully.</div>
-
 <script>
 /* ================= CONFIG ================= */
 const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
@@ -267,17 +256,12 @@ function formatContact(input) {
   input.value = v;
 }
 
-/* ================= DATE/TIME AUTO-POPULATE ================= */
-function setCurrentDateTime() {
-  const now = new Date();
-  document.getElementById("a_date").value = now.toISOString().slice(0,10);
-  document.getElementById("a_time").value = now.toTimeString().slice(0,5);
-}
-  
 /* ================= CLIENTS ================= */
 document.getElementById("c_dob").onchange = () => {
   document.getElementById("c_age").value = calcAge(document.getElementById("c_dob").value);
 };
+
+let editingClientId = null;
 
 document.getElementById("addClientBtn").onclick = async () => {
   const client = {
@@ -290,40 +274,59 @@ document.getElementById("addClientBtn").onclick = async () => {
     email: document.getElementById("c_email").value,
     address: document.getElementById("c_address").value
   };
-  const { error } = await sb.from("clients").insert(client);
-  if (error) { alert("Error saving client: " + error.message); return; }
+
+  if (editingClientId) {
+    await sb.from("clients").update(client).eq("id", editingClientId);
+    editingClientId = null;
+  } else {
+    await sb.from("clients").insert(client);
+  }
+
   loadClients();
-  ["c_name","c_dob","c_age","c_gender","c_citizen","c_ic","c_contact","c_email","c_address"]
-    .forEach(id => document.getElementById(id).value = "");
 };
 
 async function loadClients() {
-  const { data, error } = await sb.from("clients").select("*").order("created_at",{ascending:false});
-  if (error) { console.error("Error loading clients:", error); return; }
+  const { data, error } = await sb
+    .from("clients")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error loading clients:", error);
+    return;
+  }
+
   clients = data;
+
   const table = document.querySelector("#clientsTable");
   table.innerHTML = "";
-  data.forEach(c => {
-    const row = `<tr>
-      <td>${c.full_name||""}</td>
-      <td>${fmtDMY(c.date_of_birth)||""}</td>
-      <td>${calcAge(c.date_of_birth)||""}</td>
-      <td>${c.gender||""}</td>
-      <td>${c.citizenship||""}</td>
-      <td>${c.ic_passport||""}</td>
-      <td>${c.contact||""}</td>
-      <td>${c.email||""}</td>
-      <td>${c.address||""}</td>
-      <td><button onclick="editClient('${c.id}')" class="small primary">Edit</button></td>
-      <td><button onclick="deleteClient('${c.id}')" class="small danger">Delete</button></td>
-    </tr>`;
-    table.insertAdjacentHTML("beforeend", row);
-  });
+
   const clientSelect = document.getElementById("a_client");
-  if (clientSelect) {
-    clientSelect.innerHTML = "<option value=''>Select Client</option>";
-    data.forEach(c => { clientSelect.innerHTML += `<option value="${c.id}">${c.full_name}</option>`; });
-  }
+  if (clientSelect) clientSelect.innerHTML = "";
+
+  data.forEach(c => {
+    const row = `
+      <tr>
+        <td>${c.full_name || ""}</td>
+        <td>${fmtDMY(c.date_of_birth) || ""}</td>
+        <td>${calcAge(c.date_of_birth) || ""}</td>
+        <td>${c.gender || ""}</td>
+        <td>${c.citizenship || ""}</td>
+        <td>${c.ic_passport || ""}</td>
+        <td>${c.contact || ""}</td>
+        <td>${c.email || ""}</td>
+        <td>${c.address || ""}</td>
+        <td><button onclick="editClient('${c.id}')" class="small primary">Edit</button></td>
+        <td><button onclick="deleteClient('${c.id}')" class="small danger">Delete</button></td>
+      </tr>
+    `;
+
+    table.insertAdjacentHTML("beforeend", row);
+
+    if (clientSelect) {
+      clientSelect.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
+    }
+  });
 }
 
 async function deleteClient(id) {
@@ -386,161 +389,243 @@ function resetClientSave() {
 
 /* ================= PRACTITIONERS ================= */
 
-// Add practitioner
+async function loadPractitioners() {
+  const { data, error } = await sb.from("practitioners").select("*");
+
+  if (error) {
+    console.error("Load practitioners error:", error);
+    return;
+  }
+
+  practitioners = data;
+
+  // TABLE
+  const table = document.getElementById("practitionerTable");
+  table.innerHTML = "";
+
+  data.forEach(p => {
+    table.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${p.name || ""}</td>
+        <td>
+          <button class="small danger" onclick="deletePractitioner('${p.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `);
+  });
+
+  // DROPDOWN (appointments)
+  const select = document.getElementById("a_practitioner");
+  select.innerHTML = `<option value="">Select Practitioner</option>`;
+
+  data.forEach(p => {
+    select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+  });
+}
+
+/* ADD PRACTITIONER */
 document.getElementById("addPractitionerBtn").onclick = async () => {
   const name = document.getElementById("p_name").value.trim();
+
   if (!name) {
-    alert("Please enter a practitioner name.");
+    alert("Enter practitioner name");
     return;
   }
+
   const { error } = await sb.from("practitioners").insert({ name });
+
   if (error) {
-    alert("Error saving practitioner: " + error.message);
+    alert(error.message);
     return;
   }
+
   document.getElementById("p_name").value = "";
-  await loadPractitioners(); // refresh list immediately
+  loadPractitioners();
 };
 
-// Cancel input
+/* CANCEL */
 document.getElementById("cancelPractitionerBtn").onclick = () => {
   document.getElementById("p_name").value = "";
 };
 
-// Load practitioners
-async function loadPractitioners() {
-  const { data, error } = await sb.from("practitioners").select("*");
-  if (error) {
-    console.error("Error loading practitioners:", error);
-    return;
-  }
-  console.log("Practitioners data:", data);
-
-  // Populate table
-  const table = document.getElementById("practitionerTable");
-  table.innerHTML = "";
-  data.forEach(p => {
-    const row = `<tr>
-      <td>${p.name || ""}</td>
-      <td><button onclick="deletePractitioner('${p.id}')" class="small danger">Delete</button></td>
-    </tr>`;
-    table.insertAdjacentHTML("beforeend", row);
-  });
-
-  // Populate dropdown
-  const pracSelect = document.getElementById("a_practitioner");
-  if (pracSelect) {
-    pracSelect.innerHTML = "<option value=''>Select Practitioner</option>";
-    data.forEach(p => {
-      pracSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-    });
-  }
-}
-
-  
-// Delete practitioner
+/* DELETE */
 async function deletePractitioner(id) {
+  if (!confirm("Delete this practitioner?")) return;
+
   const { error } = await sb.from("practitioners").delete().eq("id", id);
+
   if (error) {
-    alert("Error deleting practitioner: " + error.message);
+    alert(error.message);
     return;
   }
-  await loadPractitioners();
+
+  loadPractitioners();
 }
 
-
-
- 
 /* ================= APPOINTMENTS ================= */
 
-// Auto-populate current date/time
+let editingAppointmentId = null;
+
+/* AUTO DATE TIME */
 function setCurrentDateTime() {
   const now = new Date();
   document.getElementById("a_date").value = now.toISOString().slice(0,10);
   document.getElementById("a_time").value = now.toTimeString().slice(0,5);
 }
 
-// Calculate Amount, SST, Total
+/* CALCULATE TOTALS */
 function updateTotals() {
-  const service = SERVICES.find(s => s.id === document.getElementById("a_service").value);
+  const service = SERVICES.find(s =>
+    s.id === document.getElementById("a_service").value
+  );
+
   const amount = service?.price || 0;
+
+  const client = clients.find(c =>
+    c.id === document.getElementById("a_client").value
+  );
+
   let sst = 0;
-  const client = clients.find(c=>c.id===document.getElementById("a_client").value);
-  const needsSST = ["SM","PB","PKP"].includes(service?.id) || (client?.citizenship==="Foreigner");
-  if (needsSST) sst = +(amount*0.06).toFixed(2);
-  const total = amount+sst;
+
+  const needsSST =
+    ["SM","PB","PKP"].includes(service?.id) ||
+    client?.citizenship === "Foreigner";
+
+  if (needsSST) sst = +(amount * 0.06).toFixed(2);
+
+  const total = amount + sst;
+
   document.getElementById("a_amount").value = amount.toFixed(2);
   document.getElementById("a_sst").value = sst.toFixed(2);
   document.getElementById("a_total").value = total.toFixed(2);
 }
 
-// Bind calculation to dropdowns
+/* TRIGGERS */
 document.getElementById("a_service").onchange = updateTotals;
 document.getElementById("a_client").onchange = updateTotals;
 
-// Save new appointment
+/* SAVE (INSERT / UPDATE) */
 document.getElementById("saveAppointmentBtn").onclick = async () => {
-  const service = SERVICES.find(s => s.id === document.getElementById("a_service").value);
-  const amount = parseFloat(document.getElementById("a_amount").value) || 0;
-  const sst = parseFloat(document.getElementById("a_sst").value) || 0;
-  const total = parseFloat(document.getElementById("a_total").value) || 0;
+
+  const service = SERVICES.find(s =>
+    s.id === document.getElementById("a_service").value
+  );
+
   const appointment = {
-    start_time: document.getElementById("a_date").value+"T"+document.getElementById("a_time").value,
+    start_time:
+      document.getElementById("a_date").value +
+      "T" +
+      document.getElementById("a_time").value,
+
     client_id: document.getElementById("a_client").value,
     practitioner_id: document.getElementById("a_practitioner").value,
     service_id: service?.id,
     payment_method: document.getElementById("a_payment").value,
     remarks: document.getElementById("a_remarks").value,
-    amount, sst, total
+
+    amount: parseFloat(document.getElementById("a_amount").value) || 0,
+    sst: parseFloat(document.getElementById("a_sst").value) || 0,
+    total: parseFloat(document.getElementById("a_total").value) || 0
   };
-  const { error } = await sb.from("appointments").insert(appointment);
-  if (error) { alert("Error saving appointment: " + error.message); return; }
+
+  let error;
+
+  if (editingAppointmentId) {
+    ({ error } = await sb
+      .from("appointments")
+      .update(appointment)
+      .eq("id", editingAppointmentId));
+
+    editingAppointmentId = null;
+  } else {
+    ({ error } = await sb
+      .from("appointments")
+      .insert(appointment));
+  }
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  resetAppointmentForm();
   loadAppointments();
-  setCurrentDateTime(); // reset to current date/time
-  ["a_client","a_practitioner","a_service","a_payment","a_remarks"].forEach(id => document.getElementById(id).value = "");
-  updateTotals();
 };
 
-// Load appointments
+/* RESET FORM */
+function resetAppointmentForm() {
+  setCurrentDateTime();
+
+  ["a_client","a_practitioner","a_service","a_payment","a_remarks"]
+    .forEach(id => document.getElementById(id).value = "");
+
+  updateTotals();
+}
+
+/* LOAD */
 async function loadAppointments() {
-  const { data, error } = await sb.from("appointments").select("*").order("start_time",{ascending:false});
-  if (error) { console.error("Error loading appointments:", error); return; }
+  const { data, error } = await sb
+    .from("appointments")
+    .select("*")
+    .order("start_time", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
   appointments = data;
-  const table = document.querySelector("#appointmentsTable");
+
+  const table = document.getElementById("appointmentsTable");
   table.innerHTML = "";
+
   data.forEach(a => {
-    const clientName = clients.find(c=>c.id===a.client_id)?.full_name||"";
-    const practitionerName = practitioners.find(p=>p.id===a.practitioner_id)?.name||"";
-    const serviceName = SERVICES.find(s=>s.id===a.service_id)?.name||"";
-    const row = `<tr>
-      <td>${a.start_time.slice(0,10)}</td>
-      <td>${a.start_time.slice(11,16)}</td>
-      <td>${clientName}</td>
-      <td>${serviceName}</td>
-      <td>${practitionerName}</td>
-      <td>${a.payment_method}</td>
-      <td>${a.amount?.toFixed(2)||"0.00"}</td>
-      <td>${a.sst?.toFixed(2)||"0.00"}</td>
-      <td>${a.total?.toFixed(2)||"0.00"}</td>
-      <td>${a.remarks||""}</td>
-      <td><button onclick="editAppointment('${a.id}')" class="small primary">Edit</button></td>
-      <td><button onclick="deleteAppointment('${a.id}')" class="small danger">Delete</button></td>
-    </tr>`;
-    table.insertAdjacentHTML("beforeend", row);
+
+    const clientName =
+      clients.find(c => c.id === a.client_id)?.full_name || "";
+
+    const practitionerName =
+      practitioners.find(p => p.id === a.practitioner_id)?.name || "";
+
+    const serviceName =
+      SERVICES.find(s => s.id === a.service_id)?.name || "";
+
+    table.insertAdjacentHTML("beforeend", `
+      <tr>
+        <td>${a.start_time.slice(0,10)}</td>
+        <td>${a.start_time.slice(11,16)}</td>
+        <td>${clientName}</td>
+        <td>${serviceName}</td>
+        <td>${practitionerName}</td>
+        <td>${a.payment_method}</td>
+        <td>${a.amount?.toFixed(2) || "0.00"}</td>
+        <td>${a.sst?.toFixed(2) || "0.00"}</td>
+        <td>${a.total?.toFixed(2) || "0.00"}</td>
+        <td>${a.remarks || ""}</td>
+        <td>
+          <button class="small primary" onclick="editAppointment('${a.id}')">
+            Edit
+          </button>
+        </td>
+        <td>
+          <button class="small danger" onclick="deleteAppointment('${a.id}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `);
   });
 }
 
-// Delete appointment
-async function deleteAppointment(id) {
-  const { error } = await sb.from("appointments").delete().eq("id", id);
-  if (error) { alert("Error deleting appointment: " + error.message); return; }
-  loadAppointments();
-}
-
-// Edit appointment
-async function editAppointment(id) {
-  const a = appointments.find(appt => appt.id === id);
+/* EDIT */
+function editAppointment(id) {
+  const a = appointments.find(x => x.id === id);
   if (!a) return;
+
+  editingAppointmentId = id;
+
   document.getElementById("a_date").value = a.start_time.slice(0,10);
   document.getElementById("a_time").value = a.start_time.slice(11,16);
   document.getElementById("a_client").value = a.client_id;
@@ -548,57 +633,27 @@ async function editAppointment(id) {
   document.getElementById("a_service").value = a.service_id;
   document.getElementById("a_payment").value = a.payment_method;
   document.getElementById("a_remarks").value = a.remarks;
+
   updateTotals();
-
-  document.getElementById("saveAppointmentBtn").onclick = async () => {
-    const service = SERVICES.find(s => s.id === document.getElementById("a_service").value);
-    const amount = parseFloat(document.getElementById("a_amount").value) || 0;
-    const sst = parseFloat(document.getElementById("a_sst").value) || 0;
-    const total = parseFloat(document.getElementById("a_total").value) || 0;
-    const updated = {
-      start_time: document.getElementById("a_date").value+"T"+document.getElementById("a_time").value,
-      client_id: document.getElementById("a_client").value,
-      practitioner_id: document.getElementById("a_practitioner").value,
-      service_id: service?.id,
-      payment_method: document.getElementById("a_payment").value,
-      remarks: document.getElementById("a_remarks").value,
-      amount, sst, total
-    };
-    const { error } = await sb.from("appointments").update(updated).eq("id", id);
-    if (error) { alert("Error updating appointment: " + error.message); return; }
-    loadAppointments();
-    resetAppointmentSave();
-  };
 }
 
-// Reset Save button back to insert mode
-function resetAppointmentSave() {
-  document.getElementById("saveAppointmentBtn").onclick = async () => {
-    const service = SERVICES.find(s => s.id === document.getElementById("a_service").value);
-    const amount = parseFloat(document.getElementById("a_amount").value) || 0;
-    let sst = 0;
-    const client = clients.find(c=>c.id===document.getElementById("a_client").value);
-    const needsSST = ["SM","PB","PKP"].includes(service?.id) || (client?.citizenship==="Foreigner");
-    if (needsSST) sst = +(amount*0.06).toFixed(2);
-    const total = amount+sst;
-    const appointment = {
-      start_time: document.getElementById("a_date").value+"T"+document.getElementById("a_time").value,
-      client_id: document.getElementById("a_client").value,
-      practitioner_id: document.getElementById("a_practitioner").value,
-      service_id: service?.id,
-      payment_method: document.getElementById("a_payment").value,
-      remarks: document.getElementById("a_remarks").value,
-      amount, sst, total
-    };
-    const { error } = await sb.from("appointments").insert(appointment);
-    if (error) { alert("Error saving appointment: " + error.message); return; }
-    loadAppointments();
-    setCurrentDateTime();
-    ["a_client","a_practitioner","a_service","a_payment","a_remarks"].forEach(id => document.getElementById(id).value = "");
-    updateTotals();
-  };
+/* DELETE */
+async function deleteAppointment(id) {
+  if (!confirm("Delete this appointment?")) return;
+
+  const { error } = await sb
+    .from("appointments")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  loadAppointments();
 }
-  
+
 /* ================= SALES REPORT ================= */
 let salesChartInstance = null;
 let latestReport = {};
@@ -627,11 +682,11 @@ async function loadSalesReport() {
   Object.keys(report).forEach(service => {
     const r = report[service];
     const row = `<tr>
-      <td>${service}</td>
-      <td>${r.amount.toFixed(2)}</td>
-      <td>${r.sst.toFixed(2)}</td>
-      <td>${r.total.toFixed(2)}</td>
-    </tr>`;
+  <td>${service}</td>
+  <td>${r.amount.toFixed(2)}</td>
+  <td>${r.sst.toFixed(2)}</td>
+  <td>${r.total.toFixed(2)}</td>
+</tr>`;
     table.insertAdjacentHTML("beforeend", row);
   });
 
@@ -729,22 +784,10 @@ window.onload = async () => {
 
   document.getElementById("loginError").innerText = "";
 }
+setCurrentDateTime();
+updateTotals();
 
 
-
-    // Optional: set default date/time for appointments
-    if (typeof setCurrentDateTime === "function") {
-      setCurrentDateTime();
-    }
-
-    // Optional: initialize totals
-    if (typeof updateTotals === "function") {
-      updateTotals();
-    }
-  } catch (err) {
-    console.error("Initialization error:", err);
-  }
-};
 
 </script>
 </body>
