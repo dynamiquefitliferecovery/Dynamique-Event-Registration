@@ -362,28 +362,7 @@ async function loadPractitioners() {
     `<option value="${p.id}">${p.name}</option>`
   ).join("");
 }
-function calculateCharges() {
-  const selects = document.querySelectorAll("#appointmentsTab select");
 
-  const clientSelect = selects[0];
-  const serviceSelect = selects[2];
-
-  if (!serviceSelect.value || !clientSelect.value) return;
-
-  const selectedService = serviceSelect.selectedOptions[0];
-  const price = Number(selectedService.dataset.price || 0);
-  const sstRequired = selectedService.dataset.foreignerSst === "true";
-
-  const client = clients.find(c => c.id === clientSelect.value);
-  const isForeigner = client?.citizenship === "Foreigner";
-
-  const sst = (sstRequired && isForeigner) ? price * 0.06 : 0;
-  const total = price + sst;
-
-  document.getElementById("apptAmount").value = price.toFixed(2);
-  document.getElementById("apptSST").value = sst.toFixed(2);
-  document.getElementById("apptTotal").value = total.toFixed(2);
-}
 /* ================= SERVICES ================= */
 let services = [];
 
@@ -572,11 +551,7 @@ async function loadAll() {
   loadAppointments();
 }
 
-  const now = new Date();
-  const inputs = document.querySelectorAll("#appointmentsTab input");
-  inputs[0].value = now.toISOString().slice(0,10);
-  inputs[1].value = now.toTimeString().slice(0,5);
-}
+
 </script>
 
     
