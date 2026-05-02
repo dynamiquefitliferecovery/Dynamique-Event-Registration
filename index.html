@@ -153,6 +153,10 @@
         <option>Male</option>
         <option>Female</option>
       </select>
+      <select>
+  <option value="Malaysian">Malaysian</option>
+  <option value="Foreigner">Foreigner</option>
+</select>
       <input placeholder="IC / Passport (14 characters)">
       <input placeholder="Contact">
       <input placeholder="Email">
@@ -341,14 +345,16 @@ async function saveClient() {
   const inputs = document.querySelectorAll("#clientsTab input");
   const selects = document.querySelectorAll("#clientsTab select");
 
-  const payload = {
-    full_name: inputs[0].value,
-    date_of_birth: inputs[1].value,
-    gender: selects[0].value,
-    ic_passport: inputs[2].value,
-    contact: inputs[3].value,
-    email: inputs[4].value,
-    address: inputs[5].value
+const payload = {
+  full_name: inputs[0].value,
+  date_of_birth: inputs[1].value,
+  gender: selects[0].value,        // ✅ Gender
+  citizenship: selects[1].value,  // ✅ Citizenship
+  ic_passport: inputs[2].value,
+  contact: inputs[3].value,
+  email: inputs[4].value,
+  address: inputs[5].value
+
   };
 
   if (!payload.full_name) {
@@ -422,45 +428,31 @@ async function loadPractitioners() {
     practitioners.map(p => `<div>${p.name}</div>`).join("");
 }
 
-
 /* ================= SERVICES ================= */
-async function loadServices() {
-  const { data, error } = await sb.from("services").select("*");
+let services = [];
 
-  if("#appointmentsTab select")[2];  if (error) {
+async function loadServices() {
+  const { data, error } = await sb
+    .from("services")
+    .select("id, name, price, sst");
+
+  if (error) {
+    console.error("loadServices error:", error);
+    return;
+  }
+
+  services = data || [];
+
+  const serviceSelect = document.getElementById("apptService");
 
   serviceSelect.innerHTML = services.map(s => `
-    <option 
+    <option
       value="${s.id}"
       data-price="${s.price}"
       data-sst="${s.sst}">
       ${s.name} (RM ${s.price})
     </option>
   `).join("");
-}
-    console.error(error);
-    return;
-  }
-
-  services = data || [];
-
-
-
-  const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
-
-  serviceSelect.innerHTML = services.map(s => `
-    <option 
-      value="${s.id}"
-      data-price="${s.price}"
-      data-sst="${s.sst}"
-      ${s.name} (RM ${s.price})
-    </option>
-  `).join("");
-
-  // Attach calculation listeners
-  serviceSelect.addEventListener("change", calculateCharges);
-  const clientSelect = document.querySelectorAll("#appointmentsTab select")[0];
-  clientSelect.addEventListener("change", calculateCharges);
 }
 /* ================= APPOINTMENTS ================= */
 
@@ -484,7 +476,7 @@ function fillAppointmentDropdowns() {
   apptService.innerHTML = services.map(s =>
     `<option value="${s.id}"
             data-price="${s.price}"
-            data-foreigner-sst="${s.foreigner_sst}">
+            data-sst="${s.sst}">
       ${s.name} (RM ${s.price})
     </option>`
   ).join("");
