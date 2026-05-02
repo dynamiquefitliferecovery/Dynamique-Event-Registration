@@ -385,6 +385,7 @@ function editClient(c) {
   inputs[0].value = c.full_name || "";
   inputs[1].value = c.date_of_birth || "";
   selects[0].value = c.gender || "Male";
+  selects[1].value = c.citizenship || "Malaysian";
   inputs[2].value = c.ic_passport || "";
   inputs[3].value = c.contact || "";
   inputs[4].value = c.email || "";
@@ -443,9 +444,8 @@ async function loadServices() {
 
   services = data || [];
 
-  const serviceSelect = document.getElementById("apptService");
-
-  serviceSelect.innerHTML = services.map(s => `
+  // ✅ Populate service dropdown here
+  apptService.innerHTML = services.map(s => `
     <option
       value="${s.id}"
       data-price="${s.price}"
@@ -454,6 +454,7 @@ async function loadServices() {
     </option>
   `).join("");
 }
+ 
 /* ================= APPOINTMENTS ================= */
 
 /* defaults */
@@ -506,9 +507,11 @@ function calculateCharges() {
 }
 
 /* events */
-apptService.onchange = calculateCharges;
-apptClient.onchange = calculateCharges;
-
+document.addEventListener("DOMContentLoaded", () => {
+  apptService.onchange = calculateCharges;
+  apptClient.onchange = calculateCharges;
+});
+  
 /* save */
 async function saveAppointment() {
   if (!apptDate.value || !apptTime.value)
@@ -568,6 +571,8 @@ async function loadAppointments() {
 /* edit */
 function editAppointment(a) {
   editingAppointmentId = a.id;
+
+  fillAppointmentDropdowns();
 
   const d = new Date(a.start_time);
   apptDate.value = d.toISOString().slice(0, 10);
