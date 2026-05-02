@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Sports Rehab System</title>
+<title>Sports Rehab Management System</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -10,42 +10,39 @@
 
 <style>
 body{margin:0;font-family:Segoe UI;background:#f4f6f8}
-header{
-background:#111;color:#fff;
-display:flex;gap:10px;padding:10px
-}
-header button{background:#ff9800;border:none;padding:8px 12px;border-radius:6px;color:#000}
+header{background:#111;color:#fff;padding:10px;display:flex;gap:10px}
+header button{background:#ff9800;border:none;padding:8px 14px;border-radius:6px;cursor:pointer}
+
 .container{padding:20px}
-.card{
-background:#fff;padding:20px;border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:20px
-}
+.card{background:#fff;padding:20px;margin-bottom:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
 input,select,textarea{
 padding:8px;border-radius:6px;border:1px solid #ddd;width:100%
 }
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid #eee;padding:8px;text-align:left}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:8px;border:1px solid #eee}
 th{background:#fafafa}
-button.small{padding:4px 6px;font-size:12px}
-canvas{max-height:300px}
+
+button.small{font-size:12px;padding:4px 6px}
+canvas{max-height:300px;margin-top:20px}
 </style>
 </head>
 
 <body>
 
 <header>
-<button onclick="showTab('clients')">Clients</button>
-<button onclick="showTab('pract')">Practitioners</button>
-<button onclick="showTab('appt')">Appointments</button>
-<button onclick="showTab('report')">Reports</button>
+<button onclick="show('clients')">Clients</button>
+<button onclick="show('pract')">Practitioners</button>
+<button onclick="show('appt')">Appointments</button>
+<button onclick="show('report')">Reports</button>
 </header>
 
 <div class="container">
 
 <!-- CLIENTS -->
 <section id="clients" class="card">
-<h3>Client Registration</h3>
+<h2>Client Registration</h2>
 <div class="grid">
 <input id="c_name" placeholder="Full Name">
 <select id="c_gender"><option>Male</option><option>Female</option></select>
@@ -56,7 +53,7 @@ canvas{max-height:300px}
 <input id="c_email" placeholder="Email">
 <input id="c_address" placeholder="Address">
 </div>
-<button onclick="saveClient()">Save</button>
+<button onclick="saveClient()">Save Client</button>
 
 <h3>Client List</h3>
 <table>
@@ -70,36 +67,36 @@ canvas{max-height:300px}
 </table>
 </section>
 
-<!-- PRACT -->
+<!-- PRACTITIONERS -->
 <section id="pract" class="card" hidden>
-<h3>Practitioners</h3>
-<input id="p_name" placeholder="Name">
-<button onclick="addPrac()">Add</button>
-<div id="pracList"></div>
+<h2>Practitioners</h2>
+<input id="p_name" placeholder="Practitioner Name">
+<button onclick="addPractitioner()">Add</button>
+<div id="practList"></div>
 </section>
 
-<!-- APPOINTMENT -->
+<!-- APPOINTMENTS -->
 <section id="appt" class="card" hidden>
-<h3>Appointment</h3>
+<h2>Appointment</h2>
 <div class="grid">
 <input id="a_date" type="date">
 <input id="a_time" type="time">
-<select id="a_client"></select>
+<select id="a_client" onchange="calcTotal()"></select>
 <select id="a_prac"></select>
 <select id="a_service" onchange="calcTotal()"></select>
-<input id="amount" readonly placeholder="Amount">
-<input id="sst" readonly placeholder="SST">
-<input id="total" readonly placeholder="Total">
+<input id="a_amount" readonly placeholder="Amount">
+<input id="a_sst" readonly placeholder="SST">
+<input id="a_total" readonly placeholder="Total">
 </div>
-<textarea id="remark" placeholder="Remark"></textarea>
-<button onclick="saveAppt()">Save</button>
+<textarea id="a_remark" placeholder="Remark"></textarea>
+<button onclick="saveAppointment()">Save Appointment</button>
 
-<h3>Appointments</h3>
 <table>
 <thead>
 <tr>
 <th>Date</th><th>Time</th><th>Client</th><th>Service</th>
-<th>Amount</th><th>SST</th><th>Total</th><th>Practitioner</th>
+<th>Amount</th><th>SST</th><th>Total</th>
+<th>Practitioner</th><th>Remark</th>
 </tr>
 </thead>
 <tbody id="apptTable"></tbody>
@@ -108,7 +105,7 @@ canvas{max-height:300px}
 
 <!-- REPORT -->
 <section id="report" class="card" hidden>
-<h3>Reports</h3>
+<h2>Reports</h2>
 <input type="date" id="repDate">
 <button onclick="generateReport()">Generate</button>
 <button onclick="exportExcel()">Export Excel</button>
@@ -123,12 +120,15 @@ canvas{max-height:300px}
 </div>
 
 <script>
-const sb = supabase.createClient("https://fmwdizyexroiezezitly.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo");
+const sb = supabase.createClient(
+   "https://fmwdizyexroiezezitly.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
+);
 
-let services=[],clients=[],appointments=[];
+let clients=[],services=[],appointments=[];
 
-/* UTILS */
-function showTab(id){
+/* NAV */
+function show(id){
 document.querySelectorAll("section").forEach(s=>s.hidden=true);
 document.getElementById(id).hidden=false;
 }
@@ -136,79 +136,107 @@ document.getElementById(id).hidden=false;
 /* CLIENTS */
 async function saveClient(){
 await sb.from("clients").insert({
-full_name:c_name.value,gender:c_gender.value,dob:c_dob.value,
-citizenship:c_citizen.value,ic_passport:c_ic.value,
-contact:c_contact.value,email:c_email.value,address:c_address.value
+full_name:c_name.value,
+gender:c_gender.value,
+dob:c_dob.value,
+citizenship:c_citizen.value,
+ic_passport:c_ic.value,
+contact:c_contact.value,
+email:c_email.value,
+address:c_address.value
 });
 loadClients();
 }
+
 async function loadClients(){
 let {data}=await sb.from("clients").select("*");
 clients=data||[];
+
 clientTable.innerHTML=clients.map(c=>{
 let age=new Date().getFullYear()-new Date(c.dob).getFullYear();
 return `<tr>
-<td>${c.full_name}</td><td>${c.ic_passport}</td>
-<td>${c.gender}</td><td>${age}</td>
-<td>${c.contact}</td><td>${c.address}</td><td>${c.email}</td>
+<td>${c.full_name}</td>
+<td>${c.ic_passport}</td>
+<td>${c.gender}</td>
+<td>${age}</td>
+<td>${c.contact}</td>
+<td>${c.address}</td>
+<td>${c.email}</td>
 <td><button class="small" onclick="delClient('${c.id}')">Delete</button></td>
 </tr>`;
 }).join("");
-a_client.innerHTML=clients.map(c=>`<option value="${c.id}" data-cit="${c.citizenship}">${c.full_name}</option>`).join("");
+
+a_client.innerHTML=clients.map(c=>
+`<option value="${c.id}" data-cit="${c.citizenship}">${c.full_name}</option>`
+).join("");
 }
+
 async function delClient(id){
 await sb.from("clients").delete().eq("id",id);
 loadClients();
 }
 
 /* PRACT */
-async function addPrac(){
+async function addPractitioner(){
 await sb.from("practitioners").insert({name:p_name.value});
-loadPrac();
+loadPract();
 }
-async function loadPrac(){
+async function loadPract(){
 let {data}=await sb.from("practitioners").select("*");
-pracList.innerHTML=data.map(p=>`${p.name} <button onclick="delPrac('${p.id}')">X</button>`).join("<br>");
+practList.innerHTML=data.map(p=>`${p.name} <button onclick="delPract('${p.id}')">X</button>`).join("<br>");
 a_prac.innerHTML=data.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
 }
-async function delPrac(id){
+async function delPract(id){
 await sb.from("practitioners").delete().eq("id",id);
-loadPrac();
+loadPract();
 }
 
 /* SERVICES */
 async function loadServices(){
 let {data}=await sb.from("services").select("*");
 services=data;
-a_service.innerHTML=data.map(s=>`<option value="${s.id}" data-price="${s.price}" data-sst="${s.foreigner_sst}">${s.name}</option>`).join("");
+a_service.innerHTML=data.map(s=>
+`<option value="${s.id}" data-price="${s.price}" data-sst="${s.foreigner_sst}">
+${s.name}
+</option>`
+).join("");
 }
 
 /* APPOINTMENT */
 function calcTotal(){
 let s=a_service.selectedOptions[0];
+let c=a_client.selectedOptions[0];
+if(!s||!c) return;
+
 let price=Number(s.dataset.price);
-let isSST=s.dataset.sst==="true" && a_client.selectedOptions[0].dataset.cit==="Foreigner";
-let sstVal=isSST?price*0.06:0;
-amount.value=price.toFixed(2);
-sst.value=sstVal.toFixed(2);
-total.value=(price+sstVal).toFixed(2);
+let sstApply=(s.dataset.sst==="true" && c.dataset.cit==="Foreigner");
+let sst=sstApply?price*0.06:0;
+
+a_amount.value=price.toFixed(2);
+a_sst.value=sst.toFixed(2);
+a_total.value=(price+sst).toFixed(2);
 }
-async function saveAppt(){
+
+async function saveAppointment(){
 await sb.from("appointments").insert({
 start_time:`${a_date.value}T${a_time.value}`,
 client_id:a_client.value,
 practitioner_id:a_prac.value,
 service_id:a_service.value,
-amount:amount.value,sst:sst.value,total:total.value,
-remark:remark.value
+amount:a_amount.value,
+sst:a_sst.value,
+total:a_total.value,
+remark:a_remark.value
 });
-loadAppt();
+loadAppointments();
 }
-async function loadAppt(){
+
+async function loadAppointments(){
 let {data}=await sb.from("appointments")
-.select(`*,clients(full_name),services(name),practitioners(name)`);
-appointments=data;
-apptTable.innerHTML=data.map(a=>{
+.select(`*,clients(full_name,citizenship,dob),services(name),practitioners(name)`);
+appointments=data||[];
+
+apptTable.innerHTML=appointments.map(a=>{
 let d=new Date(a.start_time);
 return `<tr>
 <td>${d.toLocaleDateString()}</td>
@@ -219,24 +247,28 @@ return `<tr>
 <td>${a.sst}</td>
 <td>${a.total}</td>
 <td>${a.practitioners.name}</td>
+<td>${a.remark||""}</td>
 </tr>`;
 }).join("");
 }
 
 /* REPORT */
 function generateReport(){
-let sum=appointments.reduce((t,a)=>t+Number(a.total),0);
-repSummary.innerText="Total Revenue: RM "+sum.toFixed(2);
+let total=appointments.reduce((s,a)=>s+Number(a.total),0);
+repSummary.innerText=`Total Revenue: RM ${total.toFixed(2)}`;
 drawCharts();
 }
+
 function drawCharts(){
 new Chart(serviceChart,{
 type:'pie',
 data:{
 labels:[...new Set(appointments.map(a=>a.services.name))],
-datasets:[{data:appointments.map(a=>a.total),backgroundColor:['#ff9800','#03a9f4','#4caf50']}]
+datasets:[{data:appointments.map(a=>a.total),
+backgroundColor:['#ff9800','#03a9f4','#4caf50','#e91e63']}]
 }});
 }
+
 function exportExcel(){
 let ws=XLSX.utils.json_to_sheet(appointments);
 let wb=XLSX.utils.book_new();
@@ -246,12 +278,11 @@ XLSX.writeFile(wb,"report.xlsx");
 
 /* INIT */
 (async()=>{
-loadClients();loadPrac();loadServices();loadAppt();
-let n=new Date();
-a_date.value=n.toISOString().slice(0,10);
-a_time.value=n.toTimeString().slice(0,5);
+loadClients();loadPract();loadServices();loadAppointments();
+let now=new Date();
+a_date.value=now.toISOString().slice(0,10);
+a_time.value=now.toTimeString().slice(0,5);
 })();
 </script>
-
 </body>
 </html>
