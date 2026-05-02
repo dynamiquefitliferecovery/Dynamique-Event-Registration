@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Sports Rehab System</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body{margin:0;font-family:Segoe UI;background:#f4f6f8}
+.hidden{display:none}
 
 /* LOGIN */
 #loginView{
@@ -23,79 +23,43 @@ background:#fff;
 padding:30px;
 border-radius:12px;
 width:320px;
-text-align:center;
 box-shadow:0 10px 25px rgba(0,0,0,.2);
 }
 
-.login-box input{
+.login-box input,button{
 width:100%;
 padding:10px;
-margin:6px 0;
+margin:8px 0;
 border-radius:8px;
 border:1px solid #ddd;
 }
 
-.login-box button{
-width:100%;
-padding:10px;
-background:orange;
-border:none;
-border-radius:8px;
-cursor:pointer;
-}
+button{background:orange;border:none;cursor:pointer}
 
 /* APP */
-#appView{display:none}
-
 header{
-background:black;
-color:white;
+background:#000;
 padding:10px;
 display:flex;
 gap:10px;
 }
 
-header button{
-background:orange;
-border:none;
-padding:8px 10px;
-border-radius:6px;
-cursor:pointer;
-}
+header button{background:orange;border-radius:6px}
 
 .container{padding:20px}
-
 .card{
-background:white;
+background:#fff;
 padding:20px;
 border-radius:12px;
 margin-bottom:20px;
 box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 
-input,select{
-padding:10px;
-border-radius:8px;
-border:1px solid #ddd;
-width:100%;
-}
-
-table{
-width:100%;
-margin-top:10px;
-border-collapse:collapse;
-}
-
-td,th{
-padding:8px;
-border:1px solid #eee;
-}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{padding:8px;border:1px solid #eee}
+small{color:#888}
 </style>
 </head>
 
@@ -103,105 +67,85 @@ border:1px solid #eee;
 
 <!-- LOGIN -->
 <section id="loginView">
-<div class="login-box">
-<h2>Login</h2>
-<input id="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-<p id="err"></p>
-</div>
+  <div class="login-box">
+    <h2>Login</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="err" style="color:red"></p>
+  </div>
 </section>
 
 <!-- APP -->
-<div id="appView">
+<div id="appView" class="hidden">
 
 <header>
-<button onclick="tab('clientsTab')">Clients</button>
-<button onclick="tab('pracTab')">Practitioners</button>
-<button onclick="tab('appTab')">Appointments</button>
-<button onclick="tab('repTab')">Reports</button>
-<button onclick="logout()">Logout</button>
+  <button onclick="showTab('clients')">Clients</button>
+  <button onclick="showTab('practitioners')">Practitioners</button>
+  <button onclick="showTab('appointments')">Appointments</button>
+  <button onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
 
-<!-- CLIENT -->
-<section id="clientsTab">
+<!-- CLIENTS -->
+<section id="clients">
 <div class="card">
-<h3>Client Registration</h3>
-
+<h3>Register Client</h3>
 <div class="grid">
 <input id="c_name" placeholder="Full Name">
-
-<select id="c_gender">
-<option>Male</option>
-<option>Female</option>
-</select>
-
-<select id="c_citizen">
-<option>Malaysian</option>
-<option>Foreigner</option>
-</select>
-
+<select id="c_gender"><option>Male</option><option>Female</option></select>
+<select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select>
 <input id="c_ic" placeholder="IC / Passport">
 <input id="c_contact" placeholder="Contact">
 <input id="c_email" placeholder="Email">
 <input id="c_address" placeholder="Address">
 </div>
-
-<button onclick="saveClient()">Save</button>
+<button onclick="saveClient()">Save Client</button>
+<small id="clientMsg"></small>
 </div>
 
 <div class="card">
-<h3>Clients</h3>
+<h3>Client List</h3>
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th>IC / Passport</th>
-</tr>
-</thead>
+<thead><tr><th>Name</th><th>IC / Passport</th></tr></thead>
 <tbody id="clientTable"></tbody>
 </table>
 </div>
 </section>
 
-<!-- PRACT -->
-<section id="pracTab" hidden>
+<!-- PRACTITIONERS -->
+<section id="practitioners" class="hidden">
 <div class="card">
 <h3>Practitioners</h3>
-<input id="p_name">
-<button onclick="addPrac()">Add</button>
+<input id="p_name" placeholder="Practitioner Name">
+<button onclick="addPractitioner()">Add</button>
 <div id="pracList"></div>
 </div>
 </section>
 
-<!-- APPOINTMENT -->
-<section id="appTab" hidden>
+<!-- APPOINTMENTS -->
+<section id="appointments" class="hidden">
 <div class="card">
-<h3>Appointments</h3>
-
+<h3>New Appointment</h3>
 <div class="grid">
 <input id="a_date" type="date">
 <input id="a_time" type="time">
-
 <select id="a_client"></select>
 <select id="a_prac"></select>
 </div>
+<button onclick="saveAppointment()">Save Appointment</button>
+<small id="appMsg"></small>
+</div>
 
-<button onclick="saveApp()">Save</button>
-
+<div class="card">
+<h3>Appointments</h3>
 <table>
+<thead>
+<tr><th>Date</th><th>Client</th><th>Practitioner</th></tr>
+</thead>
 <tbody id="appTable"></tbody>
 </table>
-</div>
-</section>
-
-<!-- REPORT -->
-<section id="repTab" hidden>
-<div class="card">
-<h3>Reports</h3>
-<p>Report module ready</p>
 </div>
 </section>
 
@@ -209,115 +153,149 @@ border:1px solid #eee;
 </div>
 
 <script>
-
 const sb = supabase.createClient(
-"https://fmwdizyexroiezezitly.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
+  "https://fmwdizyexroiezezitly.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
 );
 
-let clients=[],prac=[];
+let clients=[], practitioners=[], appointments=[];
 
-/* LOGIN */
+/* SESSION */
+(async()=>{
+  const { data:{session} } = await sb.auth.getSession();
+  if(session) openApp();
+})();
+
+/* AUTH */
 async function login(){
-const {data,error}=await sb.auth.signInWithPassword({
-email:email.value,
-password:password.value
-});
-if(error) return err.innerText=error.message;
-
-loginView.style.display="none";
-appView.style.display="block";
-
-loadClients();
-loadPrac();
+  err.textContent="";
+  const { error } = await sb.auth.signInWithPassword({
+    email:email.value,
+    password:password.value
+  });
+  if(error) return err.textContent=error.message;
+  openApp();
 }
 
-/* TAB FIX */
-function tab(t){
-clientsTab.hidden=true;
-pracTab.hidden=true;
-appTab.hidden=true;
-repTab.hidden=true;
+function logout(){
+  sb.auth.signOut();
+  location.reload();
+}
 
-document.getElementById(t).hidden=false;
+function openApp(){
+  loginView.classList.add("hidden");
+  appView.classList.remove("hidden");
+  loadAll();
+}
+
+/* UI */
+function showTab(id){
+  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
 }
 
 /* FORMATTERS */
-c_ic.oninput = e=>{
-let v=e.target.value.replace(/\D/g,"");
-if(v.length>6)v=v.slice(0,6)+"-"+v.slice(6);
-if(v.length>9)v=v.slice(0,9)+"-"+v.slice(9);
-e.target.value=v;
-};
+c_ic.oninput=e=>{
+  let v=e.target.value.replace(/\D/g,"");
+  if(v.length>6)v=v.slice(0,6)+"-"+v.slice(6);
+  if(v.length>13)v=v.slice(0,13);
+  e.target.value=v;
+}
 
-c_contact.oninput = e=>{
-let v=e.target.value.replace(/\D/g,"");
-if(v.length>3)v=v.slice(0,3)+"-"+v.slice(3);
-e.target.value=v;
-};
+c_contact.oninput=e=>{
+  let v=e.target.value.replace(/\D/g,"");
+  if(v.length>3)v=v.slice(0,3)+"-"+v.slice(3,10);
+  e.target.value=v;
+}
 
-/* CLIENT */
+/* LOAD ALL */
+async function loadAll(){
+  await Promise.all([loadClients(),loadPractitioners(),loadAppointments()]);
+}
+
+/* CLIENTS */
 async function saveClient(){
-await sb.from("clients").insert({
-full_name:c_name.value,
-gender:c_gender.value,
-citizenship:c_citizen.value,
-ic_passport:c_ic.value,
-contact:c_contact.value,
-email:c_email.value,
-address:c_address.value
-});
-loadClients();
+  if(!c_name.value) return alert("Name required");
+
+  const { error } = await sb.from("clients").insert({
+    full_name:c_name.value,
+    gender:c_gender.value,
+    citizenship:c_citizen.value,
+    ic_passport:c_ic.value,
+    contact:c_contact.value,
+    email:c_email.value,
+    address:c_address.value
+  });
+
+  if(error) return alert(error.message);
+  clientMsg.textContent="Client saved ✔";
+  loadClients();
 }
 
 async function loadClients(){
-let {data}=await sb.from("clients").select("*");
-clients=data||[];
+  const { data,error } = await sb.from("clients").select("*").order("created_at",{ascending:false});
+  if(error) return;
+  clients=data||[];
 
-clientTable.innerHTML=clients.map(c=>
-`<tr>
-<td>${c.full_name}</td>
-<td>${c.ic_passport}</td>
-</tr>`
-).join("");
+  clientTable.innerHTML=clients.map(c=>`
+    <tr><td>${c.full_name}</td><td>${c.ic_passport||""}</td></tr>
+  `).join("");
 
-a_client.innerHTML=clients.map(c=>
-`<option value="${c.id}">${c.full_name}</option>`
-).join("");
+  a_client.innerHTML=clients.map(c=>`
+    <option value="${c.id}">${c.full_name}</option>
+  `).join("");
 }
 
-/* PRACT */
-async function addPrac(){
-await sb.from("practitioners").insert({name:p_name.value});
-loadPrac();
+/* PRACTITIONERS */
+async function addPractitioner(){
+  if(!p_name.value) return;
+  await sb.from("practitioners").insert({name:p_name.value});
+  p_name.value="";
+  loadPractitioners();
 }
 
-async function loadPrac(){
-let {data}=await sb.from("practitioners").select("*");
-prac=data||[];
+async function loadPractitioners(){
+  const { data } = await sb.from("practitioners").select("*");
+  practitioners=data||[];
 
-pracList.innerHTML=prac.map(p=>`<div>${p.name}</div>`).join("");
+  pracList.innerHTML=practitioners.map(p=>`<div>${p.name}</div>`).join("");
 
-a_prac.innerHTML=prac.map(p=>
-`<option value="${p.id}">${p.name}</option>`
-).join("");
+  a_prac.innerHTML=practitioners.map(p=>`
+    <option value="${p.id}">${p.name}</option>
+  `).join("");
 }
 
-/* APPOINT */
-async function saveApp(){
-await sb.from("appointments").insert({
-start_time:`${a_date.value}T${a_time.value}`,
-client_id:a_client.value,
-practitioner_id:a_prac.value
-});
+/* APPOINTMENTS */
+async function saveAppointment(){
+  if(!a_date.value||!a_time.value) return alert("Date & time required");
+
+  const { error } = await sb.from("appointments").insert({
+    start_time:`${a_date.value}T${a_time.value}`,
+    client_id:a_client.value,
+    practitioner_id:a_prac.value
+  });
+
+  if(error) return alert(error.message);
+  appMsg.textContent="Appointment saved ✔";
+  loadAppointments();
 }
 
-/* LOGOUT */
-function logout(){
-location.reload();
-}
+async function loadAppointments(){
+  const { data } = await sb
+    .from("appointments")
+    .select("*, clients(full_name), practitioners(name)")
+    .order("start_time",{ascending:false});
 
+  appointments=data||[];
+
+  appTable.innerHTML=appointments.map(a=>`
+    <tr>
+    <td>${new Date(a.start_time).toLocaleString()}</td>
+    <td>${a.clients.full_name}</td>
+    <td>${a.practitioners.name}</td>
+    </tr>
+  `).join("");
+}
 </script>
-
 </body>
 </html>
