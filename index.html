@@ -424,16 +424,27 @@ async function loadPractitioners() {
 
 
 /* ================= SERVICES ================= */
-let services = [];
-
 async function loadServices() {
   const { data, error } = await sb.from("services").select("*");
 
-  if (error) {
+  if("#appointmentsTab select")[2];  if (error) {
+
+  serviceSelect.innerHTML = services.map(s => `
+    <option 
+      value="${s.id}"
+      data-price="${s.price}"
+      data-sst="${s.sst}">
+      ${s.name} (RM ${s.price})
+    </option>
+  `).join("");
+}
     console.error(error);
+    return;
   }
 
   services = data || [];
+
+
 
   const serviceSelect = document.querySelectorAll("#appointmentsTab select")[2];
 
@@ -441,7 +452,7 @@ async function loadServices() {
     <option 
       value="${s.id}"
       data-price="${s.price}"
-      data-foreigner-sst="${s.foreigner_sst}">
+      data-sst="${s.sst}"
       ${s.name} (RM ${s.price})
     </option>
   `).join("");
@@ -483,17 +494,18 @@ function fillAppointmentDropdowns() {
 function calculateCharges() {
   if (!apptService.value || !apptClient.value) return;
 
-  const price = Number(
-    apptService.selectedOptions[0].dataset.price
-  );
+  const selectedService = apptService.selectedOptions[0];
 
-  const sstRequired =
-    apptService.selectedOptions[0].dataset.foreignerSst === "true";
+  const price = Number(selectedService.dataset.price);
+  const serviceHasSST = selectedService.dataset.sst === "true";
 
   const client = clients.find(c => c.id === apptClient.value);
   const isForeigner = client?.citizenship === "Foreigner";
 
-  const sst = (sstRequired && isForeigner) ? price * 0.06 : 0;
+  const sst = (serviceHasSST && isForeigner)
+    ? price * 0.06
+    : 0;
+
   const total = price + sst;
 
   apptAmount.value = price.toFixed(2);
