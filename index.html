@@ -1,841 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dynamique Sports Rehab Centre</title>
-  <style>
-    body { background: orange; font-family: 'Segoe UI', sans-serif; margin:0; color:black; }
-    header { background:black; color:white; padding:10px; display:flex; gap:10px; }
-    header button { background:orange; color:black; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:600; }
-    header button:hover { background:white; color:black; border:1px solid orange; }
-    .container { padding:20px; }
-    .card { background:white; padding:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.2); margin-bottom:20px; }
-    .section-title { color:black; border-bottom:2px solid orange; margin-bottom:15px; font-size:18px; font-weight:bold; }
-    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
-    .form-actions { margin-top:15px; display:flex; gap:10px; }
-    input, select, textarea { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; }
-    button.primary { background:orange; color:black; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:600; }
-    button.primary:hover { background:black; color:white; }
-    button.danger { background:black; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; }
-    button.danger:hover { background:orange; color:black; }
-    table { width:100%; border-collapse:collapse; margin-top:15px; }
-    th, td { border:1px solid #ddd; padding:8px; text-align:left; }
-    th { background:black; color:white; }
-    .small { font-size:12px; padding:4px 8px; }
+<meta charset="UTF-8">
+<title>Dynamique Sports Rehab Centre</title>
 
-/* Center login/logout screen */
-#loginTab, #logoutMessage {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh; /* full screen height */
+<style>
+body { margin:0; font-family:Segoe UI; background:orange; }
+
+header {
+  background:black;
+  color:white;
+  padding:10px;
+  display:flex;
+  gap:10px;
 }
 
-.login-card {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  text-align: center;
-  max-width: 350px;
-  width: 100%;
+header button {
+  background:orange;
+  border:none;
+  padding:8px 12px;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-.login-card h2 {
-  margin-bottom: 20px;
-  color: black;
+.container { padding:20px; }
+
+.card {
+  background:white;
+  padding:20px;
+  border-radius:8px;
+  margin-bottom:20px;
 }
 
-.login-card input, .login-card button {
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.section-title {
+  font-size:18px;
+  font-weight:bold;
+  border-bottom:2px solid orange;
 }
 
-.login-card button {
-  background: orange;
-  color: black;
-  font-weight: 600;
-  cursor: pointer;
+.form-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
 }
 
-.login-card button:hover {
-  background: black;
-  color: white;
+input, select {
+  padding:8px;
+  width:100%;
 }
 
-#loginError {
-  margin-top: 10px;
-  color: red;
-  font-size: 14px;
+button.primary { background:orange; }
+button.danger { background:black; color:white; }
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
 }
 
-    
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+th, td {
+  border:1px solid #ddd;
+  padding:8px;
+}
+
+th { background:black; color:white; }
+
+#loginScreen, #logoutScreen {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.loginBox {
+  background:white;
+  padding:30px;
+  width:300px;
+  text-align:center;
+  border-radius:8px;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
-<!-- Login -->
- <section id="loginTab">
-  <div class="login-card">
-    <h2>Login</h2>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
-    <div id="loginError"></div>
-  </div>
-</section>
 
-<div id="logoutMessage" hidden>
-  <div class="login-card">
-    <h2>Logged out successfully</h2>
-    <p>Please log in again to continue.</p>
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="loginBox">
+    <h2>Login</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <p id="loginError"></p>
   </div>
 </div>
 
-  
+<div id="logoutScreen" hidden>
+  <div class="loginBox">Logged out</div>
+</div>
+
+<!-- APP -->
 <div class="container" hidden>
-  <header>
-    <button id="tabClients">Clients</button>
-    <button id="tabPractitioners">Practitioners</button>
-    <button id="tabAppointments">Appointments</button>
-    <button id="tabReports">Sales Report</button>
-    <button id="logoutBtn">Logout</button>
-  </header>
 
-  <!-- Clients -->
-  <section id="clientsTab" hidden>
-    <h2 class="section-title">Client Registration</h2>
-    <div class="card">
-      <div class="form-grid-2">
-        <label>Name <input id="c_name"></label>
-        <label>DOB <input id="c_dob" type="date"></label>
-        <label>Age <input id="c_age" readonly></label>
-        <label>Gender <select id="c_gender"><option>Male</option><option>Female</option></select></label>
-        <label>Citizen <select id="c_citizen"><option>Malaysian</option><option>Foreigner</option></select></label>
-        <label>IC / Passport <input id="c_ic"></label>
-        <label>Contact <input id="c_contact"></label>
-        <label>Email <input id="c_email"></label>
-        <label>Address <input id="c_address"></label>
-      </div>
-      <div class="form-actions">
-        <button id="addClientBtn" class="primary">Save</button>
-        <button class="danger">Cancel</button>
-      </div>
-      <table>
-        <thead>
-          <tr><th>Name</th><th>DOB</th><th>Age</th><th>Gender</th><th>Citizen</th><th>IC</th><th>Contact</th><th>Email</th><th>Address</th><th>Edit</th><th>Delete</th></tr>
-        </thead>
-        <tbody id="clientsTable"></tbody>
-      </table>
-    </div>
-  </section>
+<header>
+<button onclick="showTab('clients')">Clients</button>
+<button onclick="showTab('practitioners')">Practitioners</button>
+<button onclick="showTab('appointments')">Appointments</button>
+<button onclick="showTab('reports')">Reports</button>
+<button id="logoutBtn">Logout</button>
+</header>
 
-  <!-- Practitioners -->
+<!-- CLIENTS -->
+<section id="clients">
+<h2 class="section-title">Clients</h2>
 
-<section id="practitionersTab" hidden>
-  <h2 class="section-title">Practitioners</h2>
-  <div class="card">
-    <div class="form-grid-2">
-      <label>Name <input id="p_name"></label>
-    </div>
-    <div class="form-actions">
-      <button id="addPractitionerBtn" class="primary">Add</button>
-      <button id="cancelPractitionerBtn" class="danger">Cancel</button>
-    </div>
-    <table>
-      <thead><tr><th>Name</th><th>Delete</th></tr></thead>
-      <tbody id="practitionerTable"></tbody>
-    </table>
-  </div>
-</section>
+<div class="card">
+<div class="form-grid">
 
+<input id="c_name" placeholder="Name">
+<input id="c_dob" type="date">
+<input id="c_age" readonly>
+<select id="c_gender">
+<option>Male</option><option>Female</option>
+</select>
+<select id="c_citizen">
+<option>Malaysian</option><option>Foreigner</option>
+</select>
+<input id="c_ic" placeholder="IC">
+<input id="c_contact" placeholder="Contact">
+<input id="c_email" placeholder="Email">
+<input id="c_address" placeholder="Address">
 
-  <!-- Appointments -->
-  <section id="appointmentsTab" hidden>
-    <h2 class="section-title">Appointments</h2>
-    <div class="card">
-      <div class="form-grid-2">
-        <label>Date <input id="a_date" type="date"></label>
-        <label>Time <input id="a_time" type="time"></label>
-        <label>Client <select id="a_client"></select></label>
-        <label>Practitioner <select id="a_practitioner"></select></label>
-        <label>Service <select id="a_service"></select></label>
-        <label>Payment <select id="a_payment"><option>Cash</option><option>Card</option><option>E-Wallet</option></select></label>
-        <label>Remarks <input id="a_remarks"></label>
-        <label>Amount <input id="a_amount" readonly></label>
-        <label>SST <input id="a_sst" readonly></label>
-        <label>Total <input id="a_total" readonly></label>
-      </div>
-      <div class="form-actions">
-        <button id="saveAppointmentBtn" class="primary">Save</button>
-        <button id="cancelAppointmentBtn" class="danger">Cancel</button>
-      </div>
-      <table>
-        <thead>
-          <tr><th>Date</th><th>Time</th><th>Client</th><th>Service</th><th>Practitioner</th><th>Payment</th><th>Amount</th><th>SST</th><th>Total</th><th>Remarks</th><th>Edit</th><th>Delete</th></tr>
-        </thead>
-        <tbody id="appointmentsTable"></tbody>
-      </table>
-    </div>
-  </section>
+</div>
 
-  <!-- Sales Report -->
-  <section id="reportsTab" hidden>
-  <h2 class="section-title">Sales Report</h2>
-  <div class="card">
-    <input type="date" id="reportStart">
-    <input type="date" id="reportEnd">
-    <button id="filterReportBtn" class="primary">Filter</button>
-    <button id="exportExcelBtn" class="primary">Export to Excel</button>
+<button id="saveClient" class="primary">Save</button>
+<button onclick="clearClient()" class="danger">Cancel</button>
 
-    <!-- Table first -->
-    <table style="margin-top:20px;">
-      <thead><tr><th>Service</th><th>Amount</th><th>SST</th><th>Total</th></tr></thead>
-      <tbody id="salesReportTable"></tbody>
-    </table>
-
-    <!-- Chart after table with spacing -->
-    <div style="margin-top:30px;">
-      <canvas id="salesChart"></canvas>
-    </div>
-  </div>
+<table>
+<thead>
+<tr><th>Name</th><th>Action</th></tr>
+</thead>
+<tbody id="clientTable"></tbody>
+</table>
+</div>
 </section>
 
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"; // replace with your actual key
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ================= SERVICES ================= */
-const SERVICES = [
-  { id:"SM", name:"Sports Massage", price:45 },
-  { id:"RCB", name:"Recovery Compression Boots", price:25 },
-  { id:"AS", name:"Assisted Stretch Session", price:20 },
-  { id:"PB", name:"Physio Bundle", price:400 },
-  { id:"PKP", name:"Performance Kickstart Program", price:261 },
-  { id:"SMFT", name:"Sports Massage - First Trial", price:189 },
-  { id:"QF15", name:"Quick Fix 15 minutes", price:15 }
-];
+/* ================= SUPABASE ================= */
+const sb = supabase.createClient(
+"https://fmwdizyexroiezezitly.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
+);
 
-/* ================= GLOBAL STATE ================= */
+/* ================= STATE ================= */
 let clients = [];
-let practitioners = [];
-let appointments = [];
-
-/* ================= HELPERS ================= */
-function calcAge(dob) {
-  if (!dob) return "";
-  const birth = new Date(dob);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return age;
-}
-function fmtDMY(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
-}
-function formatIC(input) {
-  let v = input.value.replace(/\D/g, "");
-  if (v.length > 6) v = v.slice(0,6) + "-" + v.slice(6);
-  if (v.length > 8) v = v.slice(0,9) + "-" + v.slice(9);
-  input.value = v;
-}
-function formatContact(input) {
-  let v = input.value.replace(/\D/g, "");
-  if (v.length > 3) v = v.slice(0,3) + "-" + v.slice(3);
-  input.value = v;
-}
-
-/* ================= CLIENTS ================= */
-document.getElementById("c_dob").onchange = () => {
-  document.getElementById("c_age").value = calcAge(document.getElementById("c_dob").value);
-};
-
-let editingClientId = null;
-
-document.getElementById("addClientBtn").onclick = async () => {
-  const client = {
-    full_name: document.getElementById("c_name").value,
-    date_of_birth: document.getElementById("c_dob").value,
-    gender: document.getElementById("c_gender").value,
-    citizenship: document.getElementById("c_citizen").value,
-    ic_passport: document.getElementById("c_ic").value,
-    contact: document.getElementById("c_contact").value,
-    email: document.getElementById("c_email").value,
-    address: document.getElementById("c_address").value
-  };
-
-  if (editingClientId) {
-    await sb.from("clients").update(client).eq("id", editingClientId);
-    editingClientId = null;
-  } else {
-    await sb.from("clients").insert(client);
-  }
-
-  loadClients();
-};
-
-async function loadClients() {
-  const { data, error } = await sb
-    .from("clients")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error loading clients:", error);
-    return;
-  }
-
-  clients = data;
-
-  const table = document.querySelector("#clientsTable");
-  table.innerHTML = "";
-
-  const clientSelect = document.getElementById("a_client");
-  if (clientSelect) clientSelect.innerHTML = "";
-
-  data.forEach(c => {
-    const row = `
-      <tr>
-        <td>${c.full_name || ""}</td>
-        <td>${fmtDMY(c.date_of_birth) || ""}</td>
-        <td>${calcAge(c.date_of_birth) || ""}</td>
-        <td>${c.gender || ""}</td>
-        <td>${c.citizenship || ""}</td>
-        <td>${c.ic_passport || ""}</td>
-        <td>${c.contact || ""}</td>
-        <td>${c.email || ""}</td>
-        <td>${c.address || ""}</td>
-        <td><button onclick="editClient('${c.id}')" class="small primary">Edit</button></td>
-        <td><button onclick="deleteClient('${c.id}')" class="small danger">Delete</button></td>
-      </tr>
-    `;
-
-    table.insertAdjacentHTML("beforeend", row);
-
-    if (clientSelect) {
-      clientSelect.innerHTML += `<option value="${c.id}">${c.full_name}</option>`;
-    }
-  });
-}
-
-async function deleteClient(id) {
-  const { error } = await sb.from("clients").delete().eq("id", id);
-  if (error) { alert("Error deleting client: " + error.message); return; }
-  loadClients();
-}
-
-async function editClient(id) {
-  const client = clients.find(c => c.id === id);
-  if (!client) return;
-  document.getElementById("c_name").value = client.full_name;
-  document.getElementById("c_dob").value = client.date_of_birth;
-  document.getElementById("c_age").value = calcAge(client.date_of_birth);
-  document.getElementById("c_gender").value = client.gender;
-  document.getElementById("c_citizen").value = client.citizenship;
-  document.getElementById("c_ic").value = client.ic_passport;
-  document.getElementById("c_contact").value = client.contact;
-  document.getElementById("c_email").value = client.email;
-  document.getElementById("c_address").value = client.address;
-
-  document.getElementById("addClientBtn").onclick = async () => {
-    const updated = {
-      full_name: document.getElementById("c_name").value,
-      date_of_birth: document.getElementById("c_dob").value,
-      gender: document.getElementById("c_gender").value,
-      citizenship: document.getElementById("c_citizen").value,
-      ic_passport: document.getElementById("c_ic").value,
-      contact: document.getElementById("c_contact").value,
-      email: document.getElementById("c_email").value,
-      address: document.getElementById("c_address").value
-    };
-    const { error } = await sb.from("clients").update(updated).eq("id", id);
-    if (error) { alert("Error updating client: " + error.message); return; }
-    loadClients();
-    resetClientSave();
-  };
-}
-
-function resetClientSave() {
-  document.getElementById("addClientBtn").onclick = async () => {
-    const client = {
-      full_name: document.getElementById("c_name").value,
-      date_of_birth: document.getElementById("c_dob").value,
-      gender: document.getElementById("c_gender").value,
-      citizenship: document.getElementById("c_citizen").value,
-      ic_passport: document.getElementById("c_ic").value,
-      contact: document.getElementById("c_contact").value,
-      email: document.getElementById("c_email").value,
-      address: document.getElementById("c_address").value
-    };
-    const { error } = await sb.from("clients").insert(client);
-    if (error) { alert("Error saving client: " + error.message); return; }
-    loadClients();
-    ["c_name","c_dob","c_age","c_gender","c_citizen","c_ic","c_contact","c_email","c_address"]
-      .forEach(id => document.getElementById(id).value = "");
-  };
-}
-
-
-/* ================= PRACTITIONERS ================= */
-
-let practitioners = [];
-let editingPractitionerId = null;
-
-/* LOAD */
-async function loadPractitioners() {
-  const { data, error } = await sb.from("practitioners").select("*");
-
-  if (error) {
-    console.error("Practitioners load error:", error);
-    return;
-  }
-
-  practitioners = data;
-
-  renderPractitionersTable();
-  renderPractitionerDropdown();
-}
-
-/* RENDER TABLE */
-function renderPractitionersTable() {
-  const table = document.getElementById("practitionerTable");
-  table.innerHTML = "";
-
-  practitioners.forEach(p => {
-    table.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${p.name || ""}</td>
-        <td>
-          <button class="small danger" onclick="deletePractitioner('${p.id}')">
-            Delete
-          </button>
-        </td>
-      </tr>
-    `);
-  });
-}
-
-/* DROPDOWN (Appointments) */
-function renderPractitionerDropdown() {
-  const select = document.getElementById("a_practitioner");
-  if (!select) return;
-
-  select.innerHTML = `<option value="">Select Practitioner</option>`;
-
-  practitioners.forEach(p => {
-    select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-  });
-}
-
-/* ADD */
-document.getElementById("addPractitionerBtn").onclick = async () => {
-  const name = document.getElementById("p_name").value.trim();
-  if (!name) return alert("Enter practitioner name");
-
-  const { error } = await sb.from("practitioners").insert({ name });
-
-  if (error) return alert(error.message);
-
-  document.getElementById("p_name").value = "";
-  loadPractitioners();
-};
-
-/* CANCEL */
-document.getElementById("cancelPractitionerBtn").onclick = () => {
-  document.getElementById("p_name").value = "";
-};
-
-/* DELETE */
-async function deletePractitioner(id) {
-  if (!confirm("Delete this practitioner?")) return;
-
-  const { error } = await sb.from("practitioners").delete().eq("id", id);
-
-  if (error) return alert(error.message);
-
-  loadPractitioners();
-}
-
-/* ================= APPOINTMENTS ================= */
-
-let appointments = [];
-let editingAppointmentId = null;
-
-/* AUTO DATE TIME */
-function setCurrentDateTime() {
-  const now = new Date();
-  document.getElementById("a_date").value = now.toISOString().slice(0,10);
-  document.getElementById("a_time").value = now.toTimeString().slice(0,5);
-}
-
-/* TOTAL CALC */
-function updateTotals() {
-  const service = SERVICES.find(s =>
-    s.id === document.getElementById("a_service").value
-  );
-
-  const amount = service?.price || 0;
-
-  const client = clients.find(c =>
-    c.id === document.getElementById("a_client").value
-  );
-
-  let sst = 0;
-
-  const needsSST =
-    ["SM","PB","PKP"].includes(service?.id) ||
-    client?.citizenship === "Foreigner";
-
-  if (needsSST) sst = +(amount * 0.06).toFixed(2);
-
-  const total = amount + sst;
-
-  document.getElementById("a_amount").value = amount.toFixed(2);
-  document.getElementById("a_sst").value = sst.toFixed(2);
-  document.getElementById("a_total").value = total.toFixed(2);
-}
-
-/* TRIGGERS */
-document.getElementById("a_service").onchange = updateTotals;
-document.getElementById("a_client").onchange = updateTotals;
-
-/* SAVE (CREATE / UPDATE) */
-document.getElementById("saveAppointmentBtn").onclick = async () => {
-
-  const service = SERVICES.find(s =>
-    s.id === document.getElementById("a_service").value
-  );
-
-  const appointment = {
-    start_time: `${document.getElementById("a_date").value}T${document.getElementById("a_time").value}`,
-    client_id: document.getElementById("a_client").value,
-    practitioner_id: document.getElementById("a_practitioner").value,
-    service_id: service?.id,
-    payment_method: document.getElementById("a_payment").value,
-    remarks: document.getElementById("a_remarks").value,
-    amount: parseFloat(document.getElementById("a_amount").value) || 0,
-    sst: parseFloat(document.getElementById("a_sst").value) || 0,
-    total: parseFloat(document.getElementById("a_total").value) || 0
-  };
-
-  let error;
-
-  if (editingAppointmentId) {
-    ({ error } = await sb
-      .from("appointments")
-      .update(appointment)
-      .eq("id", editingAppointmentId));
-  } else {
-    ({ error } = await sb
-      .from("appointments")
-      .insert(appointment));
-  }
-
-  if (error) return alert(error.message);
-
-  editingAppointmentId = null;
-
-  loadAppointments();
-  setCurrentDateTime();
-  clearAppointmentForm();
-};
-
-/* CLEAR FORM */
-function clearAppointmentForm() {
-  ["a_client","a_practitioner","a_service","a_payment","a_remarks"]
-    .forEach(id => document.getElementById(id).value = "");
-
-  updateTotals();
-}
-
-/* LOAD */
-async function loadAppointments() {
-  const { data, error } = await sb
-    .from("appointments")
-    .select("*")
-    .order("start_time", { ascending: false });
-
-  if (error) {
-    console.error("Appointments load error:", error);
-    return;
-  }
-
-  appointments = data;
-
-  renderAppointmentsTable();
-}
-
-/* TABLE */
-function renderAppointmentsTable() {
-  const table = document.getElementById("appointmentsTable");
-  table.innerHTML = "";
-
-  appointments.forEach(a => {
-
-    const clientName = clients.find(c => c.id === a.client_id)?.full_name || "";
-    const practitionerName = practitioners.find(p => p.id === a.practitioner_id)?.name || "";
-    const serviceName = SERVICES.find(s => s.id === a.service_id)?.name || "";
-
-    table.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${a.start_time.slice(0,10)}</td>
-        <td>${a.start_time.slice(11,16)}</td>
-        <td>${clientName}</td>
-        <td>${serviceName}</td>
-        <td>${practitionerName}</td>
-        <td>${a.payment_method || ""}</td>
-        <td>${a.amount?.toFixed(2) || "0.00"}</td>
-        <td>${a.sst?.toFixed(2) || "0.00"}</td>
-        <td>${a.total?.toFixed(2) || "0.00"}</td>
-        <td>${a.remarks || ""}</td>
-        <td>
-          <button class="small primary" onclick="editAppointment('${a.id}')">Edit</button>
-        </td>
-        <td>
-          <button class="small danger" onclick="deleteAppointment('${a.id}')">Delete</button>
-        </td>
-      </tr>
-    `);
-  });
-}
-
-/* EDIT */
-function editAppointment(id) {
-  const a = appointments.find(x => x.id === id);
-  if (!a) return;
-
-  editingAppointmentId = id;
-
-  document.getElementById("a_date").value = a.start_time.slice(0,10);
-  document.getElementById("a_time").value = a.start_time.slice(11,16);
-  document.getElementById("a_client").value = a.client_id;
-  document.getElementById("a_practitioner").value = a.practitioner_id;
-  document.getElementById("a_service").value = a.service_id;
-  document.getElementById("a_payment").value = a.payment_method;
-  document.getElementById("a_remarks").value = a.remarks;
-
-  updateTotals();
-}
-
-/* DELETE */
-async function deleteAppointment(id) {
-  if (!confirm("Delete this appointment?")) return;
-
-  const { error } = await sb
-    .from("appointments")
-    .delete()
-    .eq("id", id);
-
-  if (error) return alert(error.message);
-
-  loadAppointments();
-}
-/* ================= SALES REPORT ================= */
-let salesChartInstance = null;
-let latestReport = {};
-
-async function loadSalesReport() {
-  const start = document.getElementById("reportStart").value;
-  const end = document.getElementById("reportEnd").value;
-  let query = sb.from("appointments").select("*");
-  if (start) query = query.gte("start_time", start + "T00:00:00");
-  if (end) query = query.lte("start_time", end + "T23:59:59");
-  const { data, error } = await query;
-  if (error) { console.error(error); return; }
-
-  const report = {};
-  data.forEach(a => {
-    const serviceName = SERVICES.find(s=>s.id===a.service_id)?.name || "Unknown";
-    if (!report[serviceName]) report[serviceName] = { amount:0, sst:0, total:0 };
-    report[serviceName].amount += a.amount || 0;
-    report[serviceName].sst += a.sst || 0;
-    report[serviceName].total += a.total || 0;
-  });
-  latestReport = report;
- // Update table
-  const table = document.getElementById("salesReportTable");
-  table.innerHTML = "";
-  Object.keys(report).forEach(service => {
-    const r = report[service];
-    const row = `<tr>
-  <td>${service}</td>
-  <td>${r.amount.toFixed(2)}</td>
-  <td>${r.sst.toFixed(2)}</td>
-  <td>${r.total.toFixed(2)}</td>
-</tr>`;
-    table.insertAdjacentHTML("beforeend", row);
-  });
-
-  // Refresh chart
-  const ctx = document.getElementById("salesChart").getContext("2d");
-  if (salesChartInstance) salesChartInstance.destroy();
-  salesChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(report),
-      datasets: [{
-        label: 'Total Sales',
-        data: Object.values(report).map(r=>r.total),
-        backgroundColor: 'orange'
-      }]
-    },
-    options: { responsive:true, plugins:{legend:{display:false}} }
-  });
-}
-
- document.getElementById("filterReportBtn").onclick = loadSalesReport;
-document.getElementById("exportExcelBtn").onclick = () => {
-  let csv = "Service,Amount,SST,Total\n";
-  Object.keys(latestReport).forEach(s => {
-    const r = latestReport[s];
-    csv += `${s},${r.amount.toFixed(2)},${r.sst.toFixed(2)},${r.total.toFixed(2)}\n`;
-  });
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "sales_report.csv"; a.click();
-};
-
-
-
+let editClientId = null;
 
 /* ================= LOGIN ================= */
+loginBtn.onclick = async () => {
 
-function showAppUI() {
-  document.getElementById("loginTab").hidden = true;
-  document.querySelector(".container").hidden = false;
-  document.getElementById("logoutMessage").hidden = true;
-}
+const { data, error } = await sb.auth.signInWithPassword({
+email: email.value,
+password: password.value
+});
 
-function showLoginUI() {
-  document.getElementById("loginTab").hidden = false;
-  document.querySelector(".container").hidden = true;
-  document.getElementById("logoutMessage").hidden = true;
-}
+if (error) return loginError.innerText = error.message;
 
-/* LOGIN */
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+loginScreen.hidden = true;
+document.querySelector(".container").hidden = false;
 
-  const { data, error } = await sb.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    document.getElementById("loginError").innerText = error.message;
-    console.error(error);
-    return;
-  }
-
-  if (data.session) {
-    showAppUI();
-
-    loadClients();
-    loadPractitioners();
-    loadAppointments();
-
-    setCurrentDateTime();
-    updateTotals();
-  }
+loadClients();
+showTab("clients");
 };
 
-/* LOGOUT */
-document.getElementById("logoutBtn").onclick = async () => {
-  await sb.auth.signOut();
-
-  document.getElementById("logoutMessage").hidden = false;
-  showLoginUI();
+/* ================= LOGOUT ================= */
+logoutBtn.onclick = async () => {
+await sb.auth.signOut();
+location.reload();
 };
 
-/* TAB SWITCHING */
-function showTab(tabId) {
-  ["clientsTab","practitionersTab","appointmentsTab","reportsTab"]
-    .forEach(id => document.getElementById(id).hidden = true);
-
-  document.getElementById(tabId).hidden = false;
-
-  if (tabId === "reportsTab") loadSalesReport();
+/* ================= TABS ================= */
+function showTab(id){
+["clients"].forEach(t=>{
+document.getElementById(t).hidden = true;
+});
+document.getElementById(id).hidden = false;
 }
 
-document.getElementById("tabClients").onclick = () => showTab("clientsTab");
-document.getElementById("tabPractitioners").onclick = () => showTab("practitionersTab");
-document.getElementById("tabAppointments").onclick = () => showTab("appointmentsTab");
-document.getElementById("tabReports").onclick = () => showTab("reportsTab");
+/* ================= CLIENT ================= */
+function calcAge(dob){
+if(!dob) return "";
+return new Date().getFullYear() - new Date(dob).getFullYear();
+}
 
-/* INITIAL LOAD */
-window.onload = async () => {
-  const { data: { session }, error } = await sb.auth.getSession();
-
-  if (error) console.error(error);
-
-  if (session) {
-    showAppUI();
-
-    loadClients();
-    loadPractitioners();
-    loadAppointments();
-
-    setCurrentDateTime();
-    updateTotals();
-  } else {
-    showLoginUI();
-  }
-
-  document.getElementById("loginError").innerText = "";
+c_dob.onchange = () => {
+c_age.value = calcAge(c_dob.value);
 };
-/* ================= TAB SWITCHING ================= */
-function showTab(tabId) {
-  ["clientsTab","practitionersTab","appointmentsTab","reportsTab"].forEach(id=>{
-    document.getElementById(id).hidden = true;
-  });
-  document.getElementById(tabId).hidden = false;
-  if (tabId === "reportsTab") loadSalesReport();
+
+function clearClient(){
+editClientId = null;
+saveClient.innerText = "Save";
+
+c_name.value="";
+c_dob.value="";
+c_age.value="";
+c_gender.value="Male";
+c_citizen.value="Malaysian";
+c_ic.value="";
+c_contact.value="";
+c_email.value="";
+c_address.value="";
 }
-document.getElementById("tabClients").onclick = ()=>showTab("clientsTab");
-document.getElementById("tabPractitioners").onclick = ()=>showTab("practitionersTab");
-document.getElementById("tabAppointments").onclick = ()=>showTab("appointmentsTab");
-document.getElementById("tabReports").onclick = ()=>showTab("reportsTab");
 
-/* ================= INITIALIZATION ================= */
-window.onload = async () => {
-  const { data: { session }, error } = await sb.auth.getSession();
-  if (error) {
-    console.error("Session check error:", error);
-  }
+saveClient.onclick = async () => {
 
-  if (session) {
-    document.getElementById("loginTab").hidden = true;
-    document.querySelector(".container").hidden = false;
-    document.getElementById("logoutMessage").hidden = true;
+const obj = {
+full_name:c_name.value,
+date_of_birth:c_dob.value,
+gender:c_gender.value,
+citizenship:c_citizen.value,
+ic_passport:c_ic.value,
+contact:c_contact.value,
+email:c_email.value,
+address:c_address.value
+};
 
-    loadClients();
-    loadPractitioners();
-    loadAppointments();
-  } else {
-    document.getElementById("loginTab").hidden = false;
-    document.querySelector(".container").hidden = true;
-    document.getElementById("logoutMessage").hidden = true;
-  }
+let error;
 
-  document.getElementById("loginError").innerText = "";
+if(editClientId){
+({error} = await sb.from("clients").update(obj).eq("id",editClientId));
+}else{
+({error} = await sb.from("clients").insert(obj));
 }
-setCurrentDateTime();
-updateTotals();
 
+if(error) return alert(error.message);
 
+clearClient();
+loadClients();
+};
+
+async function loadClients(){
+
+const { data } = await sb.from("clients").select("*");
+
+clients = data;
+
+clientTable.innerHTML = "";
+
+data.forEach(c=>{
+clientTable.innerHTML += `
+<tr>
+<td>${c.full_name}</td>
+<td>
+<button onclick="editClient('${c.id}')">Edit</button>
+<button onclick="deleteClient('${c.id}')">Delete</button>
+</td>
+</tr>`;
+});
+}
+
+function editClient(id){
+const c = clients.find(x=>x.id===id);
+
+editClientId = id;
+
+c_name.value = c.full_name;
+c_dob.value = c.date_of_birth;
+c_gender.value = c.gender;
+c_citizen.value = c.citizenship;
+c_ic.value = c.ic_passport;
+c_contact.value = c.contact;
+c_email.value = c.email;
+c_address.value = c.address;
+
+saveClient.innerText = "Update";
+}
+
+async function deleteClient(id){
+await sb.from("clients").delete().eq("id",id);
+loadClients();
+}
 
 </script>
 </body>
