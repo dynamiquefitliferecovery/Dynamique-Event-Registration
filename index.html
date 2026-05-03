@@ -564,11 +564,19 @@ async function loadPractitioners() {
   });
 }
                                                          
-/* ================= SERVICES ================= */
+/* ================= SERVICES ================= */-CODED SERVICES (NO SUPABASE)
+const services = [
+  { code: "SM",   name: "Sports Massage",                   price: 45,  sst: false },
+  { code: "RCB",  name: "Recovery Compression Boots",       price: 25,  sst: false },
+  { code: "ASS",  name: "Assisted Stretch Session",         price: 20,  sst: false },
 
-: 1, name: "Physiotherapy", price: 120, sst: true },const services = [
-  { id: 2, name: "Sports Massage", price: 150, sst: true },
-  { id: 3, name: "Rehab Assessment", price: 200, sst: false }
+  // ✅ SST applies IF client is Foreigner
+  { code: "PB",   name: "Physio Bundle",                    price: 400, sst: true },
+  { code: "PKP",  name: "Performance Kickstart Program",   price: 261, sst: true },
+  { code: "SMFT", name: "Sports Massage - First Trial",    price: 189, sst: true },
+
+  // ✅ No SST
+  { code: "QF15", name: "Quick Fix 15 minutes",             price: 15,  sst: false }
 ];
 
 function initServiceDropdown() {
@@ -576,15 +584,15 @@ function initServiceDropdown() {
 
   services.forEach(s => {
     const opt = document.createElement("option");
-    opt.value = s.id;
+    opt.value = s.code;          // service code
     opt.dataset.price = s.price;
-    opt.dataset.sst = s.sst;
+    opt.dataset.sst = s.sst;     // true / false
     opt.textContent = `${s.name} (RM ${s.price.toFixed(2)})`;
     apptService.appendChild(opt);
   });
 }
 
-
+  
 /* ================= APPOINTMENTS ================= */
 
 function setAppointmentDefaults() {
@@ -687,7 +695,6 @@ const to = reportTo.value;
 async function loadAll() {
   await loadClients();
   await loadPractitioners();
-  await loadServices();   // data only
 
   setAppointmentDefaults();
   loadAppointments();
