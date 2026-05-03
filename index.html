@@ -449,7 +449,9 @@ function formatContact(v = "") {
 
 
 /* ================= HELPER FUNCTION ================= */
-function calculateAge(dob) {function calculateAge(d) return "";
+
+  function calculateAge(dob) {
+  if (!dob) return "";
   const birth = new Date(dob);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
@@ -459,8 +461,6 @@ function calculateAge(dob) {function calculateAge(d) return "";
   }
   return age;
 }
-
-  
 /* ================= CLIENTS ================= */
 let clients = [];
 
@@ -480,8 +480,10 @@ async function loadClients() {
   const tbody = document.getElementById("clientsTable");
 
 
-tbody.innerHTML = clients.map(c => `}</td>
-    <td>${c.date_of_birth || ""} (${calculateAge(c.date_of_birth)} yrs)</td>
+tbody.innerHTML = clients.map(c => `
+  <tr>
+    <td>${c.full_name}</td>
+   <td>${c.date_of_birth || ""} (${calculateAge(c.date_of_birth)} yrs)</td>
     <td>${c.gender || ""}</td>
     <td>${c.citizenship || ""}</td>
     <td>${formatIc(c.ic_passport)}</td>
@@ -493,7 +495,6 @@ tbody.innerHTML = clients.map(c => `}</td>
     </td>
   </tr>
 `).join("");
-  <tr>
 
 async function saveClient() {
   const inputs = document.querySelectorAll("#clientsTab input");
@@ -659,31 +660,21 @@ function setAppointmentDefaults() {
 /* fill client & practitioner dropdowns ONLY */
 function fillAppointmentDropdowns() {
   // Clients
-  apptClient.innerHTML = `
-    <option value="">Select Client</option>
-    ${clients.map(c =>
-      `<option value="${c.id}">${c.full_name}</option>`
-    ).join("")}
-  `;
+ apptClient.innerHTML = `<option value="">Select Client</option>`;
+clients.forEach(c => {
+  const opt = document.createElement("option");
+  opt.value = c.id;
+  opt.textContent = c.full_name;
+  apptClient.appendChild(opt);
+});
 
-  // Practitioners
-  apptPractitioner.innerHTML = `
-    <option value="">Select Practitioner</option>
-    ${practitioners.map(p =>
-      `<option value="${p.id}">${p.name}</option>`
-    ).join("")}
-  `;
-}
-
-/* service dropdown (called when tab opens) */
-function initServiceDropdown() {
-  if (!services.length) return;
-
-  apptService.innerHTML = "";
-  const defaultOpt = document.createElement("option");
-  defaultOpt.value = "";
-  defaultOpt.textContent = "Select Service";
-  apptService.appendChild(defaultOpt);
+apptPractitioner.innerHTML = `<option value="">Select Practitioner</option>`;
+practitioners.forEach(p => {
+  const opt = document.createElement("option");
+  opt.value = p.id;
+  opt.textContent = p.name;
+  apptPractitioner.appendChild(opt);
+});
 
   services.forEach(s => {
     const opt = document.createElement("option");
@@ -783,7 +774,7 @@ async function loadAppointments() {
     return;
   }
 
- apptTable.innerHTML = data.map(a => `
+apptTable.innerHTML = data.map(a => `
   <tr>
     <td>${new Date(a.start_time).toLocaleString()}</td>
     <td>${a.clients.full_name}</td>
@@ -796,7 +787,6 @@ async function loadAppointments() {
     <td class="edit" onclick='editAppointment(${JSON.stringify(a)})'>Edit</td>
   </tr>
 `).join("");
-}
 
 /* edit appointment */
 function editAppointment(a) {
