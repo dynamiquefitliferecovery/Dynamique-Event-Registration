@@ -521,23 +521,24 @@ clientsTable.addEventListener("click", async e => {
     clientAddress.value = c.address;
   }
 });
+
 /* ================= PRACTITIONERS ================= */
 let practitioners = [];
 
 async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
 
-  if (!input.value) {
+  if (!input.value.trim()) {
     alert("Practitioner name required");
     return;
   }
 
-  const res = await sb
+  const { error } = await sb
     .from("practitioners")
-    .insert({ name: input.value });
+    .insert({ name: input.value.trim() });
 
-  if (res.error) {
-    alert(res.error.message);
+  if (error) {
+    alert(error.message);
     return;
   }
 
@@ -555,14 +556,20 @@ async function loadPractitioners() {
 
   practitioners = data || [];
 
- document.getElementById("practitionerList").innerHTML =
-  practitioners.map(p => `
-    <div>
-      ${p.name}
-      <span class="edit" onclick="deletePractitioner(${p.id})">Delete</span>
-    </div>
-  `).join("");
-}
+  document.getElementById("practitionerList").innerHTML =
+    practitioners.map(p => `
+      <div>
+        ${p.name}
+        <span
+          class="edit"
+          data-action="delete"
+          data-id="${p.id}"
+ent
+  .getElementById("practitionerList")
+  .addEventListener("click", async e => {
+    if (e.target.dataset.action !== "delete") return;
+    await deletePractitioner(e.target.dataset.id);
+  });
 
 async function deletePractitioner(id) {
   if (!confirm("Delete practitioner?")) return;
@@ -577,9 +584,9 @@ async function deletePractitioner(id) {
     return;
   }
 
-  alert("Practitioner deleted");
   loadPractitioners();
 }
+
 
 /* ================= SERVICES ================= */
 let services = [];
