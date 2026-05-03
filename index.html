@@ -458,22 +458,17 @@ async function loadClients() {
 
   clients = data || [];
 
-clientsTable.innerHTML = clients.map(c => `
-  <tr>
-    <td>${c.full_name}</td>
-    <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
+clientsTable.innerHTML = clients.map(c => `clientsTable.innerHTML = clients_birth} (${calculateAge(c.date_of_birth)})</td>
     <td>${c.gender}</td>
     <td>${c.citizenship}</td>
     <td>${formatIc(c.ic_passport)}</td>
     <td>${formatContact(c.contact)}</td>
     <td>${c.email}</td>
     <td>
-      editEdit</span> |
-      deleteDelete</span>
-    </td>
-  </tr>
-`).join("");
-}
+      <span class="edit" data-action="edit" data data-action="delete" data-id="${c
+  <tr>
+    <td>${c.full_name}</td>
+
 
 document.getElementById("saveClientBtn").addEventListener("click", async () => {
   const payload = {
@@ -667,15 +662,7 @@ async function saveAppointment() {
 
   const payload = {
     start_time: local.toISOString(),
-    client_id if (res.error) {    client_id: apptClient.value,
-    alert(res.error.message);
-    return;
-  }
-
-  editingAppointmentId = null;
-  loadAppointments();
-}
-
+    client_id: apptClient.value,
     practitioner_id: apptPractitioner.value,
     service_id: apptService.value,
     payment_method: apptPayment.value,
@@ -685,7 +672,20 @@ async function saveAppointment() {
     total: Number(apptTotal.value)
   };
 
+  const res = editingAppointmentId
+    ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
+    : await sb.from("appointments").insert(payload);
 
+  if (res.error) {
+    alert(res.error.message);
+    return;
+  }
+
+  editingAppointmentId = null;
+  loadAppointments();
+}
+
+  
 /* list appointments */
 async function loadAppointments() {
   const { data, error } = await sb
