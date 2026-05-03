@@ -673,9 +673,12 @@ async function loadAppointments() {
 
 /* ================= REPORT ================= */
 
-async function loadReport() {async function load from = reportFrom.value;
+/* ================= SALES REPORT ================= */let reportData = [];
+
+async function loadReport() {
+  const from = reportFrom.value;
   const to = reportTo.value;
-                             
+
   reportData = [];
   let totalAmount = 0;
 
@@ -688,9 +691,8 @@ async function loadReport() {async function load from = reportFrom.value;
       total,
       payment,
       remarks,
-      client:clients(full_name, citizenship, date_of_birth),
-      service_code,
-      service_name
+      service_name,
+      client:clients(full_name, citizenship, date_of_birth)
     `)
     .order("start_time", { ascending: true });
 
@@ -700,7 +702,7 @@ async function loadReport() {async function load from = reportFrom.value;
   const { data, error } = await query;
   if (error) {
     console.error(error);
-    alert("Failed to load report");
+    alert("Failed to load sales report");
     return;
   }
 
@@ -709,8 +711,11 @@ async function loadReport() {async function load from = reportFrom.value;
 
   data.forEach(r => {
     const age = calculateAge(r.client?.date_of_birth);
+    const amount = Number(r.amount || 0);
+    const sst = Number(r.sst || 0);
+    const total = Number(r.total || 0);
 
-    totalAmount += Number(r.total || 0);
+    totalAmount += total;
 
     // store for Excel
     reportData.push({
@@ -719,26 +724,26 @@ async function loadReport() {async function load from = reportFrom.value;
       age: age,
       citizenship: r.client?.citizenship || "",
       service: r.service_name || "",
-      amount: Number(r.amount || 0),
-      sst: Number(r.sst || 0),
-      total: Number(r.total || 0),
+      amount: amount,
+      sst: sst,
+      total: total,
       payment: r.payment || "",
       remarks: r.remarks || ""
     });
 
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${new Date(r.start_time).toLocaleDateString()}</td>
-      <td>${r.client?.full_name || ""}</td>
-      <td>${age}</td>
-      <td>${r.client?.citizenship || ""}</td>
-      <td>${r.service_name || ""}</td>
-      <td>${Number(r.amount || 0).toFixed(2)}</td>
-      <td>${Number(r.sst || 0).toFixed(2)}</td>
-      <td>${Number(r.total || 0).toFixed(2)}</td>
-      <td>${r.payment || ""}</td>
-      <td>${r.remarks || ""}</td>
-    `;
+    tr.innerHTML =
+      "<td>" + new Date(r.start_time).toLocaleDateString() + "</td>" +
+      "<td>" + (r.client?.full_name || "") + "</td>" +
+      "<td>" + age + "</td>" +
+      "<td>" + (r.client?.citizenship || "") + "</td>" +
+      "<td>" + (r.service_name || "") + "</td>" +
+      "<td>" + amount.toFixed(2) + "</td>" +
+      "<td>" + sst.toFixed(2) + "</td>" +
+      "<td>" + total.toFixed(2) + "</td>" +
+      "<td>" + (r.payment || "") + "</td>" +
+      "<td>" + (r.remarks || "") + "</td>";
+
     tbody.appendChild(tr);
   });
 
@@ -746,39 +751,32 @@ async function loadReport() {async function load from = reportFrom.value;
     "Total: RM " + totalAmount.toFixed(2);
 }
 
-  function exportReportExcel() {
-  if (!reportData || reportData.length === 0) {
+function exportReportExcel() {
+  if (!reportData.length) {
     alert("No data to export");
     return;
   }
 
   let csv = [];
-  csv.push([
-    "Date",
-    "Client",
-    "Age",
-    "Citizenship",
-    "Service",
-    "Amount",
-    "SST",
-    "Total",
-    "Payment",
-    "Remarks"
-  ].join(","));
+  csv.push(
+    "Date,Client,Age,Citizenship,Service,Amount,SST,Total,Payment,Remarks"
+  );
 
   reportData.forEach(r => {
-    csv.push([
-      r.date,
-      `"${r.client}"`,
-      r.age,
-      r.citizenship,
-      `"${r.service}"`,
-      r.amount.toFixed(2),
-      r.sst.toFixed(2),
-      r.total.toFixed(2),
-      r.payment,
-      `"${r.remarks}"`
-    ].join(","));
+    csv.push(
+      [
+        r.date,
+        `"${r.client}"`,
+        r.age,
+        r.citizenship,
+        `"${r.service}"`,
+        r.amount.toFixed(2),
+        r.sst.toFixed(2),
+        r.total.toFixed(2),
+        r.payment,
+        `"${r.remarks}"`
+      ].join(",")
+    );
   });
 
   const blob = new Blob([csv.join("\n")], { type: "text/csv" });
