@@ -568,10 +568,14 @@ async function loadPractitioners() {
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      <span class="edit" data-action="delete" data-id="${p.idn("");
+      delete
+        Delete
+      </span>
+    </div>
+  `).join("");
 }
 
-/* CLICK HANDLER */
+/* CLICK HANDLER (event delegation) */
 document
   .getElementById("practitionerList")
   .addEventListener("click", async e => {
@@ -595,6 +599,7 @@ async function deletePractitioner(id) {
 
   loadPractitioners();
 }
+
 
 /* ================= SERVICES ================= */
 
