@@ -463,17 +463,17 @@ async function loadClients() {
 
   clients = data || [];
 
-  clientsTable.innerHTML = clients.map(c => `
-    <tr>
-      <td>${c.full_name}</td>
-      <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
-      <td>${c.gender}</td>
-      <td>${c.citizenship}</td>
-      <td>${formatIc(c.ic_passport)}</td>
-      <td>${formatContact(c.contact)}</td>
-      <td>${c.email}</td>
-     <td>
-  <span class="edit" data-action="edit" data-id="${c.id
+ clientsTable.innerHTML = clients.map(c => `
+  <tr>
+    <td>${c.full_name}</td>
+    <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
+    <td>${c.gender}</td>
+    <td>${c.citizenship}</td>
+    <td>${formatIc(c.ic_passport)}</td>
+    <td>${formatContact(c.contact)}</td>
+    <td>${c.email}</td>
+    <td>
+      <span class="edit" data-action="edit" data-id="${c.id}="delete" data-id="${
 </td>
   `).join("");
 }
