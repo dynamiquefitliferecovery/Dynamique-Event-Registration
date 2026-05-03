@@ -581,18 +581,18 @@ const services = [
   { code: "QF15", name: "Quick Fix 15 minutes",           price: 15,  sst: false }
 ];
 
-function initServiceDropdown() {
-  apptService.innerHTML = `<option value="">Select Service</option>`;
+function initServiceDropdown() {function initServiceptService.innerHTML = '<option value="">Select Service</option>';
 
   services.forEach(s => {
     const opt = document.createElement("option");
     opt.value = s.code;
     opt.dataset.price = s.price;
     opt.dataset.sst = s.sst;
-    opt.textContent = `${s.name} (RM ${s.price.toFixed(2)})`;
+    opt.textContent = s.name + " (RM " + s.price.toFixed(2) + ")";
     apptService.appendChild(opt);
   });
 }
+
   
 /* ================= APPOINTMENTS ================= */
 
