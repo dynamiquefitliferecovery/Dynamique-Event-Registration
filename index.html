@@ -463,7 +463,7 @@ async function loadClients() {
 
   clients = data || [];
 
- clientsTable.innerHTML = clients.map(c => `
+clientsTable.innerHTML = clients.map(c => `
   <tr>
     <td>${c.full_name}</td>
     <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
@@ -473,8 +473,8 @@ async function loadClients() {
     <td>${formatContact(c.contact)}</td>
     <td>${c.email}</td>
     <td>
-      <span class="edit" data-action="edit" data-idta-action="delete" data-id="${c.id}
-
+      <span class="edit" data-action="edit" data-id="${ction="delete" data-id="${c.id}
+      
 document.getElementById("saveClientBtn").addEventListener("click", async () => {
   const payload = {
     full_name: clientName.value.trim(),
