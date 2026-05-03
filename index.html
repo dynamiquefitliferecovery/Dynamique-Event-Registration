@@ -678,14 +678,6 @@ practitioners.forEach(p => {
   apptPractitioner.appendChild(opt);
 });
 
-  services.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.id;
-    opt.dataset.price = s.price;
-    opt.dataset.sst = s.sst;
-    opt.textContent = `${s.code} – ${s.name} (RM ${Number(s.price).toFixed(2)})`;
-    apptService.appendChild(opt);
-  });
 }
 
 /* calculate amount / SST */
