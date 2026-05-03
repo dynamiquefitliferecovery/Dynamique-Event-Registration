@@ -526,42 +526,75 @@ clientsTable.addEventListener("click", async e => {
 
 let practitioners = [];
 
+/* ADD PRACTITIONER */
 async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
-  if (!input.value.trim()) return alert("Practitioner name required");
 
-  await sb.from("practitioners").insert({ name: input.value.trim() });
+  if (!input || !input.value.trim()) {
+    alert("Practitioner name required");
+    return;
+  }
+
+  const { error } = await sb
+    .from("practitioners")
+    .insert({ name: input.value.trim() });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
   input.value = "";
   loadPractitioners();
 }
 
+/* LOAD PRACTITIONERS */
 async function loadPractitioners() {
-  const { data } = await sb
+  const { data, error } = await sb
     .from("practitioners")
     .select("*")
     .order("name");
 
+  if (error) {
+    console.error(error);
+    return;
+  }
+
   practitioners = data || [];
 
   const list = document.getElementById("practitionerList");
+  if (!list) return;
+
   list.innerHTML = practitioners.map(p => `
-  <div>
-    ${p.name}
-    <span class="edit" data-action="delete" data-id="${p.id
-  </div>
-`).join("");
+    <div>
+      ${p.name}
+      <span class="edit" data-action="delete" data-id="${p.idn("");
 }
 
+/* DELETE CLICK HANDLER (delegation) */
 document
   .getElementById("practitionerList")
   .addEventListener("click", e => {
-    if (e.target.dataset.action === "delete") {
-      deletePractitioner(e.target.dataset.id);
+    const { action, id } = e.target.dataset;
+    if (action === "delete") {
+      deletePractitioner(id);
     }
   });
 
+/* DELETE PRACTITIONER */
 async function deletePractitioner(id) {
-  await sb.from("practitioners").delete().eq("id", id);
+  if (!confirm("Delete practitioner?")) return;
+
+  const { error } = await sb
+    .from("practitioners")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
   loadPractitioners();
 }
 /* ================= SERVICES ================= */
