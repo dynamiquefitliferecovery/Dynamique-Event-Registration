@@ -522,8 +522,38 @@ clientsTable.addEventListener("click", async e => {
   }
 });
 
-/* ================= PRACTITIONERS ================= *//*let practitioners = [];
+/* ================= PRACTITIONERS ================= *//* ================= PRACTITION </div>
+  `).join("");
+}
 
+/* CLICK HANDLER */
+document
+  .getElementById("practitionerList")
+  .addEventListener("click", async e => {
+    if (e.target.dataset.action !== "delete") return;
+    await deletePractitioner(e.target.dataset.id);
+  });
+
+/* DELETE */
+async function deletePractitioner(id) {
+  if (!confirm("Delete practitioner?")) return;
+
+  const { error } = await sb
+    .from("practitioners")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  loadPractitioners();
+}
+
+let practitioners = [];
+
+/* ADD */
 async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
 
@@ -545,6 +575,7 @@ async function addPractitioner() {
   loadPractitioners();
 }
 
+/* LOAD */
 async function loadPractitioners() {
   const { data, error } = await sb
     .from("practitioners")
@@ -564,36 +595,16 @@ async function loadPractitioners() {
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      <span class="edit" data-action="delete" </div>
-  `).join("");
-}
-
-document
-  .getElementById("practitionerList")
-  .addEventListener("click", async e => {
-    if (e.target.dataset.action !== "delete") return;
-    await deletePractitioner(e.target.dataset.id);
-  });
-
-async function deletePractitioner(id) {
-  if (!confirm("Delete practitioner?")) return;
-
-  const { error } = await sb
-    .from("practitioners")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  loadPractitioners();
-}
+      delete
+        Delete
+      </span>
 
 /* ================= SERVICES ================= */
 
-letlet services = [];
+let services = [];
+
+async function loadServices() {
+  const { data, error } = await sb
     .from("services")
     .select("id, name, price, sst")
     .order("name");
@@ -619,11 +630,20 @@ function initServiceDropdown() {
   });
 }
 
-
-async function loadServices() {
-
   
-/* ================= APPOINTMENTS ================= *//* ================= APPOINTMENTS =================.value = c.id;
+/* ================= APPOINTMENTS ================= */
+
+function setAppointmentDefaults() {
+  const now = new Date();
+  apptDate.value = now.toISOString().slice(0, 10);
+  apptTime.value = now.toTimeString().slice(0, 5);
+}
+
+function fillAppointmentDropdowns() {
+  apptClient.innerHTML = `<option value="">Select Client</option>`;
+  clients.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
     opt.textContent = c.full_name;
     apptClient.appendChild(opt);
   });
@@ -643,8 +663,10 @@ function calculateCharges() {
 
   const price = Number(opt.dataset.price);
   const client = clients.find(c => c.id == apptClient.value);
+
   const sst =
-    client.citizenship === "Foreigner" && opt.dataset.sst === "true"
+    client.citizenship === "Foreigner" &&
+    opt.dataset.sst === "true"
       ? price * 0.06
       : 0;
 
@@ -681,19 +703,6 @@ async function saveAppointment() {
   editingAppointmentId = null;
   loadAppointments();
 }
-
-function setAppointmentDefaults() {
-  const now = new Date();
-  apptDate.value = now.toISOString().slice(0, 10);
-  apptTime.value = now.toTimeString().slice(0, 5);
-}
-
-function fillAppointmentDropdowns() {
-  apptClient.innerHTML = `<option value="">Select Client</option>`;
-  clients.forEach(c => {
-    const opt = document.createElement("option");
-
-
 
 /* ================= REPORT ================= */
 
