@@ -419,9 +419,6 @@ function tab(id) {
     initServiceDropdown();
   }
 
-  if (id === "reportsTab") {
-    loadReport();
-  }
 }
   
 /* ================= FORMATTERS ================= */
@@ -731,16 +728,16 @@ async function loadReport() {
 
     const tr = document.createElement("tr");
     tr.innerHTML =
-      "<td>" + new Date(r.start_time).toLocaleDateString() + "</td>" +
-      "<td>" + (r.client?.full_name || "") + "</td>" +
-      "<td>" + age + "</td>" +
-      "<td>" + (r.client?.citizenship || "") + "</td>" +
-      "<td>" + (r.service_name || "") + "</td>" +
-      "<td>" + amount.toFixed(2) + "</td>" +
-      "<td>" + sst.toFixed(2) + "</td>" +
-      "<td>" + total.toFixed(2) + "</td>" +
-      "<td>" + (r.payment || "") + "</td>" +
-      "<td>" + (r.remarks || "") + "</td>";
+  "<td>" + new Date(r.start_time).toLocaleDateString() + "</td>" +
+ +  "<td>" + (r.client?.full_name || "") + "</td>" +
+  "<td>" + (r.client?.citizenship || "") + "</td>" +
+  "<td>" + (r.service_name || "") + "</td>" +
+  "<td>" + amount.toFixed(2) + "</td>" +
+  "<td>" + sst.toFixed(2) + "</td>" +
+  "<td>" + total.toFixed(2) + "</td>" +
+  "<td>" + (r.payment || "") + "</td>" +
+  "<td>" + (r.remarks || "") + "</td>";
+
 
     tbody.appendChild(tr);
   });
