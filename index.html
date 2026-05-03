@@ -444,7 +444,17 @@ let clients = [];
 
 // cache DOM once
 const clientName = document.getElementById("clientName");
-const clientDob = document.getElementById("clientDob");
+ClientId = id;const clientDob = document.getElementById("clientDob");
+    clientName.value = c.full_name;
+    clientDob.value = c.date_of_birth;
+    clientGender.value = c.gender;
+    clientCitizenship.value = c.citizenship;
+    clientIc.value = c.ic_passport;
+    clientContact.value = c.contact;
+    clientEmail.value = c.email;
+    clientAddress.value = c.address;
+  }
+});
 const clientGender = document.getElementById("clientGender");
 const clientCitizenship = document.getElementById("clientCitizenship");
 const clientIc = document.getElementById("clientIc");
@@ -453,17 +463,38 @@ const clientEmail = document.getElementById("clientEmail");
 const clientAddress = document.getElementById("clientAddress");
 const clientsTable = document.getElementById("clientsTable");
 
+/* LOAD CLIENTS */
 async function loadClients() {
   const { data, error } = await sb
     .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   clients = data || [];
 
+  clientsTable.innerHTML = clients.map(c => `
+    <tr>
+      <td>${c.full_name}</td>
+      <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
+      <td>${c.gender}</td>
+      <td>${c.citizenship}</td>
+      <td>${formatIc(c.ic_passport)}</td>
+      <td>${formatContact(c.contact)}</td>
+      <td>${c.email}</td>
+      <td>
+        editEdit</span> |
+        deleteDelete</span>
+      </td>
+    </tr>
+  `).join("");
+}
 
+/* SAVE CLIENT (bind once) */
 document.getElementById("saveClientBtn").addEventListener("click", async () => {
   const payload = {
     full_name: clientName.value.trim(),
@@ -481,14 +512,17 @@ document.getElementById("saveClientBtn").addEventListener("click", async () => {
     return;
   }
 
-  editingClientId
-    ? await sb.from("clients").update(payload).eq("id", editingClientId)
-    : await sb.from("clients").insert(payload);
+  if (editingClientId) {
+    await sb.from("clients").update(payload).eq("id", editingClientId);
+  } else {
+    await sb.from("clients").insert(payload);
+  }
 
   editingClientId = null;
   loadClients();
 });
 
+/* TABLE ACTIONS (delegation) */
 clientsTable.addEventListener("click", async e => {
   const id = e.target.dataset.id;
   const action = e.target.dataset.action;
@@ -504,94 +538,53 @@ clientsTable.addEventListener("click", async e => {
     const c = clients.find(x => x.id == id);
     if (!c) return;
 
-    editingClientId = id;
-    clientName.value = c.full_name;
-    clientDob.value = c.date_of_birth;
-    clientGender.value = c.gender;
-    clientCitizenship.value = c.citizenship;
-    clientIc.value = c.ic_passport;
-    clientContact.value = c.contact;
-    clientEmail.value = c.email;
-    clientAddress.value = c.address;
-  }
-});
+
 
 /* ================= PRACTITIONERS ================= */
 
 let practitioners = [];
 
-/* ADD PRACTITIONER */
-async function addPractitioner (!confirm("Delete practitioner?")) return;async function addPractitioner() {
-
-  const { error } = await sb
-    .from("practitioners")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  loadPractitioners();
-}
+async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
-
   if (!input || !input.value.trim()) {
     alert("Practitioner name required");
     return;
   }
 
-  const { error } = await sb
-    .from("practitioners")
-    .insert({ name: input.value.trim() });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
+  await sb.from("practitioners").insert({ name: input.value.trim() });
   input.value = "";
   loadPractitioners();
 }
 
-/* LOAD PRACTITIONERS */
 async function loadPractitioners() {
-  const { data, error } = await sb
+  const { data } = await sb
     .from("practitioners")
     .select("*")
     .order("name");
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-
   practitioners = data || [];
 
   const list = document.getElementById("practitionerList");
-  if (!list) return;
-
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      delete
-        Delete
-      </span>
+      deleteDelete</span>
     </div>
   `).join("");
 }
 
-/* CLICK HANDLER */
 document
   .getElementById("practitionerList")
   .addEventListener("click", e => {
-    if (e.target.dataset.action !== "delete") return;
-    deletePractitioner(e.target.dataset.id);
+    if (e.target.dataset.action === "delete") {
+      deletePractitioner(e.target.dataset.id);
+    }
   });
 
-/* DELETE PRACTITIONER */
 async function deletePractitioner(id) {
+  await sb.from("practitioners").delete().eq("id", id);
+  loadPractitioners();
+}
 
 /* ================= SERVICES ================= */
 
