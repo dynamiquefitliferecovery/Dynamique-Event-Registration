@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+alert("JS OK");
+function test() {}
+console.log(typeof test);
+</script>
+</body>
+</html>
