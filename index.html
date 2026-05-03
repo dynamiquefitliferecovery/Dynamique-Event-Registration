@@ -447,6 +447,8 @@ const clientName = document.getElementById("clientName");
 const clientDob = document.getElementById("clientDob");
 const clientGender = document.getElementById("clientGender");
 const clientCitizenship = document.getElementById("clientCitizenship");
+const clientIc = document.getElementById("clientIc");
+const clientContact = document.getElementById("clientContact");
 const clientEmail = document.getElementById("clientEmail");
 const clientAddress = document.getElementById("clientAddress");
 const clientsTable = document.getElementById("clientsTable");
@@ -483,8 +485,9 @@ async function loadClients() {
     edit.onclick = () => editClient(c.id);
 
     const del = document.createElement("span");
-    del.textContent = " Delete";
+    del.textContent = "Delete";
     del.className = "edit";
+    del.style.marginLeft = "8px";
     del.onclick = () => deleteClient(c.id);
 
     actionTd.append(edit, document.createTextNode(" | "), del);
@@ -563,9 +566,7 @@ async function loadPractitioners() {
                                                          
 /* ================= SERVICES ================= */
 
-let services = [];
-
-const services = [const services1, name: "Physiotherapy", price: 120, sst: true },
+: 1, name: "Physiotherapy", price: 120, sst: true },const services = [
   { id: 2, name: "Sports Massage", price: 150, sst: true },
   { id: 3, name: "Rehab Assessment", price: 200, sst: false }
 ];
