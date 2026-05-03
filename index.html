@@ -667,7 +667,15 @@ async function saveAppointment() {
 
   const payload = {
     start_time: local.toISOString(),
-    client_id: apptClient.value,
+    client_id if (res.error) {    client_id: apptClient.value,
+    alert(res.error.message);
+    return;
+  }
+
+  editingAppointmentId = null;
+  loadAppointments();
+}
+``
     practitioner_id: apptPractitioner.value,
     service_id: apptService.value,
     payment_method: apptPayment.value,
@@ -677,13 +685,6 @@ async function saveAppointment() {
     total: Number(apptTotal.value)
   };
 
-  editingAppointmentId
-    ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
-    : await sb.from("appointments").insert(payload);
-
-  editingAppointmentId = null;
-  loadAppointments();
-}
 
 /* list appointments */
 async function loadAppointments() {
@@ -791,6 +792,8 @@ async function loadAll() {
   setAppointmentDefaults();
   loadAppointments();
 }
+
+  document.getElementById("loginBtn").addEventListener("click", login);
 
 </script>
 
