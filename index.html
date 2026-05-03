@@ -460,9 +460,12 @@ async function loadClients() {
   if (error) return console.error(error);
 
   clients = data || [];
+  clientsTable.innerHTML = "";
 
-  clientsTable.innerHTML = clients.map(c => `
-    <tr>
+  clients.forEach(c => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
       <td>${c.full_name}</td>
       <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
       <td>${c.gender}</td>
@@ -470,65 +473,47 @@ async function loadClients() {
       <td>${formatIc(c.ic_passport)}</td>
       <td>${formatContact(c.contact)}</td>
       <td>${c.email}</td>
-      <td>
-        <spandit</span> |
-        <span class="edit" data   </td>
-    </tr>
-  `).join("");
+    `;
+
+    const actionTd = document.createElement("td");
+
+    const edit = document.createElement("span");
+    edit.textContent = "Edit";
+    edit.className = "edit";
+    edit.onclick = () => editClient(c.id);
+
+    const del = document.createElement("span");
+    del.textContent = " Delete";
+    del.className = "edit";
+    del.onclick = () => deleteClient(c.id);
+
+    actionTd.append(edit, document.createTextNode(" | "), del);
+    tr.appendChild(actionTd);
+
+    clientsTable.appendChild(tr);
+  });
 }
 
-document.getElementById("saveClientBtn").addEventListener("click", async () => {
-  const payload = {
-    full_name: clientName.value.trim(),
-    date_of_birth: clientDob.value,
-    gender: clientGender.value,
-    citizenship: clientCitizenship.value,
-    ic_passport: clientIc.value,
-    contact: clientContact.value,
-    email: clientEmail.value,
-    address: clientAddress.value
-  };
+function editClient(id) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
 
-  if (!payload.full_name) return alert("Full name is required");
+  editingClientId = id;
+  clientName.value = c.full_name;
+  clientDob.value = c.date_of_birth;
+  clientGender.value = c.gender;
+  clientCitizenship.value = c.citizenship;
+  clientIc.value = c.ic_passport;
+  clientContact.value = c.contact;
+  clientEmail.value = c.email;
+  clientAddress.value = c.address;
+}
 
-  if (editingClientId) {
-    await sb.from("clients").update(payload).eq("id", editingClientId);
-  } else {
-    await sb.from("clients").insert(payload);
-  }
-
-  editingClientId = null;
+async function deleteClient(id) {
+  if (!confirm("Delete this client?")) return;
+  await sb.from("clients").delete().eq("id", id);
   loadClients();
-});
-
-clientsTable.addEventListener("click", async e => {
-  const { action, id } = e.target.dataset;
-  if (!action || !id) return;
-
-  if (action === "delete") {
-    if (!confirm("Delete this client?")) return;
-    await sb.from("clients").delete().eq("id", id);
-    loadClients();
-  }
-
-  if (action === "edit") {
-    const c = clients.find(x => x.id === id);
-    if (!c) return;
-
-    editingClientId = id;
-    clientName.value = c.full_name;
-    clientDob.value = c.date_of_birth;
-    clientGender.value = c.gender;
-    clientCitizenship.value = c.citizenship;
-    clientIc.value = c.ic_passport;
-    clientContact.value = c.contact;
-    clientEmail.value = c.email;
-    clientAddress.value = c.address;
-  }
-});
-
-const clientIc = document.getElementById("clientIc");
-
+}
 
 /* ================= PRACTITIONERS ================= */
 
@@ -555,60 +540,49 @@ async function loadPractitioners() {
   if (error) return console.error(error);
 
   practitioners = data || [];
-
   const list = document.getElementById("practitionerList");
-  list.innerHTML = practitioners.map(p => `
-    <div>
-      ${p.name}
-      deleteDelete</span>
-    </div>
-  `).join("");
-}
+  list.innerHTML = "";
 
-document.getElementById("practitionerList")
-  .addEventListener("click", async e => {
-    const { action, id } = e.target.dataset;
-    if (action !== "delete") return;
+  practitioners.forEach(p => {
+    const div = document.createElement("div");
+    div.textContent = p.name + " ";
 
-    if (!confirm("Delete practitioner?")) return;
-    await sb.from("practitioners").delete().eq("id", id);
-    loadPractitioners();
+    const del = document.createElement("span");
+    del.textContent = "Delete";
+    del.className = "edit";
+    del.onclick = async () => {
+      if (!confirm("Delete practitioner?")) return;
+      await sb.from("practitioners").delete().eq("id", p.id);
+      loadPractitioners();
+    };
+
+    div.appendChild(del);
+    list.appendChild(div);
   });
+}
                                                          
 /* ================= SERVICES ================= */
 
 let services = [];
 
-async function loadServices() {
-  const { data, error } = await sb
-    .from("services")
-    .select("id, name, price, sst")
-    .order("name");
-
-  if (error) return console.error(error);
-
-  services = data || [];
-}
+const services = [const services1, name: "Physiotherapy", price: 120, sst: true },
+  { id: 2, name: "Sports Massage", price: 150, sst: true },
+  { id: 3, name: "Rehab Assessment", price: 200, sst: false }
+];
 
 function initServiceDropdown() {
-  if (services.length === 0) {
-    apptService.innerHTML =
-      `<option value="">No services found</option>`;
-    return;
-  }
-
-  apptService.innerHTML =
-    `<option value="">Select Service</option>`;
+  apptService.innerHTML = `<option value="">Select Service</option>`;
 
   services.forEach(s => {
     const opt = document.createElement("option");
     opt.value = s.id;
     opt.dataset.price = s.price;
     opt.dataset.sst = s.sst;
-    opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
+    opt.textContent = `${s.name} (RM ${s.price.toFixed(2)})`;
     apptService.appendChild(opt);
   });
 }
+
 
 /* ================= APPOINTMENTS ================= */
 
