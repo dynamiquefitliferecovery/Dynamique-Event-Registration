@@ -524,8 +524,6 @@ clientsTable.addEventListener("click", async e => {
 
 /* ================= PRACTITIONERS ================= */
 let practitioners = [];
-
-async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
 
   if (!input.value.trim()) {
@@ -586,6 +584,9 @@ async function deletePractitioner(id) {
 
   loadPractitioners();
 }
+
+  let practitioners = [];
+
 
 
 /* ================= SERVICES ================= */
