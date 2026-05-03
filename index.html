@@ -143,7 +143,7 @@
     <h2>Login</h2>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-    <button type="button" onclick="login()">Login</button>
+    <button id="loginBtn">Login</button>
     <p id="err" style="color:red"></p>
   </div>
 </div>
@@ -165,42 +165,45 @@
 <section id="clientsTab">
   <div class="card">
     <h3>Client</h3>
+
     <div class="grid">
-      <input placeholder="Full Name">
-      <input type="date">
-      <select>
+      <input id="clientName" placeholder="Full Name">
+      <input id="clientDob" type="date">
+
+      <select id="clientGender">
         <option>Male</option>
         <option>Female</option>
       </select>
-      <select>
-  <option value="Malaysian">Malaysian</option>
-  <option value="Foreigner">Foreigner</option>
-</select>
-      <input placeholder="IC / Passport (14 characters)">
-      <input placeholder="Contact">
-      <input placeholder="Email">
-      <input placeholder="Address">
+
+      <select id="clientCitizenship">
+        <option value="Malaysian">Malaysian</option>
+        <option value="Foreigner">Foreigner</option>
+      </select>
+
+      <input id="clientIc" maxlength="14" placeholder="XXXXXX-XX-XXXX">
+      <input id="clientContact" placeholder="Contact">
+      <input id="clientEmail" placeholder="Email">
+      <input id="clientAddress" placeholder="Address">
     </div>
-    <button class="action" onclick="saveClient()">Save Client</button>
+
+    <button class="action" id="saveClientBtn">Save Client</button>
   </div>
 
   <div class="card">
     <table>
       <thead>
-  <tr>
-    <th>Full Name</th>
-    <th>DOB</th>
-    <th>Gender</th>
-    <th>Citizenship</th>
-    <th>IC / Passport</th>
-    <th>Contact</th>
-    <th>Email</th>
-    <th>Action</th>
-  </tr>
-</thead>
-<tbody id="clientsTable">
-  <!-- client rows -->
-</tbody>
+        <tr>
+          <th>Name</th>
+          <th>DOB</th>
+          <th>Gender</th>
+          <th>Citizen</th>
+          <th>IC</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="clientsTable"></tbody>
     </table>
   </div>
 </section>
@@ -373,67 +376,35 @@ window.login = login;
 
  
 function logout() {
-  sb.auth.signOut();
-  location.reload();
+sb.auth.signOut();
 }
 
-  console.log("openApp function exists:", typeof openApp);
-function openApp() {
-  const loginViewEl = document.getElementById("loginView");
-  const appViewEl = document.getElementById("appView");
 
-  if (!loginViewEl || !appViewEl) {
-    console.error("loginView or appView not found");
-    return;
-  }
-
-  loginViewEl.classList.add("hidden");
-  appViewEl.classList.remove("hidden");
-
-  tab("clientsTab");
-  loadAll();
-}
 /* ================= TABS ================= */
 function tab(id) {
-  // Hide all sections
-  document.querySelectorAll("section")
-    .forEach(section => section.classList.add("hidden"));
+  document.querySelectorAll("section").forEach(s => {
+    s.classList.add("hidden");
+  });
 
-  // Show selected section
   const target = document.getElementById(id);
   if (!target) {
-    console.error("tab(): section not found:", id);
+    console.error("Tab not found:", id);
     return;
   }
 
   target.classList.remove("hidden");
 
-  // Init Appointments tab
   if (id === "appointmentsTab") {
     fillAppointmentDropdowns();
     initServiceDropdown();
   }
 
-  // Init Reports tab
   if (id === "reportsTab") {
     loadReport();
   }
 }
-
+  
 /* ================= FORMATTERS ================= */
-document.addEventListener("input", e => {
-  if (e.target.matches('input[placeholder*="IC"], input[placeholder*="Passport"]')) {
-    let v = e.target.value.replace(/\D/g, "").slice(0, 12);
-
-    if (v.length > 8) {
-      v = v.replace(/(\d{6})(\d{2})(\d{0,4})/, "$1-$2-$3");
-    } else if (v.length > 6) {
-      v = v.replace(/(\d{6})(\d{0,2})/, "$1-$2");
-    }
-
-    e.target.value = v;
-  }
-});
 
 function formatIc(v = "") {
   return v
@@ -461,8 +432,21 @@ function formatContact(v = "") {
   }
   return age;
 }
+
 /* ================= CLIENTS ================= */
+
 let clients = [];
+
+// cache DOM once
+const clientName = document.getElementById("clientName");
+const clientDob = document.getElementById("clientDob");
+const clientGender = document.getElementById("clientGender");
+const clientCitizenship = document.getElementById("clientCitizenship");
+const clientIc = document.getElementById("clientIc");
+const clientContact = document.getElementById("clientContact");
+const clientEmail = document.getElementById("clientEmail");
+const clientAddress = document.getElementById("clientAddress");
+const clientsTable = document.getElementById("clientsTable");
 
 async function loadClients() {
   const { data, error } = await sb
@@ -470,108 +454,78 @@ async function loadClients() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
 
   clients = data || [];
 
-  const tbody = document.getElementById("clientsTable");
-
-
-tbody.innerHTML = clients.map(c => `
+clientsTable.innerHTML = clients.map(c => `
   <tr>
     <td>${c.full_name}</td>
-    <td>${c.date_of_birth || ""} (${calculateAge(c.date_of_birth)} yrs)</td>
-    <td>${c.gender || ""}</td>
-    <td>${c.citizenship || ""}</td>
+    <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
+    <td>${c.gender}</td>
+    <td>${c.citizenship}</td>
     <td>${formatIc(c.ic_passport)}</td>
     <td>${formatContact(c.contact)}</td>
-    <td>${c.email || ""}</td>
+    <td>${c.email}</td>
     <td>
-      <span class="edit" onclick='editClient(${JSON.stringify(c)})'>Edit</span> |
-      <span class="edit" onclick="deleteClient(${c.id})">Delete</span>
+      editEdit</span> |
+      deleteDelete</span>
     </td>
   </tr>
 `).join("");
+}
 
-}   // 
-
-async function saveClient() {
-  const inputs = document.querySelectorAll("#clientsTab input");
-  const selects = document.querySelectorAll("#clientsTab select");
-
-const payload = {
-  full_name: inputs[0].value,
-  date_of_birth: inputs[1].value,
-  gender: selects[0].value,        // ✅ Gender
-  citizenship: selects[1].value,  // ✅ Citizenship
-  ic_passport: inputs[2].value,
-  contact: inputs[3].value,
-  email: inputs[4].value,
-  address: inputs[5].value
-
+document.getElementById("saveClientBtn").addEventListener("click", async () => {
+  const payload = {
+    full_name: clientName.value.trim(),
+    date_of_birth: clientDob.value,
+    gender: clientGender.value,
+    citizenship: clientCitizenship.value,
+    ic_passport: clientIc.value,
+    contact: clientContact.value,
+    email: clientEmail.value,
+    address: clientAddress.value
   };
 
   if (!payload.full_name) {
-    alert("Full Name is required");
+    alert("Full name is required");
     return;
   }
 
-  const res = editingClientId
+  editingClientId
     ? await sb.from("clients").update(payload).eq("id", editingClientId)
     : await sb.from("clients").insert(payload);
 
-  if (res.error) {
-    alert(res.error.message);
-    return;
-  }
-
   editingClientId = null;
-  inputs.forEach(i => i.value = "");
   loadClients();
-}
-
-function editClient(c) {
-  editingClientId = c.id;
-
-  const inputs = document.querySelectorAll("#clientsTab input");
-  const selects = document.querySelectorAll("#clientsTab select");
-
-  inputs[0].value = c.full_name || "";
-  inputs[1].value = c.date_of_birth || "";
-  selects[0].value = c.gender || "Male";
-  selects[1].value = c.citizenship || "Malaysian";
-  inputs[2].value = c.ic_passport || "";
-  inputs[3].value = c.contact || "";
-  inputs[4].value = c.email || "";
-  inputs[5].value = c.address || "";
-}
-
-async function deleteClient(id) {
-  if (!confirm("Delete this client?")) return;
-
-  const { error } = await sb
-    .from("clients")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  alert("Client deleted");
-  await loadClients();
-}
-
-document.addEventListener("click", e => {
-  if (e.target.dataset.action === "delete-client") {
-    deleteClient(e.target.dataset.id);
-  }
 });
 
+clientsTable.addEventListener("click", async e => {
+  const id = e.target.dataset.id;
+  const action = e.target.dataset.action;
+  if (!id || !action) return;
+
+  if (action === "delete") {
+    if (!confirm("Delete this client?")) return;
+    await sb.from("clients").delete().eq("id", id);
+    loadClients();
+  }
+
+  if (action === "edit") {
+    const c = clients.find(x => x.id == id);
+    if (!c) return;
+
+    editingClientId = id;
+    clientName.value = c.full_name;
+    clientDob.value = c.date_of_birth;
+    clientGender.value = c.gender;
+    clientCitizenship.value = c.citizenship;
+    clientIc.value = c.ic_passport;
+    clientContact.value = c.contact;
+    clientEmail.value = c.email;
+    clientAddress.value = c.address;
+  }
+});
 /* ================= PRACTITIONERS ================= */
 let practitioners = [];
 
@@ -633,23 +587,31 @@ async function deletePractitioner(id) {
 }
 
 /* ================= SERVICES ================= */
-
 let services = [];
 
 async function loadServices() {
   const { data, error } = await sb
     .from("services")
-    .select("id, code, name, price, sst")
-    .order("code");
+    .select("id, name, price, sst")
+    .order("name");
 
-  if (error) {
-    console.error("loadServices error:", error);
-    return;
-  }
-
+  if (error) return console.error(error);
   services = data || [];
 }
 
+  function initServiceDropdown() {
+  apptService.innerHTML = `<option value="">Select Service</option>`;
+
+  services.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.dataset.price = s.price;
+    opt.dataset.sst = s.sst;
+    opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
+    apptService.appendChild(opt);
+  });
+}
+  
 /* ================= APPOINTMENTS ================= */
 
 /* defaults */
@@ -661,65 +623,50 @@ function setAppointmentDefaults() {
 
 /* fill client & practitioner dropdowns ONLY */
 function fillAppointmentDropdowns() {
-  // Clients
- apptClient.innerHTML = `<option value="">Select Client</option>`;
-clients.forEach(c => {
-  const opt = document.createElement("option");
-  opt.value = c.id;
-  opt.textContent = c.full_name;
-  apptClient.appendChild(opt);
-});
+  apptClient.innerHTML = `<option value="">Select Client</option>`;
+  clients.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.full_name;
+    apptClient.appendChild(opt);
+  });
 
-apptPractitioner.innerHTML = `<option value="">Select Practitioner</option>`;
-practitioners.forEach(p => {
-  const opt = document.createElement("option");
-  opt.value = p.id;
-  opt.textContent = p.name;
-  apptPractitioner.appendChild(opt);
-});
-
+  apptPractitioner.innerHTML = `<option value="">Select Practitioner</option>`;
+  practitioners.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.name;
+    apptPractitioner.appendChild(opt);
+  });
 }
 
-/* calculate amount / SST */
 function calculateCharges() {
-  const serviceOpt = apptService.selectedOptions[0];
-  if (!serviceOpt || !apptClient.value) return;
+  const opt = apptService.selectedOptions[0];
+  if (!opt || !apptClient.value) return;
 
-  const price = Number(serviceOpt.dataset.price || 0);
-  const serviceHasSST = serviceOpt.dataset.sst === "true";
-
-  const client = clients.find(c => String(c.id) === String(apptClient.value));
-  const isForeigner = client?.citizenship === "Foreigner";
-
-  const sst = (serviceHasSST && isForeigner) ? price * 0.06 : 0;
-  const total = price + sst;
+  const price = Number(opt.dataset.price);
+  const client = clients.find(c => c.id == apptClient.value);
+  const sst = client.citizenship === "Foreigner" && opt.dataset.sst === "true"
+    ? price * 0.06
+    : 0;
 
   apptAmount.value = price.toFixed(2);
   apptSST.value = sst.toFixed(2);
-  apptTotal.value = total.toFixed(2);
+  apptTotal.value = (price + sst).toFixed(2);
 }
 
+apptService.addEventListener("change", calculateCharges);
+apptClient.addEventListener("change", calculateCharges);
 /* wire events (ONCE) */
 apptService.onchange = calculateCharges;
 apptClient.onchange = calculateCharges;
 
 /* save appointment */
 async function saveAppointment() {
-  if (!apptDate.value || !apptTime.value) {
-    alert("Date and time required");
-    return;
-  }
-  if (!apptClient.value || !apptService.value || !apptPractitioner.value) {
-    alert("Please complete all selections");
-    return;
-  }
-  if (!apptPayment.value) {
-    alert("Please select a payment method");
-    return;
-  }
+  const local = new Date(`${apptDate.value}T${apptTime.value}`);
 
   const payload = {
-    start_time: `${apptDate.value}T${apptTime.value}`,
+    start_time: local.toISOString(),
     client_id: apptClient.value,
     practitioner_id: apptPractitioner.value,
     service_id: apptService.value,
@@ -730,14 +677,9 @@ async function saveAppointment() {
     total: Number(apptTotal.value)
   };
 
-  const res = editingAppointmentId
+  editingAppointmentId
     ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
     : await sb.from("appointments").insert(payload);
-
-  if (res.error) {
-    alert(res.error.message);
-    return;
-  }
 
   editingAppointmentId = null;
   loadAppointments();
