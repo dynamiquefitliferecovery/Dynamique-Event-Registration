@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Sports Rehab System</title>
-
+  
   <!-- Supabase JS (logic will come later) -->
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-
     body {
   margin: 0;
   font-family: Segoe UI;
@@ -453,8 +452,6 @@ function formatContact(v = "") {
 /* ================= CLIENTS ================= */
 
 let clients = [];
-
-const clientName = document.getElementById("clientName");
 const clientDob = document.getElementById("clientDob");
 const clientGender = document.getElementById("clientGender");
 const clientCitizenship = document.getElementById("clientCitizenship");
@@ -463,14 +460,19 @@ const clientContact = document.getElementById("clientContact");
 const clientEmail = document.getElementById("clientEmail");
 const clientAddress = document.getElementById("clientAddress");
 const clientsTable = document.getElementById("clientsTable");
+const saveClientBtn = document.getElementById("saveClientBtn");
 
+/* ===== LOAD CLIENTS ===== */
 async function loadClients() {
   const { data, error } = await sb
     .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   clients = data || [];
   clientsTable.innerHTML = "";
@@ -478,16 +480,15 @@ async function loadClients() {
   clients.forEach(c => {
     const tr = document.createElement("tr");
 
-    tr.innerHTML = `
-      <td>${c.full_name}</td>
-      <td>${c.date_of_birth}</td>
-      <td>${calculateAge(c.date_of_birth)}</td>
-      <td>${c.gender}</td>
-      <td>${c.citizenship}</td>
-      <td>${formatIc(c.ic_passport)}</td>
-      <td>${formatContact(c.contact)}</td>
-      <td>${c.email}</td>
-    `;
+    tr.innerHTML =
+      "<td>" + c.full_name + "</td>" +
+      "<td>" + c.date_of_birth + "</td>" +
+      "<td>" + calculateAge(c.date_of_birth) + "</td>" +
+      "<td>" + c.gender + "</td>" +
+      "<td>" + c.citizenship + "</td>" +
+      "<td>" + formatIc(c.ic_passport || "") + "</td>" +
+      "<td>" + formatContact(c.contact || "") + "</td>" +
+      "<td>" + (c.email || "") + "</td>";
 
     const actionTd = document.createElement("td");
 
@@ -509,30 +510,46 @@ async function loadClients() {
   });
 }
 
+/* ===== EDIT CLIENT ===== */
 function editClient(id) {
   const c = clients.find(x => x.id == id);
   if (!c) return;
 
   editingClientId = id;
-  clientName.value = c.full_name;
-  clientDob.value = c.date_of_birth;
-  clientGender.value = c.gender;
-  clientCitizenship.value = c.citizenship;
-  clientIc.value = c.ic_passport;
-  clientContact.value = c.contact;
-  clientEmail.value = c.email;
-  clientAddress.value = c.address;
+
+  clientName.value = c.full_name || "";
+  clientDob.value = c.date_of_birth || "";
+  clientGender.value = c.gender || "Male";
+  clientCitizenship.value = c.citizenship || "Malaysian";
+  clientIc.value = c.ic_passport || "";
+  clientContact.value = c.contact || "";
+  clientEmail.value = c.email || "";
+  clientAddress.value = c.address || "";
 }
 
+/* ===== DELETE CLIENT ===== */
 async function deleteClient(id) {
   if (!confirm("Delete this client?")) return;
-  await sb.from("clients").delete().eq("id", id);
+
+  const { error } = await sb
+    .from("clients")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to delete client");
+    return;
+  }
+
   loadClients();
 }
 
-  document.getElementById("saveClientBtn").addEventListener("click", saveClient);
+/* ===== SAVE CLIENT (INSERT + UPDATE) ===== */
+saveClientBtn.addEventListener("click", saveClient);
 
-!clientDob.value) {async function saveClient() {
+async function saveClient() {
+  if (!clientName.value || !clientDob.value) {
     alert("Name and DOB are required");
     return;
   }
@@ -550,14 +567,11 @@ async function deleteClient(id) {
 
   let error;
 
-  // ✅ EDIT MODE → UPDATE
   if (editingClientId) {
     ({ error } = await sb
       .from("clients")
       .update(payload)
       .eq("id", editingClientId));
-
-  // ✅ NEW MODE → INSERT
   } else {
     ({ error } = await sb
       .from("clients")
@@ -570,13 +584,13 @@ async function deleteClient(id) {
     return;
   }
 
-  // ✅ RESET FORM
   editingClientId = null;
   clearClientForm();
   loadClients();
 }
 
-  function clearClientForm() {
+/* ===== CLEAR FORM ===== */
+function clearClientForm() {
   clientName.value = "";
   clientDob.value = "";
   clientGender.value = "Male";
@@ -586,6 +600,8 @@ async function deleteClient(id) {
   clientEmail.value = "";
   clientAddress.value = "";
 }
+
+// DOM references
 
 /* ================= PRACTITIONERS ================= */
 
@@ -650,8 +666,10 @@ const services = [
   { code: "QF15", name: "Quick Fix 15 minutes",           price: 15,  sst: false }
 ];
 
+
 function initServiceDropdown() {
   apptService.innerHTML = '<option value="">Select Service</option>';
+
 
   services.forEach(s => {
     const opt = document.createElement("option");
@@ -786,7 +804,8 @@ async function loadReport() {
     const tr = document.createElement("tr");
     tr.innerHTML =
   "<td>" + new Date(r.start_time).toLocaleDateString() + "</td>" +
- +  "<td>" + (r.client?.full_name || "") + "</td>" +
+  "<td>" + (r.client?.full_name || "") + "</td>" +
+  "<td>" + age + "</td>" +
   "<td>" + (r.client?.citizenship || "") + "</td>" +
   "<td>" + (r.service_name || "") + "</td>" +
   "<td>" + amount.toFixed(2) + "</td>" +
