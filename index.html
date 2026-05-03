@@ -600,7 +600,12 @@ async function deletePractitioner(id) {
 
 let services = [];
 
-asyncname");async function loadServices() {
+/* LOAD SERVICES */
+async function loadServices() {
+  const { data, error } = await sb
+    .from("services")
+    .select("id, name, price, sst")
+    .order("name");
 
   if (error) {
     console.error(error);
@@ -610,6 +615,7 @@ asyncname");async function loadServices() {
   services = data || [];
 }
 
+/* INIT SERVICE DROPDOWN */
 function initServiceDropdown() {
   apptService.innerHTML = `<option value="">Select Service</option>`;
 
@@ -622,11 +628,6 @@ function initServiceDropdown() {
     apptService.appendChild(opt);
   });
 }
-
-  const { data, error } = await sb
-    .from("services")
-    .select("id, name, price, sst")
-
 /* ================= APPOINTMENTS ================= */
 
  c.id;function setAppointmentDefaults() {
