@@ -315,7 +315,8 @@ const apptTotal = document.getElementById("apptTotal");
 
 const apptTable = document.getElementById("apptTable");
 
-
+const reportFrom = document.getElementById("reportFrom");
+const reportTo = document.getElementById("reportTo");
   
 /* ================= SUPABASE ================= */
 const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
@@ -471,9 +472,8 @@ async function loadClients() {
       <td>${formatIc(c.ic_passport)}</td>
       <td>${formatContact(c.contact)}</td>
       <td>${c.email}</td>
-      <td>
-  editEdit</span> |
-  deleteDelete</span>
+     <td>
+  <span class="edit" data-action="editan>
 </td>
   `).join("");
 }
@@ -550,7 +550,7 @@ async function loadPractitioners() {
   list.innerHTML = practitioners.map(p => `
   <div>
     ${p.name}
-    <span class="edit" data-action="join("");
+    <span class="edit" data-action="delete" data-id="${p.id
   </div>
 `).join("");
 }
