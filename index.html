@@ -522,11 +522,12 @@ clientsTable.addEventListener("click", async e => {
   }
 });
 
-/* ================= PRACTITIONERS ================= */
-let practitioners = [];
+/* ================= PRACTITIONERS ================= *//*let practitioners = [];
+
+async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
 
-  if (!input.value.trim()) {
+  if (!input || !input.value.trim()) {
     alert("Practitioner name required");
     return;
   }
@@ -545,7 +546,10 @@ let practitioners = [];
 }
 
 async function loadPractitioners() {
-  const { data, error } = await sb.from("practitioners").select("*");
+  const { data, error } = await sb
+    .from("practitioners")
+    .select("*")
+    .order("name");
 
   if (error) {
     console.error(error);
@@ -554,15 +558,17 @@ async function loadPractitioners() {
 
   practitioners = data || [];
 
-  document.getElementById("practitionerList").innerHTML =
-    practitioners.map(p => `
-      <div>
-        ${p.name}
-        <span
-          class="edit"
-          data-action="delete"
-          data-id="${p.id}"
-ent
+  const list = document.getElementById("practitionerList");
+  if (!list) return;
+
+  list.innerHTML = practitioners.map(p => `
+    <div>
+      ${p.name}
+      <span class="edit" data-action="delete" </div>
+  `).join("");
+}
+
+document
   .getElementById("practitionerList")
   .addEventListener("click", async e => {
     if (e.target.dataset.action !== "delete") return;
@@ -585,9 +591,164 @@ async function deletePractitioner(id) {
   loadPractitioners();
 }
 
-  let practitioners = [];
+/* ================= SERVICES ================= */
+
+letlet services = [];
+    .from("services")
+    .select("id, name, price, sst")
+    .order("name");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  services = data || [];
+}
+
+function initServiceDropdown() {
+  apptService.innerHTML = `<option value="">Select Service</option>`;
+
+  services.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.dataset.price = s.price;
+    opt.dataset.sst = s.sst;
+    opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
+    apptService.appendChild(opt);
+  });
+}
 
 
+async function loadServices() {
+
+  
+/* ================= APPOINTMENTS ================= *//* ================= APPOINTMENTS =================.value = c.id;
+    opt.textContent = c.full_name;
+    apptClient.appendChild(opt);
+  });
+
+  apptPractitioner.innerHTML = `<option value="">Select Practitioner</option>`;
+  practitioners.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.name;
+    apptPractitioner.appendChild(opt);
+  });
+}
+
+function calculateCharges() {
+  const opt = apptService.selectedOptions[0];
+  if (!opt || !apptClient.value) return;
+
+  const price = Number(opt.dataset.price);
+  const client = clients.find(c => c.id == apptClient.value);
+  const sst =
+    client.citizenship === "Foreigner" && opt.dataset.sst === "true"
+      ? price * 0.06
+      : 0;
+
+  apptAmount.value = price.toFixed(2);
+  apptSST.value = sst.toFixed(2);
+  apptTotal.value = (price + sst).toFixed(2);
+}
+
+apptService.addEventListener("change", calculateCharges);
+apptClient.addEventListener("change", calculateCharges);
+
+async function saveAppointment() {
+  const payload = {
+    start_time: new Date(`${apptDate.value}T${apptTime.value}`).toISOString(),
+    client_id: apptClient.value,
+    practitioner_id: apptPractitioner.value,
+    service_id: apptService.value,
+    payment_method: apptPayment.value,
+    remarks: apptRemarks.value || null,
+    amount: Number(apptAmount.value),
+    sst: Number(apptSST.value),
+    total: Number(apptTotal.value)
+  };
+
+  const res = editingAppointmentId
+    ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
+    : await sb.from("appointments").insert(payload);
+
+  if (res.error) {
+    alert(res.error.message);
+    return;
+  }
+
+  editingAppointmentId = null;
+  loadAppointments();
+}
+
+function setAppointmentDefaults() {
+  const now = new Date();
+  apptDate.value = now.toISOString().slice(0, 10);
+  apptTime.value = now.toTimeString().slice(0, 5);
+}
+
+function fillAppointmentDropdowns() {
+  apptClient.innerHTML = `<option value="">Select Client</option>`;
+  clients.forEach(c => {
+    const opt = document.createElement("option");
+
+
+
+/* ================= REPORT ================= */
+
+async function loadReport() {
+  const from = reportFrom.value;
+  const to = reportTo.value;
+
+  let query = sb
+    .from("appointments")
+    .select(`
+      start_time,
+      total,
+      service:services!appointments_service_id_fkey(name)
+    `);
+
+  if (from) query = query.gte("start_time", from);
+  if (to) query = query.lte("start_time", to + "T23:59:59");
+
+  const { data, error } = await query;
+  if (error) return console.error(error);
+
+  let totalAmount = 0;
+  const tbody = document.getElementById("reportTable");
+
+  tbody.innerHTML = data.map(r => {
+    totalAmount += Number(r.total || 0);
+    return `
+      <tr>
+        <td>${new Date(r.start_time).toLocaleDateString()}</td>
+        <td>${r.service?.name || ""}</td>
+        <td>${Number(r.total).toFixed(2)}</td>
+      </tr>
+    `;
+  }).join("");
+
+ document.querySelector("#reportsTab .total").innerText =
+  `Total: RM ${totalAmount.toFixed(2)}`;
+}
+/* ================= LOAD ALL ================= */
+async function loadAll() {
+  await loadClients();
+  await loadPractitioners();
+  await loadServices();   // data only
+
+  setAppointmentDefaults();
+  loadAppointments();
+}
+
+  document.getElementById("loginBtn").addEventListener("click", login);
+
+</script>
+
+    
+</body>
+</html>
 
 /* ================= SERVICES ================= */
 let services = [];
