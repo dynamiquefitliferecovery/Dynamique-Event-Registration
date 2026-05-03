@@ -299,7 +299,7 @@
 
 <script>
 console.log("JS loaded");
- alert("SCRIPT START");
+
 // ✅ Explicit DOM bindings
 const apptDate = document.getElementById("apptDate");
 const apptTime = document.getElementById("apptTime");
@@ -473,7 +473,7 @@ async function loadClients() {
       <td>${formatContact(c.contact)}</td>
       <td>${c.email}</td>
      <td>
-  <span class="edit" data-action="editan>
+  <span class="edit" data-action="edit" data-id="${c.id
 </td>
   `).join("");
 }
@@ -583,7 +583,15 @@ async function loadServices() {
 }
 
 function initServiceDropdown() {
-  apptService.innerHTML = `<option value="">Select Service</option>`;
+  if (services.length === 0) {
+    apptService.innerHTML =
+      `<option value="">No services found</option>`;
+    return;
+  }
+
+  apptService.innerHTML =
+    `<option value="">Select Service</option>`;
+
   services.forEach(s => {
     const opt = document.createElement("option");
     opt.value = s.id;
@@ -593,6 +601,7 @@ function initServiceDropdown() {
     apptService.appendChild(opt);
   });
 }
+
 /* ================= APPOINTMENTS ================= */
 
 function setAppointmentDefaults() {
@@ -621,13 +630,20 @@ function fillAppointmentDropdowns() {
 
 function calculateCharges() {
   const opt = apptService.selectedOptions[0];
-  if (!opt || !apptClient.value) return;
+
+  if (!opt || !opt.dataset.price || !apptClient.value) {
+    apptAmount.value = "0.00";
+    apptSST.value = "0.00";
+    apptTotal.value = "0.00";
+    return;
+  }
 
   const price = Number(opt.dataset.price);
   const client = clients.find(c => c.id == apptClient.value);
 
+  const isSST = opt.dataset.sst === "true";
   const sst =
-    client.citizenship === "Foreigner" && opt.dataset.sst === "true"
+    client && client.citizenship === "Foreigner" && isSST
       ? price * 0.06
       : 0;
 
