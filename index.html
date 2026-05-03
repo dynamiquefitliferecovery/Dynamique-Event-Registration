@@ -452,8 +452,10 @@ function formatContact(v = "") {
 /* ================= CLIENTS ================= */
 
 let clients = [];
-const clientDob = document.getElementById("clientDob");
-const clientGender = document.getElementById("clientGender");
+let editingClientId = null;
+
+const clientName = document.getElementById("clientName");
+const clientDob = document.getElementById("ById("clientGender");const clientDob = document.getElementById("clientDob");
 const clientCitizenship = document.getElementById("clientCitizenship");
 const clientIc = document.getElementById("clientIc");
 const clientContact = document.getElementById("clientContact");
@@ -600,8 +602,6 @@ function clearClientForm() {
   clientEmail.value = "";
   clientAddress.value = "";
 }
-
-// DOM references
 
 /* ================= PRACTITIONERS ================= */
 
