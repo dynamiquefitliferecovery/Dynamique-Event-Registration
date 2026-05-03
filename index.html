@@ -530,6 +530,63 @@ async function deleteClient(id) {
   loadClients();
 }
 
+  document.getElementById("saveClientBtn").addEventListener("click", saveClient);
+
+!clientDob.value) {async function saveClient() {
+    alert("Name and DOB are required");
+    return;
+  }
+
+  const payload = {
+    full_name: clientName.value.trim(),
+    date_of_birth: clientDob.value,
+    gender: clientGender.value,
+    citizenship: clientCitizenship.value,
+    ic_passport: clientIc.value.trim(),
+    contact: clientContact.value.trim(),
+    email: clientEmail.value.trim(),
+    address: clientAddress.value.trim()
+  };
+
+  let error;
+
+  // ✅ EDIT MODE → UPDATE
+  if (editingClientId) {
+    ({ error } = await sb
+      .from("clients")
+      .update(payload)
+      .eq("id", editingClientId));
+
+  // ✅ NEW MODE → INSERT
+  } else {
+    ({ error } = await sb
+      .from("clients")
+      .insert(payload));
+  }
+
+  if (error) {
+    console.error(error);
+    alert("Failed to save client");
+    return;
+  }
+
+  // ✅ RESET FORM
+  editingClientId = null;
+  clearClientForm();
+  loadClients();
+}
+
+  function clearClientForm() {
+  clientName.value = "";
+  clientDob.value = "";
+  clientGender.value = "Male";
+  clientCitizenship.value = "Malaysian";
+  clientIc.value = "";
+  clientContact.value = "";
+  clientEmail.value = "";
+  clientAddress.value = "";
+}
+
 /* ================= PRACTITIONERS ================= */
 
 let practitioners = [];
