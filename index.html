@@ -459,10 +459,7 @@ async function loadClients() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
 
   clients = data || [];
 
@@ -483,32 +480,33 @@ async function loadClients() {
   `).join("");
 }
 
-document.getElementById("saveClientBtn").addEventListener("click", async () => {
-  const payload = {
-    full_name: clientName.value.trim(),
-    date_of_birth: clientDob.value,
-    gender: clientGender.value,
-    citizenship: clientCitizenship.value,
-    ic_passport: clientIc.value,
-    contact: clientContact.value,
-    email: clientEmail.value,
-    address: clientAddress.value
-  };
+document.getElementById("saveClientBtn")
+  .addEventListener("click", async () => {
+    const payload = {
+      full_name: clientName.value.trim(),
+      date_of_birth: clientDob.value,
+      gender: clientGender.value,
+      citizenship: clientCitizenship.value,
+      ic_passport: clientIc.value,
+      contact: clientContact.value,
+      email: clientEmail.value,
+      address: clientAddress.value
+    };
 
-  if (!payload.full_name) {
-    alert("Full name is required");
-    return;
-  }
+    if (!payload.full_name) {
+      alert("Full name is required");
+      return;
+    }
 
-  if (editingClientId) {
-    await sb.from("clients").update(payload).eq("id", editingClientId);
-  } else {
-    await sb.from("clients").insert(payload);
-  }
+    if (editingClientId) {
+      await sb.from("clients").update(payload).eq("id", editingClientId);
+    } else {
+      await sb.from("clients").insert(payload);
+    }
 
-  editingClientId = null;
-  loadClients();
-});
+    editingClientId = null;
+    loadClients();
+  });
 
 clientsTable.addEventListener("click", async e => {
   const { action, id } = e.target.dataset;
@@ -542,15 +540,12 @@ let practitioners = [];
 
 async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
-
   if (!input || !input.value.trim()) {
-    alert("Practitioner input.value.trim() });    alert("Practitioner name required");
-
-  if (error) {
-    alert(error.message);
+    alert("Practitioner name required");
     return;
   }
 
+  await sb.from("practitioners").insert({ name: input.value.trim() });
   input.value = "";
   loadPractitioners();
 }
@@ -561,10 +556,7 @@ async function loadPractitioners() {
     .select("*")
     .order("name");
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
 
   practitioners = data || [];
 
@@ -572,7 +564,12 @@ async function loadPractitioners() {
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      <span class="edit" data-action="delete" data-id="${pument.getElementById("practitionerList")
+      <span classe</span>
+    </div>
+  `).join("");
+}
+
+document.getElementById("practitionerList")
   .addEventListener("click", async e => {
     const { action, id } = e.target.dataset;
     if (action !== "delete") return;
@@ -581,12 +578,6 @@ async function loadPractitioners() {
     await sb.from("practitioners").delete().eq("id", id);
     loadPractitioners();
   });
-    return;
-  }
-
-  const { error } = await sb
-    .from("practitioners")
-
                                                          
 /* ================= SERVICES ================= */
 
