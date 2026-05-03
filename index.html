@@ -446,9 +446,7 @@ let clients = [];
 const clientName = document.getElementById("clientName");
 const clientDob = document.getElementById("clientDob");
 const clientGender = document.getElementById("clientGender");
-const clientCitizenship = document.getElementById("clientCitizenship");
-const clientIc = document.getElementById("clientIc");
-const clientContact = document.getElementById("clientContact");
+const clientCitizenship = document.getElementByIdclientContact");const clientCitizenship = document.getElementById("clientCitizenship");
 const clientEmail = document.getElementById("clientEmail");
 const clientAddress = document.getElementById("clientAddress");
 const clientsTable = document.getElementById("clientsTable");
@@ -473,40 +471,35 @@ async function loadClients() {
       <td>${formatContact(c.contact)}</td>
       <td>${c.email}</td>
       <td>
-        editEdit</span> |
-        deleteDelete</span>
-      </td>
+        <spandit</span> |
+        <span class="edit" data   </td>
     </tr>
   `).join("");
 }
 
-document.getElementById("saveClientBtn")
-  .addEventListener("click", async () => {
-    const payload = {
-      full_name: clientName.value.trim(),
-      date_of_birth: clientDob.value,
-      gender: clientGender.value,
-      citizenship: clientCitizenship.value,
-      ic_passport: clientIc.value,
-      contact: clientContact.value,
-      email: clientEmail.value,
-      address: clientAddress.value
-    };
+document.getElementById("saveClientBtn").addEventListener("click", async () => {
+  const payload = {
+    full_name: clientName.value.trim(),
+    date_of_birth: clientDob.value,
+    gender: clientGender.value,
+    citizenship: clientCitizenship.value,
+    ic_passport: clientIc.value,
+    contact: clientContact.value,
+    email: clientEmail.value,
+    address: clientAddress.value
+  };
 
-    if (!payload.full_name) {
-      alert("Full name is required");
-      return;
-    }
+  if (!payload.full_name) return alert("Full name is required");
 
-    if (editingClientId) {
-      await sb.from("clients").update(payload).eq("id", editingClientId);
-    } else {
-      await sb.from("clients").insert(payload);
-    }
+  if (editingClientId) {
+    await sb.from("clients").update(payload).eq("id", editingClientId);
+  } else {
+    await sb.from("clients").insert(payload);
+  }
 
-    editingClientId = null;
-    loadClients();
-  });
+  editingClientId = null;
+  loadClients();
+});
 
 clientsTable.addEventListener("click", async e => {
   const { action, id } = e.target.dataset;
@@ -533,6 +526,9 @@ clientsTable.addEventListener("click", async e => {
     clientAddress.value = c.address;
   }
 });
+
+const clientIc = document.getElementById("clientIc");
+
 
 /* ================= PRACTITIONERS ================= */
 
@@ -564,7 +560,7 @@ async function loadPractitioners() {
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      <span classe</span>
+      deleteDelete</span>
     </div>
   `).join("");
 }
