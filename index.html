@@ -379,6 +379,11 @@ function logout() {
 sb.auth.signOut();
 }
 
+  function openApp() {
+  document.getElementById("loginView").classList.add("hidden");
+  document.getElementById("appView").classList.remove("hidden");
+  loadAll();
+}
 
 /* ================= TABS ================= */
 function tab(id) {
@@ -458,17 +463,6 @@ async function loadClients() {
 
   clients = data || [];
 
-clientsTable.innerHTML = clients.map(c => `
-  <tr>
-    <td>${c.full_name}</td>
-    <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
-    <td>${c.gender}</td>
-    <td>${c.citizenship}</td>
-    <td>${formatIc(c.ic_passport)}</td>
-    <td>${formatContact(c.contact)}</td>
-    <td>${c.email}</td>
-    <td>
-      <span class="edit" data-action="edit" data-id="${c.id}="delete" datan("");
 
 document.getElementById("saveClientBtn").addEventListener("click", async () => {
   const payload = {
@@ -527,19 +521,7 @@ clientsTable.addEventListener("click", async e => {
 let practitioners = [];
 
 /* ADD PRACTITIONER */
-async function addPractitioner() {
-  const input = document.querySelector("#practitionersTab input");
-LER (delegation) */  if (!input || !input.value.trim()) {
-document
-  .getElementById("practitionerList")
-  .addEventListener("click", e => {
-    if (e.target.dataset.action !== "delete") return;
-    deletePractitioner(e.target.dataset.id);
-  });
-
-/* DELETE PRACTITIONER */
-async function deletePractitioner(id) {
-  if (!confirm("Delete practitioner?")) return;
+async function addPractitioner (!confirm("Delete practitioner?")) return;async function addPractitioner() {
 
   const { error } = await sb
     .from("practitioners")
@@ -553,6 +535,9 @@ async function deletePractitioner(id) {
 
   loadPractitioners();
 }
+  const input = document.querySelector("#practitionersTab input");
+
+  if (!input || !input.value.trim()) {
     alert("Practitioner name required");
     return;
   }
@@ -597,6 +582,16 @@ async function loadPractitioners() {
   `).join("");
 }
 
+/* CLICK HANDLER */
+document
+  .getElementById("practitionerList")
+  .addEventListener("click", e => {
+    if (e.target.dataset.action !== "delete") return;
+    deletePractitioner(e.target.dataset.id);
+  });
+
+/* DELETE PRACTITIONER */
+async function deletePractitioner(id) {
 
 /* ================= SERVICES ================= */
 
