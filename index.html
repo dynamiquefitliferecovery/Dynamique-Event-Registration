@@ -459,22 +459,30 @@ async function loadClients() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   clients = data || [];
 
-clientsTable.innerHTML = clients.map(c => `
-  <tr>
-    <td>${c.full_name}</td>
-    <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
-    <td>${c.gender}</td>
-    <td>${c.citizenship}</td>
-    <td>${formatIc(c.ic_passport)}</td>
-    <td>${formatContact(c.contact)}</td>
-    <td>${c.email}</td>
-    <td>
-      <span class="edit" data-action="edit" data-idta-action="delete" datan("");
-      
+  clientsTable.innerHTML = clients.map(c => `
+    <tr>
+      <td>${c.full_name}</td>
+      <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
+      <td>${c.gender}</td>
+      <td>${c.citizenship}</td>
+      <td>${formatIc(c.ic_passport)}</td>
+      <td>${formatContact(c.contact)}</td>
+      <td>${c.email}</td>
+      <td>
+        editEdit</span> |
+        deleteDelete</span>
+      </td>
+    </tr>
+  `).join("");
+}
+
 document.getElementById("saveClientBtn").addEventListener("click", async () => {
   const payload = {
     full_name: clientName.value.trim(),
@@ -487,27 +495,33 @@ document.getElementById("saveClientBtn").addEventListener("click", async () => {
     address: clientAddress.value
   };
 
-  if (!payload.full_name) return alert("Full name is required");
+  if (!payload.full_name) {
+    alert("Full name is required");
+    return;
+  }
 
-  editingClientId
-    ? await sb.from("clients").update(payload).eq("id", editingClientId)
-    : await sb.from("clients").insert(payload);
+  if (editingClientId) {
+    await sb.from("clients").update(payload).eq("id", editingClientId);
+  } else {
+    await sb.from("clients").insert(payload);
+  }
 
   editingClientId = null;
   loadClients();
 });
 
 clientsTable.addEventListener("click", async e => {
-  const { id, action } = e.target.dataset;
-  if (!id || !action) return;
+  const { action, id } = e.target.dataset;
+  if (!action || !id) return;
 
   if (action === "delete") {
+    if (!confirm("Delete this client?")) return;
     await sb.from("clients").delete().eq("id", id);
     loadClients();
   }
 
   if (action === "edit") {
-    const c = clients.find(x => x.id == id);
+    const c = clients.find(x => x.id === id);
     if (!c) return;
 
     editingClientId = id;
@@ -526,18 +540,11 @@ clientsTable.addEventListener("click", async e => {
 
 let practitioners = [];
 
-/* ADD PRACTITIONER */
 async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
 
   if (!input || !input.value.trim()) {
-    alert("Practitioner name required");
-    return;
-  }
-
-  const { error } = await sb
-    .from("practitioners")
-    .insert({ name: input.value.trim() });
+    alert("Practitioner input.value.trim() });    alert("Practitioner name required");
 
   if (error) {
     alert(error.message);
@@ -548,7 +555,6 @@ async function addPractitioner() {
   loadPractitioners();
 }
 
-/* LOAD PRACTITIONERS */
 async function loadPractitioners() {
   const { data, error } = await sb
     .from("practitioners")
@@ -566,14 +572,7 @@ async function loadPractitioners() {
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      deleteDelete</span>
-    </div>
-  `).join("");
-}
-
-/* DELETE PRACTITIONER */
-document
-  .getElementById("practitionerList")
+      <span class="edit" data-action="delete" data-id="${pument.getElementById("practitionerList")
   .addEventListener("click", async e => {
     const { action, id } = e.target.dataset;
     if (action !== "delete") return;
@@ -582,7 +581,13 @@ document
     await sb.from("practitioners").delete().eq("id", id);
     loadPractitioners();
   });
+    return;
+  }
 
+  const { error } = await sb
+    .from("practitioners")
+
+                                                         
 /* ================= SERVICES ================= */
 
 let services = [];
