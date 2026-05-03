@@ -526,101 +526,67 @@ clientsTable.addEventListener("click", async e => {
 
 let practitioners = [];
 
-/* ADD PRACTITIONER */
 async function addPractitioner() {
   const input = document.querySelector("#practitionersTab input");
-
-  if (!input || !input.value.trim()) {
-    alert("Practitioner name required");
-    return;
-  }
+  if (!input || !input.value.trim()) return alert("Practitioner name required");
 
   const { error } = await sb
     .from("practitioners")
     .insert({ name: input.value.trim() });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
   input.value = "";
   loadPractitioners();
 }
 
-/* LOAD PRACTITIONERS */
 async function loadPractitioners() {
   const { data, error } = await sb
     .from("practitioners")
     .select("*")
     .order("name");
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+  if (error) return console.error(error);
 
   practitioners = data || [];
-
   const list = document.getElementById("practitionerList");
   if (!list) return;
 
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      delete
-        Delete
-      </span>
+      deleteDelete</span>
     </div>
   `).join("");
 }
 
-/* CLICK HANDLER (event delegation) */
 document
   .getElementById("practitionerList")
-  .addEventListener("click", async e => {
-    if (e.target.dataset.action !== "delete") return;
-    await deletePractitioner(e.target.dataset.id);
+  .addEventListener("click", e => {
+    if (e.target.dataset.action === "delete") {
+      deletePractitioner(e.target.dataset.id);
+    }
   });
 
-/* DELETE PRACTITIONER */
 async function deletePractitioner(id) {
   if (!confirm("Delete practitioner?")) return;
-
-  const { error } = await sb
-    .from("practitioners")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
+  await sb.from("practitioners").delete().eq("id", id);
   loadPractitioners();
 }
-
-
 /* ================= SERVICES ================= */
 
 let services = [];
 
-/* LOAD SERVICES */
 async function loadServices() {
   const { data, error } = await sb
     .from("services")
     .select("id, name, price, sst")
     .order("name");
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-
+  if (error) return console.error(error);
   services = data || [];
 }
 
-/* INIT SERVICE DROPDOWN */
 function initServiceDropdown() {
   apptService.innerHTML = `<option value="">Select Service</option>`;
 
@@ -633,19 +599,24 @@ function initServiceDropdown() {
     apptService.appendChild(opt);
   });
 }
+  
 /* ================= APPOINTMENTS ================= */
 
- c.id;function setAppointmentDefaults() {
-    opt.textContent = c.full_name;
-    apptClient.appendChild(opt);
+function fillAppointmentDropdowns() {
+  apptClient.innerHTML = `<option value="">Select Client</option>`;
+  clients.forEach(c => {
+    const o = document.createElement("option");
+    o.value = c.id;
+    o.textContent = c.full_name;
+    apptClient.appendChild(o);
   });
 
   apptPractitioner.innerHTML = `<option value="">Select Practitioner</option>`;
   practitioners.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = p.name;
-    apptPractitioner.appendChild(opt);
+    const o = document.createElement("option");
+    o.value = p.id;
+    o.textContent = p.name;
+    apptPractitioner.appendChild(o);
   });
 }
 
@@ -657,8 +628,7 @@ function calculateCharges() {
   const client = clients.find(c => c.id == apptClient.value);
 
   const sst =
-    client.citizenship === "Foreigner" &&
-    opt.dataset.sst === "true"
+    client.citizenship === "Foreigner" && opt.dataset.sst === "true"
       ? price * 0.06
       : 0;
 
@@ -666,45 +636,7 @@ function calculateCharges() {
   apptSST.value = sst.toFixed(2);
   apptTotal.value = (price + sst).toFixed(2);
 }
-
-apptService.addEventListener("change", calculateCharges);
-apptClient.addEventListener("change", calculateCharges);
-
-async function saveAppointment() {
-  const payload = {
-    start_time: new Date(`${apptDate.value}T${apptTime.value}`).toISOString(),
-    client_id: apptClient.value,
-    practitioner_id: apptPractitioner.value,
-    service_id: apptService.value,
-    payment_method: apptPayment.value,
-    remarks: apptRemarks.value || null,
-    amount: Number(apptAmount.value),
-    sst: Number(apptSST.value),
-    total: Number(apptTotal.value)
-  };
-
-  const res = editingAppointmentId
-    ? await sb.from("appointments").update(payload).eq("id", editingAppointmentId)
-    : await sb.from("appointments").insert(payload);
-
-  if (res.error) {
-    alert(res.error.message);
-    return;
-  }
-
-  editingAppointmentId = null;
-  loadAppointments();
-}
-  const now = new Date();
-  apptDate.value = now.toISOString().slice(0, 10);
-  apptTime.value = now.toTimeString().slice(0, 5);
-}
-
-function fillAppointmentDropdowns() {
-  apptClient.innerHTML = `<option value="">Select Client</option>`;
-  clients.forEach(c => {
-    const opt = document.createElement("option");
-
+  
 /* ================= REPORT ================= */
 
 async function loadReport() {
