@@ -195,6 +195,7 @@
         <tr>
           <th>Name</th>
           <th>DOB</th>
+          <th>Age</th>
           <th>Gender</th>
           <th>Citizen</th>
           <th>IC</th>
@@ -241,11 +242,12 @@
   <option value="Online">Online</option>
 </select>
 
-<input id="apptRemarks" placeholder="Remarks (optional)">
+
 
       <input id="apptAmount" placeholder="Amount (RM)" readonly>
       <input id="apptSST" placeholder="SST (RM)" readonly>
       <input id="apptTotal" placeholder="Total (RM)" readonly>
+      <input id="apptRemarks" placeholder="Remarks (optional)">
     </div>
 
     <button class="action" onclick="saveAppointment()">Save Appointment</button>
@@ -262,8 +264,8 @@
     <th>SST</th>
     <th>Total</th>
     <th>Payment</th>
-    <th>Remarks</th>
     <th>Action</th>
+    <th>Remarks</th>
   </tr>
 </thead>
       <tbody id="apptTable"></tbody>
@@ -272,30 +274,41 @@
 
 </section>
 
-<!-- ===== SALES REPORT ===== --> 
-  <section id="reportsTab" class="hidden">
+<!-- ===== SALES REPORT ===== -->
+<section id="reportsTab" class="hidden">
   <div class="card">
     <h3>Sales Report</h3>
-      <input type="date" id="reportFrom">
-<input type="date" id="reportTo">
-<button class="action" onclick="loadReport()">Generate</button>
-    <table>
-  <thead>
-    <tr>
-      <th>Date</th>
-      <th>Service</th>
-      <th>Amount</th>
-    </tr>
-  </thead>
-  <tbody id="reportTable"></tbody>
-</table>
 
-<p class="total">Total: RM 0.00</p>
+    <input type="date" id="reportFrom">
+    <input type="date" id="reportTo">
+
+    <button class="action" onclick="loadReport()">Generate</button>
+    <button class="action" onclick="exportReportExcel()">Export Excel</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Age</th>
+          <th>Citizenship</th>
+          <th>Service</th>
+          <th>Amount</th>
+          <th>SST</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody id="reportTable"></tbody>
+    </table>
+
+    <p class="total">Total: RM 0.00</p>
   </div>
 </section>
 
 </div>
-</div>
+
 
 <script>
 console.log("JS loaded");
@@ -336,6 +349,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 /* ================= GLOBAL STATE ================= */
 let editingClientId = null;
 let editingAppointmentId = null;
+  let reportData = [];
 
 /* ================= SESSION CHECK ================= */
 (async () => {
@@ -469,7 +483,8 @@ async function loadClients() {
 
     tr.innerHTML = `
       <td>${c.full_name}</td>
-      <td>${c.date_of_birth} (${calculateAge(c.date_of_birth)})</td>
+      <td>${c.date_of_birth}</td>
+      <td>${calculateAge(c.date_of_birth)}</td>
       <td>${c.gender}</td>
       <td>${c.citizenship}</td>
       <td>${formatIc(c.ic_passport)}</td>
@@ -498,7 +513,7 @@ async function loadClients() {
 }
 
 function editClient(id) {
-  const c = clients.find(x => x.id === id);
+  const c = clients.find(x => x.id == id);
   if (!c) return;
 
   editingClientId = id;
@@ -581,7 +596,8 @@ const services = [
   { code: "QF15", name: "Quick Fix 15 minutes",           price: 15,  sst: false }
 ];
 
-function initServiceDropdown() {function initServiceptService.innerHTML = '<option value="">Select Service</option>';
+function initServiceDropdown() {
+  apptService.innerHTML = '<option value="">Select Service</option>';
 
   services.forEach(s => {
     const opt = document.createElement("option");
@@ -657,41 +673,125 @@ async function loadAppointments() {
 
 /* ================= REPORT ================= */
 
-async function loadReport() {
-  const from = reportFrom.value;
-const to = reportTo.value;
-  
+async function loadReport() {async function load from = reportFrom.value;
+  const to = reportTo.value;
+                             
+  reportData = [];
+  let totalAmount = 0;
+
   let query = sb
     .from("appointments")
     .select(`
       start_time,
+      amount,
+      sst,
       total,
-      service:services!appointments_service_id_fkey(name)
-    `);
+      payment,
+      remarks,
+      client:clients(full_name, citizenship, date_of_birth),
+      service_code,
+      service_name
+    `)
+    .order("start_time", { ascending: true });
 
   if (from) query = query.gte("start_time", from);
   if (to) query = query.lte("start_time", to + "T23:59:59");
 
   const { data, error } = await query;
-  if (error) return console.error(error);
+  if (error) {
+    console.error(error);
+    alert("Failed to load report");
+    return;
+  }
 
-  let totalAmount = 0;
   const tbody = document.getElementById("reportTable");
+  tbody.innerHTML = "";
 
-  tbody.innerHTML = data.map(r => {
+  data.forEach(r => {
+    const age = calculateAge(r.client?.date_of_birth);
+
     totalAmount += Number(r.total || 0);
-    return `
-      <tr>
-        <td>${new Date(r.start_time).toLocaleDateString()}</td>
-        <td>${r.service?.name || ""}</td>
-        <td>${Number(r.total).toFixed(2)}</td>
-      </tr>
-    `;
-  }).join("");
 
- document.querySelector("#reportsTab .total").innerText =
-  `Total: RM ${totalAmount.toFixed(2)}`;
+    // store for Excel
+    reportData.push({
+      date: new Date(r.start_time).toLocaleDateString(),
+      client: r.client?.full_name || "",
+      age: age,
+      citizenship: r.client?.citizenship || "",
+      service: r.service_name || "",
+      amount: Number(r.amount || 0),
+      sst: Number(r.sst || 0),
+      total: Number(r.total || 0),
+      payment: r.payment || "",
+      remarks: r.remarks || ""
+    });
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${new Date(r.start_time).toLocaleDateString()}</td>
+      <td>${r.client?.full_name || ""}</td>
+      <td>${age}</td>
+      <td>${r.client?.citizenship || ""}</td>
+      <td>${r.service_name || ""}</td>
+      <td>${Number(r.amount || 0).toFixed(2)}</td>
+      <td>${Number(r.sst || 0).toFixed(2)}</td>
+      <td>${Number(r.total || 0).toFixed(2)}</td>
+      <td>${r.payment || ""}</td>
+      <td>${r.remarks || ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelector("#reportsTab .total").innerText =
+    "Total: RM " + totalAmount.toFixed(2);
 }
+
+  function exportReportExcel() {
+  if (!reportData || reportData.length === 0) {
+    alert("No data to export");
+    return;
+  }
+
+  let csv = [];
+  csv.push([
+    "Date",
+    "Client",
+    "Age",
+    "Citizenship",
+    "Service",
+    "Amount",
+    "SST",
+    "Total",
+    "Payment",
+    "Remarks"
+  ].join(","));
+
+  reportData.forEach(r => {
+    csv.push([
+      r.date,
+      `"${r.client}"`,
+      r.age,
+      r.citizenship,
+      `"${r.service}"`,
+      r.amount.toFixed(2),
+      r.sst.toFixed(2),
+      r.total.toFixed(2),
+      r.payment,
+      `"${r.remarks}"`
+    ].join(","));
+  });
+
+  const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "sales_report.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
 /* ================= LOAD ALL ================= */
 async function loadAll() {
   await loadClients();
