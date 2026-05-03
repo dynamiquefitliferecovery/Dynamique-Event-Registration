@@ -473,7 +473,7 @@ clientsTable.innerHTML = clients.map(c => `
     <td>${formatContact(c.contact)}</td>
     <td>${c.email}</td>
     <td>
-      <span class="edit" data-action="edit" data-id="${ction="delete" data-id="${c.id}
+      <span class="edit" data-action="edit" data-idta-action="delete" datan("");
       
 document.getElementById("saveClientBtn").addEventListener("click", async () => {
   const payload = {
@@ -563,40 +563,26 @@ async function loadPractitioners() {
   practitioners = data || [];
 
   const list = document.getElementById("practitionerList");
-  if (!list) return;
-
   list.innerHTML = practitioners.map(p => `
     <div>
       ${p.name}
-      <span class="edit" data-action="delete" data-id="${p.idn("");
+      deleteDelete</span>
+    </div>
+  `).join("");
 }
-
-/* DELETE CLICK HANDLER (delegation) */
-document
-  .getElementById("practitionerList")
-  .addEventListener("click", e => {
-    const { action, id } = e.target.dataset;
-    if (action === "delete") {
-      deletePractitioner(id);
-    }
-  });
 
 /* DELETE PRACTITIONER */
-async function deletePractitioner(id) {
-  if (!confirm("Delete practitioner?")) return;
+document
+  .getElementById("practitionerList")
+  .addEventListener("click", async e => {
+    const { action, id } = e.target.dataset;
+    if (action !== "delete") return;
 
-  const { error } = await sb
-    .from("practitioners")
-    .delete()
-    .eq("id", id);
+    if (!confirm("Delete practitioner?")) return;
+    await sb.from("practitioners").delete().eq("id", id);
+    loadPractitioners();
+  });
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  loadPractitioners();
-}
 /* ================= SERVICES ================= */
 
 let services = [];
