@@ -747,10 +747,9 @@ async function saveAppointment() {
     return;
   }
 
-  const startTime = apptDate.value + "T" + apptTime.value;
-
-  const endTime = new Date(startTime);
-  endTime.setHours(endTime.getHours() + 1);
+const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
+const endTime = new Date(startTime);
+endTime.setHours(endTime.getHours() + 1);
 
   const payload = {
     start_time: startTime,
