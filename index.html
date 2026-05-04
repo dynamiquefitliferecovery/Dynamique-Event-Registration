@@ -369,6 +369,16 @@ async function loadServices() {
 
   services.forEach(s => {
     const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
+    opt.dataset.price = s.price;
+    opt.dataset.sst = String(s.sst); // ✅ important
+    apptService.appendChild(opt);
+  });
+}
+
+  services.forEach(s => {
+    const opt = document.createElement("option");
     opt.value = s.id;                // ✅ BIGINT
     opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
     opt.dataset.price = s.price;
