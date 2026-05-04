@@ -683,9 +683,6 @@ function initServiceDropdown() {
 
   
 /* ================= APPOINTMENTS ================= */
-
-
-console.log("RUNNING loadAppointments()");
   
   function setAppointmentDefaults() {
   const now = new Date();
@@ -764,19 +761,16 @@ async function saveAppointment() {
   endTime.setHours(endTime.getHours() + 1);
 
   const payload = {
-    start_time: startTime,
-    end_time: endTime.toISOString(),
-
-    client_id: apptClient.value,
-    practitioner_id: apptPractitioner.value,
-
-    // ✅ match actual column names
-    payment_method: apptPayment.value,
-    remarks: apptRemarks.value.trim(),
-
-    amount: Number(apptAmount.value),
-    sst: Number(apptSST.value),
-    total: Number(apptTotal.value),
+  start_time: startTime,
+  end_time: endTime.toISOString(),
+  client_id: apptClient.value,
+  practitioner_id: apptPractitioner.value,
+  payment_method: apptPayment.value,
+  remarks: apptRemarks.value.trim(),
+  amount: Number(apptAmount.value),
+  sst: Number(apptSST.value),
+  total: Number(apptTotal.value)
+};
 
     // ✅ service linkage
     service_id: apptService.value,
@@ -852,9 +846,6 @@ async function loadAppointments() {
 }
   
 /* ================= REPORT ================= */
-
-console.log("RUNNING loadReport()");
-  
   async function loadReport() {
   const from = reportFrom.value;
   const to = reportTo.value;
