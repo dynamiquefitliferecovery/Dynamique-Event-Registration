@@ -951,32 +951,14 @@ async function deleteAppointment(id) {
 
 
 /* ================= REPORT ================= */
-async function loadReport${r.client}"`,async function loadReport() {
-      r.age,
-      r.citizenship,
-      `"${r.service}"`,
-      r.amount.toFixed(2),
-      r.sst.toFixed(2),
-      r.total.toFixed(2),
-      r.payment,
-      `"${r.remarks}"`
-    ].join(","));
-  });
-
-  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "sales_report.csv";
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
+async function loadReport() {
   const from = reportFrom.value;
   const to = reportTo.value;
 
   reportData = [];
   let totalAmount = 0;
 
-  let query = sb
+  const { data, error } = await sb
     .from("appointments")
     .select(`
       start_time,
@@ -989,10 +971,6 @@ async function loadReport${r.client}"`,async function loadReport() {
     `)
     .order("start_time", { ascending: true });
 
-  if (from) query = query.gte("start_time", from);
-  if (to) query = query.lte("start_time", to + "T23:59:59");
-
-  const { data, error } = await query;
   if (error) {
     console.error(error);
     alert("Failed to load sales report");
@@ -1005,9 +983,9 @@ async function loadReport${r.client}"`,async function loadReport() {
   data.forEach(r => {
     const tr = document.createElement("tr");
 
-    const td = t => {
+    const td = v => {
       const c = document.createElement("td");
-      c.textContent = t;
+      c.textContent = v;
       return c;
     };
 
@@ -1055,8 +1033,25 @@ function exportReportExcel() {
   reportData.forEach(r => {
     rows.push([
       r.date,
+      `"${r.client}"`,
+      r.age,
+      r.citizenship,
+      `"${r.service}"`,
+      r.amount.toFixed(2),
+      r.sst.toFixed(2),
+      r.total.toFixed(2),
+      r.payment,
+      `"${r.remarks}"`
+    ].join(","));
+  });
 
- 
+  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "sales_report.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 /* ================= LOAD ALL ================= */
 async function loadAll() {
@@ -1080,25 +1075,3 @@ document.addEventListener("DOMContentLoaded", () => {
 </body>
 </html>  
   
-/* ================= LOAD ALL ================= */
-async function loadAll() {
-  await loadClients();
-  await loadPractitioners();
-
-  setAppointmentDefaults();
-  loadAppointments();
-}
-
-  document.getElementById("loginBtn").addEventListener("click", login);
-
-document.addEventListener("DOMContentLoaded", () => {
-  setAppointmentDefaults();
-  loadAppointments();
-});
-
-</script>
-
-    
-</body>
-</html>  
-
