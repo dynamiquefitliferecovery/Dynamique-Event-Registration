@@ -425,9 +425,9 @@ async function openApp() {
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
 
-  await loadClients();        // ✅ client dropdown
-  await loadPractitioners(); // ✅ practitioner dropdown
-  await loadServices();      // ✅ service dropdown
+  await loadClients();
+  await loadPractitioners();
+  await loadServices();
 }
 
 
