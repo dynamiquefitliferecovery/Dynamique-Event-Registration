@@ -350,6 +350,34 @@ let editingClientId = null;
   let reportData = [];
 let editingAppointmentId = null;
 
+let services = [];
+
+async function loadServices() {
+  const { data, error } = await sb
+    .from("services")
+    .select("id, code, name, price, sst_applicable")
+    .order("name");
+
+  if (error) {
+    console.error("Failed to load services", error);
+    return;
+  }
+
+  services = data;
+
+  apptService.innerHTML = '<option value="">Select Service</option>';
+
+  services.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.id;                // ✅ BIGINT
+    opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
+    opt.dataset.price = s.price;
+    opt.dataset.sst = s.sst_applicable;
+    apptService.appendChild(opt);
+  });
+}
+
+  
 /* ================= SESSION CHECK ================= */
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
@@ -419,6 +447,246 @@ function tab(id) {
   }
 
 }
+
+/* ================= APPOINTMENTS ================= */
+
+  function setAppointmentDefaults() {
+  const now = new Date();
+  apptDate.value = now.toISOString().slice(0, 10);
+  apptTime.value = now.toTimeString().slice(0, 5);
+}
+
+function fillAppointmentDropdowns() {
+  apptClient.innerHTML = '<option value="">Select Client</option>';
+  clients.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.id;
+    opt.textContent = c.full_name;
+    apptClient.appendChild(opt);
+  });
+
+  apptPractitioner.innerHTML = '<option value="">Select Practitioner</option>';
+  practitioners.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = p.name;
+    apptPractitioner.appendChild(opt);
+  });
+}
+
+function calculateCharges() {
+  const opt = apptService.selectedOptions[0];
+
+  if (!opt || !opt.dataset.price || !apptClient.value) {
+    apptAmount.value = "0.00";
+    apptSST.value = "0.00";
+    apptTotal.value = "0.00";
+    return;
+  }
+
+  const price = Number(opt.dataset.price);
+  const client = clients.find(c => c.id == apptClient.value);
+
+  const isSST = opt.dataset.sst === "true";
+  const sst =
+    client && client.citizenship === "Foreigner" && isSST
+      ? price * 0.06
+      : 0;
+
+  apptAmount.value = price.toFixed(2);
+  apptSST.value = sst.toFixed(2);
+  apptTotal.value = (price + sst).toFixed(2);
+}
+
+apptService.addEventListener("change", calculateCharges);
+apptClient.addEventListener("change", calculateCharges);
+
+  function clearAppointmentForm() {
+  setAppointmentDefaults();
+  apptClient.value = "";
+  apptPractitioner.value = "";
+  apptService.value = "";
+  apptPayment.value = "";
+  apptRemarks.value = "";
+
+  apptAmount.value = "0.00";
+  apptSST.value = "0.00";
+  apptTotal.value = "0.00";
+}
+
+  async function loadAppointments() {
+  console.log("✅ loadAppointments() is running");
+
+  const { data, error } = await sb
+    .from("appointments")
+    .select(`
+      id,
+      start_time,
+      amount,
+      sst,
+      total,
+      payment_method,
+      remarks,
+      service:services(name),
+      client:clients(full_name),
+      service_id,
+      client_id,
+      practitioner_id
+    `)
+    .order("start_time", { ascending: false });
+
+  if (error) {
+    console.error("Supabase error:", error);
+    return;
+  }
+
+  apptTable.innerHTML = "";
+
+  data.forEach(a => {
+    const tr = document.createElement("tr");
+
+    const td = (text) => {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      return cell;
+    };
+
+    const dt = new Date(a.start_time);
+
+    // Date + Time ✅
+    tr.appendChild(td(
+      dt.toLocaleDateString() + " " +
+      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    ));
+
+    // Client ✅
+    tr.appendChild(td(a.client?.full_name || ""));
+
+    // Service ✅
+    tr.appendChild(td(a.service?.name || ""));
+
+    // Charges ✅
+    tr.appendChild(td(a.amount.toFixed(2)));
+    tr.appendChild(td(a.sst.toFixed(2)));
+    tr.appendChild(td(a.total.toFixed(2)));
+
+    // Payment ✅
+    tr.appendChild(td(a.payment_method));
+
+    // Actions ✅
+    const actionTd = document.createElement("td");
+
+    const edit = document.createElement("span");
+    edit.textContent = "Edit";
+    edit.className = "edit";
+    edit.onclick = () => editAppointment(a.id);
+
+    const del = document.createElement("span");
+    del.textContent = "Delete";
+    del.className = "edit";
+    del.style.marginLeft = "8px";
+    del.onclick = () => deleteAppointment(a.id);
+
+    actionTd.append(edit, document.createTextNode(" | "), del);
+    tr.appendChild(actionTd);
+
+    // Remarks ✅
+    tr.appendChild(td(a.remarks || ""));
+
+    apptTable.appendChild(tr);
+  });
+}
+
+ async function editAppointment(id) {
+  const { data, error } = await sb
+    .from("appointments")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    alert("Failed to load appointment");
+    return;
+  }
+
+  editingAppointmentId = id;
+
+  const start = new Date(data.start_time);
+  apptDate.value = start.toISOString().slice(0, 10);
+  apptTime.value = start.toTimeString().slice(0, 5);
+
+  apptClient.value = data.client_id;
+  apptPractitioner.value = data.practitioner_id;
+  apptService.value = data.service_id;
+  apptPayment.value = data.payment_method;
+  apptRemarks.value = data.remarks || "";
+
+  apptAmount.value = Number(data.amount).toFixed(2);
+  apptSST.value = Number(data.sst).toFixed(2);
+  apptTotal.value = Number(data.total).toFixed(2);
+
+  document.querySelector("#appointmentsTab .action").innerText = "Update Appointment";
+}
+
+async function saveAppointment() {
+  if (
+    !apptDate.value ||
+    !apptTime.value ||
+    !apptClient.value ||
+    !apptPractitioner.value ||
+    !apptPayment.value
+  ) {
+    alert("Please complete all required fields");
+    return;
+  }
+
+  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
+  const endTime = new Date(startTime);
+  endTime.setHours(endTime.getHours() + 1);
+
+const payload = {
+  start_time: startTime.toISOString(),
+  end_time: endTime.toISOString(),
+  client_id: Number(apptClient.value),
+  practitioner_id: Number(apptPractitioner.value),
+  service_id: Number(apptService.value), 
+  payment_method: apptPayment.value,
+  remarks: apptRemarks.value.trim(),
+  amount: Number(apptAmount.value),
+  sst: Number(apptSST.value),
+  total: Number(apptTotal.value)
+};
+
+  let error;
+
+  if (editingAppointmentId) {
+    ({ error } = await sb
+      .from("appointments")
+      .update(payload)
+      .eq("id", editingAppointmentId));
+  } else {
+    ({ error } = await sb
+      .from("appointments")
+      .insert(payload));
+  }
+
+  if (error) {
+    console.error("saveAppointment error:", error);
+    alert("Failed to save appointment");
+    return;
+  }
+
+  clearAppointmentForm();
+  editingAppointmentId = null;
+  document.querySelector("#appointmentsTab .action").innerText = "Save Appointment";
+  loadAppointments();
+}
+  
+document.addEventListener("DOMContentLoaded", () => {
+  loadServices();
+  loadAppointments();
+});
+
   
 /* ================= FORMATTERS ================= */
 
@@ -692,7 +960,11 @@ function initServiceDropdown() {
 }
 
 function fillAppointmentDropdowns() {
-  apptClient.innerHTML = '<option value="">Select Client</option>';
+ .name;  apptClient.innerHTML = '<option value="">Select Client</option>';
+    apptPractitioner.appendChild(opt);
+  });
+}
+
   clients.forEach(c => {
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -749,62 +1021,7 @@ apptClient.addEventListener("change", calculateCharges);
   apptTotal.value = "0.00";
 }
 
-
-async function saveAppointment() {
-  if (
-    !apptDate.value ||
-    !apptTime.value ||
-    !apptClient.value ||
-    !apptPractitioner.value ||
-    !apptPayment.value
-  ) {
-    alert("Please complete all required fields");
-    return;
-  }
-
-  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
-  const endTime = new Date(startTime);
-  endTime.setHours(endTime.getHours() + 1);
-
-const payload = {
-  start_time: startTime.toISOString(),
-  end_time: endTime.toISOString(),
-  client_id: Number(apptClient.value),
-  practitioner_id: Number(apptPractitioner.value),
-  service_id: Number(apptService.value), 
-  payment_method: apptPayment.value,
-  remarks: apptRemarks.value.trim(),
-  amount: Number(apptAmount.value),
-  sst: Number(apptSST.value),
-  total: Number(apptTotal.value)
-};
-
-  let error;
-
-  if (editingAppointmentId) {
-    ({ error } = await sb
-      .from("appointments")
-      .update(payload)
-      .eq("id", editingAppointmentId));
-  } else {
-    ({ error } = await sb
-      .from("appointments")
-      .insert(payload));
-  }
-
-  if (error) {
-    console.error("saveAppointment error:", error);
-    alert("Failed to save appointment");
-    return;
-  }
-
-  clearAppointmentForm();
-  editingAppointmentId = null;
-  document.querySelector("#appointmentsTab .action").innerText = "Save Appointment";
-  loadAppointments();
-}
-  
-async function loadAppointments() {
+  async function loadAppointments() {
   console.log("✅ loadAppointments() is running");
 
   const { data, error } = await sb
@@ -917,6 +1134,62 @@ async function loadAppointments() {
 
   document.querySelector("#appointmentsTab .action").innerText = "Update Appointment";
 }
+
+async function saveAppointment() {
+  if (
+    !apptDate.value ||
+    !apptTime.value ||
+    !apptClient.value ||
+    !apptPractitioner.value ||
+    !apptPayment.value
+  ) {
+    alert("Please complete all required fields");
+    return;
+  }
+
+  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
+  const endTime = new Date(startTime);
+  endTime.setHours(endTime.getHours() + 1);
+
+const payload = {
+  start_time: startTime.toISOString(),
+  end_time: endTime.toISOString(),
+  client_id: Number(apptClient.value),
+  practitioner_id: Number(apptPractitioner.value),
+  service_id: Number(apptService.value), 
+  payment_method: apptPayment.value,
+  remarks: apptRemarks.value.trim(),
+  amount: Number(apptAmount.value),
+  sst: Number(apptSST.value),
+  total: Number(apptTotal.value)
+};
+
+  let error;
+
+  if (editingAppointmentId) {
+    ({ error } = await sb
+      .from("appointments")
+      .update(payload)
+      .eq("id", editingAppointmentId));
+  } else {
+    ({ error } = await sb
+      .from("appointments")
+      .insert(payload));
+  }
+
+  if (error) {
+    console.error("saveAppointment error:", error);
+    alert("Failed to save appointment");
+    return;
+  }
+
+  clearAppointmentForm();
+  editingAppointmentId = null;
+  document.querySelector("#appointmentsTab .action").innerText = "Save Appointment";
+  loadAppointments();
+}
+  
+
 async function deleteAppointment(id) {
   if (!confirm("Delete this appointment?")) return;
 
