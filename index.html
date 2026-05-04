@@ -684,7 +684,10 @@ function initServiceDropdown() {
   
 /* ================= APPOINTMENTS ================= */
 
-function setAppointmentDefaults() {
+
+console.log("RUNNING loadAppointments()");
+  
+  function setAppointmentDefaults() {
   const now = new Date();
   apptDate.value = now.toISOString().slice(0, 10);
   apptTime.value = now.toTimeString().slice(0, 5);
@@ -807,6 +810,7 @@ async function saveAppointment() {
   apptTotal.value = "0.00";
 }
 
+  
 async function loadAppointments() {
   const { data, error } = await sb
     .from("appointments")
@@ -849,7 +853,9 @@ async function loadAppointments() {
   
 /* ================= REPORT ================= */
 
-async function loadReport() {
+console.log("RUNNING loadReport()");
+  
+  async function loadReport() {
   const from = reportFrom.value;
   const to = reportTo.value;
 
