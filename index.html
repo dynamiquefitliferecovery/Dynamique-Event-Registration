@@ -355,7 +355,7 @@ let services = [];
 async function loadServices() {
   const { data, error } = await sb
     .from("services")
-    .select("id, code, name, price, sst_applicable")
+    .select("id, code, name, price, sst")
     .order("name");
 
   if (error) {
@@ -372,7 +372,7 @@ async function loadServices() {
     opt.value = s.id;                // ✅ BIGINT
     opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
     opt.dataset.price = s.price;
-    opt.dataset.sst = s.sst_applicable;
+    opt.dataset.sst = s.sst;
     apptService.appendChild(opt);
   });
 }
