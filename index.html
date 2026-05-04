@@ -790,13 +790,13 @@ apptClient.addEventListener("change", calculateCharges);
       return cell;
     };
 
-    const dt = new Date(a.start_time + "Z");
+   const dt = new Date(a.start_time);
+
 
     // Date + Time ✅
-    tr.appendChild(td(
-      dt.toLocaleDateString() + " " +
-      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    ));
+tr.appendChild(td(
+  dt.toLocaleDate  dt.toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })  dt.toLocaleDateString("en-MY") + " " +
+));
 
     // Client ✅
     tr.appendChild(td(a.client?.full_name || ""));
@@ -850,9 +850,14 @@ apptClient.addEventListener("change", calculateCharges);
 
   editingAppointmentId = id;
 
-  const start = new Date(data.start_time);
-  apptDate.value = start.toISOString().slice(0, 10);
-  apptTime.value = start.toTimeString().slice(0, 5);
+const start = new Date(data.start_time);
+
+apptDate.value = start.toLocaleDateString("en-CA"); // YYYY-MM-DD
+apptTime.value = start.toLocaleTimeString("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false
+});
 
   apptClient.value = data.client_id;
   apptPractitioner.value = data.practitioner_id;
