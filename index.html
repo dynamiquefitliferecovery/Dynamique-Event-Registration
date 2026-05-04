@@ -353,30 +353,6 @@ let editingAppointmentId = null;
 let services = [];
 
 async function loadServices() {
-  const { data, error } = await sb
-    .from("services")
-    .select("id, code, name, price, sst")
-    .order("name");
-
-  if (error) {
-    console.error("Failed to load services", error);
-    return;
-  }
-
-  services = data;
-
-  apptService.innerHTML = '<option value="">Select Service</option>';
-
-  services.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.id;
-    opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
-    opt.dataset.price = s.price;
-    opt.dataset.sst = String(s.sst); // ✅ important
-    apptService.appendChild(opt);
-  });
-}
-
   services.forEach(s => {
     const opt = document.createElement("option");
     opt.value = s.id;                // ✅ BIGINT
@@ -431,10 +407,15 @@ function logout() {
 sb.auth.signOut();
 }
 
-function openApp() {
+async function openApp() {async function openApp()Practitioners(); // ✅ for practitioner dropdown
+}
+``
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
-}
+
+  await loadClients();        // ✅ REQUIRED for client dropdown
+
+
 
 /* ================= TABS ================= */
 function tab(id) {
@@ -697,6 +678,7 @@ async function loadPractitioners() {
 }
 
 function fillAppointmentDropdowns() {
+    console.log("Clients loaded:", clients);
   // Clients
   apptClient.innerHTML = '<option value="">Select Client</option>';
   clients.forEach(c => {
