@@ -807,17 +807,16 @@ async function saveAppointment() {
   apptTotal.value = "0.00";
 }
 
-  async function loadAppointments() {
+async function loadAppointments() {
   const { data, error } = await sb
     .from("appointments")
     .select(`
       id,
       start_time,
-      service_name,
       amount,
       sst,
       total,
-      payment,
+      payment_method,
       remarks,
       client:clients(full_name)
     `)
@@ -836,11 +835,11 @@ async function saveAppointment() {
     tr.innerHTML =
       "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
       "<td>" + (a.client?.full_name || "") + "</td>" +
-      "<td>" + (a.service_name || "") + "</td>" +
+      "<td>-</td>" +
       "<td>" + a.amount.toFixed(2) + "</td>" +
       "<td>" + a.sst.toFixed(2) + "</td>" +
       "<td>" + a.total.toFixed(2) + "</td>" +
-      "<td>" + a.payment + "</td>" +
+      "<td>" + a.payment_method + "</td>" +
       "<td>-</td>" +
       "<td>" + (a.remarks || "") + "</td>";
 
@@ -866,7 +865,6 @@ async function loadReport() {
       total,
       payment,
       remarks,
-      service_name,
       client:clients(full_name, citizenship, date_of_birth)
     `)
     .order("start_time", { ascending: true });
