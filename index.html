@@ -823,7 +823,7 @@ async function loadAppointments() {
     .order("start_time", { ascending: false });
 
   if (error) {
-    console.error(error);
+    console.error("loadAppointments error:", error);
     return;
   }
 
@@ -890,31 +890,32 @@ async function loadReport() {
 
     totalAmount += total;
 
-    // store for Excel
-    reportData.push({
-      date: new Date(r.start_time).toLocaleDateString(),
-      client: r.client?.full_name || "",
-      age: age,
-      citizenship: r.client?.citizenship || "",
-      service: r.service_name || "",
-      amount: amount,
-      sst: sst,
-      total: total,
-      payment: r.payment || "",
-      remarks: r.remarks || ""
-    });
+// store for Excel (schema-safe)
+reportData.push({
+  date: new Date(r.start_time).toLocaleDateString(),
+  client: r.client?.full_name || "",
+  age: age,
+  citizenship: r.client?.citizenship || "",
+  service: "-", // service name not stored in appointments table
+  amount: amount,
+  sst: sst,
+  total: total,
+  payment: r.payment_method || "",
+  remarks: r.remarks || ""
+});
 
-    const tr = document.createElement("tr");
-  tr.innerHTML =
+   const tr = document.createElement("tr");
+
+tr.innerHTML =
   "<td>" + new Date(r.start_time).toLocaleDateString() + "</td>" +
   "<td>" + (r.client?.full_name || "") + "</td>" +
   "<td>" + age + "</td>" +
   "<td>" + (r.client?.citizenship || "") + "</td>" +
-  "<td>" + (r.service_name || "") + "</td>" +
+  "<td>-</td>" + // service name not stored in appointments table
   "<td>" + amount.toFixed(2) + "</td>" +
   "<td>" + sst.toFixed(2) + "</td>" +
   "<td>" + total.toFixed(2) + "</td>" +
-  "<td>" + (r.payment || "") + "</td>" +
+  "<td>" + (r.payment_method || "") + "</td>" +
   "<td>" + (r.remarks || "") + "</td>";
 
 
