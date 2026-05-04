@@ -951,52 +951,8 @@ async function deleteAppointment(id) {
   
 
 /* ================= REPORT ================= */
-async function load const tbody = document.getElementById("reportTable");async function loadReport() {
-  tbody.innerHTML = "";
 
-  data.forEach(r => {
-    const tr = document.createElement("tr");
-
-    const td = (text) => {
-      const cell = document.createElement("td");
-      cell.textContent = text;
-      return cell;
-    };
-
-    const dt = new Date(r.start_time);
-
-    tr.appendChild(td(dt.toLocaleDateString("en-MY")));
-    tr.appendChild(td(r.client?.full_name || ""));
-    tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
-    tr.appendChild(td(r.client?.citizenship || ""));
-    tr.appendChild(td("-"));
-    tr.appendChild(td(Number(r.amount).toFixed(2)));
-    tr.appendChild(td(Number(r.sst).toFixed(2)));
-    tr.appendChild(td(Number(r.total).toFixed(2)));
-    tr.appendChild(td(r.payment_method || ""));
-    tr.appendChild(td(r.remarks || ""));
-
-    totalAmount += Number(r.total || 0);
-
-    tbody.appendChild(tr);
-
-    reportData.push({
-      date: dt.toLocaleDateString("en-MY"),
-      client: r.client?.full_name || "",
-      age: calculateAge(r.client?.date_of_birth),
-      citizenship: r.client?.citizenship || "",
-      service: "-",
-      amount: Number(r.amount),
-      sst: Number(r.sst),
-      total: Number(r.total),
-      payment: r.payment_method || "",
-      remarks: r.remarks || ""
-    });
-  });
-
-  document.querySelector("#reportsTab .total").innerText =
-    "Total: RM " + totalAmount.toFixed(2);
-}
+async function loadReport() {
   const from = reportFrom.value;
   const to = reportTo.value;
 
@@ -1026,8 +982,38 @@ async function load const tbody = document.getElementById("reportTable");async f
     return;
   }
 
+  const tbody = document.getElementById("reportTable");
+  tbody.innerHTML = "";
 
-  
+  data.forEach(r => {
+    const tr = document.createElement("tr");
+
+    const td = (text) => {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      return cell;
+    };
+
+    const dt = new Date(r.start_time);
+
+    tr.appendChild(td(dt.toLocaleDateString("en-MY")));
+    tr.appendChild(td(r.client?.full_name || ""));
+    tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
+    tr.appendChild(td(r.client?.citizenship || ""));
+    tr.appendChild(td("-"));
+    tr.appendChild(td(Number(r.amount).toFixed(2)));
+    tr.appendChild(td(Number(r.sst).toFixed(2)));
+    tr.appendChild(td(Number(r.total).toFixed(2)));
+    tr.appendChild(td(r.payment_method || ""));
+    tr.appendChild(td(r.remarks || ""));
+
+    totalAmount += Number(r.total || 0);
+    tbody.appendChild(tr);
+
+    reportData.push({
+      date: dt.toLocaleDateString("en-MY"),
+      client: r.client?.full_name || "",
+
   
 function exportReportExcel() {
   if (!reportData.length) {
@@ -1088,5 +1074,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     
 </body>
-</html>
+</html>  
 
