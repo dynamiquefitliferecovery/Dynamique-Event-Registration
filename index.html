@@ -805,6 +805,7 @@ const payload = {
 }
   
 async function loadAppointments() {
+  console.log("✅ loadAppointments() is running
   const { data, error } = await sb
     .from("appointments")
     .select(`
@@ -833,30 +834,55 @@ async function loadAppointments() {
   data.forEach(a => {
     const tr = document.createElement("tr");
 
-tr.innerHTML =
-  "<td>" +
-    new Date(a.start_time).toLocaleDateString() + " " +
-    new Date(a.start_time).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    }) +
-  "</td>" +
-  "<td>" + (clientMap[a.client_id] || "") + "</td>" +
-  "<td>" + (a.service || "-") + "</td>" +
-  "<td>" + a.amount.toFixed(2) + "</td>" +
-  "<td>" + a.sst.toFixed(2) + "</td>" +
-  "<td>" + a.total.toFixed(2) + "</td>" +
-  "<td>" + a.payment_method + "</td>" +
-  "<td>" +
-    "<span class='edit' onclick='editAppointment(" + a.id + ")'>Edit</span> | " +
-    "<span class='edit' onclick='deleteAppointment(" + a.id + ")'>Delete</span>" +
-  "</td>" +
-  "<td>" + (a.remarks || "") + "</td>";
+const tr = document.createElement("tr");
 
-
-    apptTable.appendChild(tr);
-  });
+function td(text) {
+  const cell = document.createElement("td");
+  cell.textContent = text;
+  return cell;
 }
+
+console.log(tr.innerHTML);
+    
+const dt = new Date(a.start_time);
+tr.appendChild(
+  td(
+    dt.toLocaleDateString() +
+      " " +
+      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  )
+);
+
+tr.appendChild(td(clientMap[a.client_id] || ""));
+tr.appendChild(td(a.service || "-"));
+tr.appendChild(td(a.amount.toFixed(2)));
+tr.appendChild(td(a.sst.toFixed(2)));
+tr.appendChild(td(a.total.toFixed(2)));
+tr.appendChild(td(a.payment_method));
+
+const actionTd = document.createElement("td");
+
+const edit = document.createElement("span");
+edit.textContent = "Edit";
+edit.className = "edit";
+edit.onclick = () => editAppointment(a.id);
+
+const del = document.createElement("span");
+del.textContent = "Delete";
+del.className = "edit";
+del.style.marginLeft = "8px";
+del.onclick = () => deleteAppointment(a.id);
+
+actionTd.append(edit, document.createTextNode(" | "), del);
+tr.appendChild(actionTd);
+
+tr.appendChild(td(a.remarks || ""));
+
+apptTable.appendChild(tr);
+
+    
+
+
 
   async function editAppointment(id) {
   const { data, error } = await sb
