@@ -352,18 +352,32 @@ let editingAppointmentId = null;
 
 let services = [];
 
+
 async function loadServices() {
+  const { data, error } = await sb
+    .from("services")
+    .select("id, code, name, price, sst")
+    .order("name");
+
+  if (error) {
+    console.error("Failed to load services", error);
+    return;
+  }
+
+  services = data || [];
+
+  apptService.innerHTML = '<option value="">Select Service</option>';
+
   services.forEach(s => {
     const opt = document.createElement("option");
-    opt.value = s.id;                // ✅ BIGINT
+    opt.value = s.id;
     opt.textContent = `${s.name} (RM ${Number(s.price).toFixed(2)})`;
     opt.dataset.price = s.price;
-    opt.dataset.sst = s.sst;
+    opt.dataset.sst = String(s.sst);
     apptService.appendChild(opt);
   });
 }
 
-  
 /* ================= SESSION CHECK ================= */
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
@@ -407,13 +421,14 @@ function logout() {
 sb.auth.signOut();
 }
 
-async function openApp() {async function openApp()Practitioners(); // ✅ for practitioner dropdown
-}
-``
+async function openApp() {
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
 
-  await loadClients();        // ✅ REQUIRED for client dropdown
+  await loadClients();        // ✅ client dropdown
+  await loadPractitioners(); // ✅ practitioner dropdown
+  await loadServices();      // ✅ service dropdown
+}
 
 
 
@@ -1053,10 +1068,7 @@ async function loadAll() {
 
   document.getElementById("loginBtn").addEventListener("click", login);
 
-  document.addEventListener("DOMContentLoaded", () => {
-  loadClients();
-  loadPractitioners();
-  loadServices();
+document.addEventListener("DOMContentLoaded", () => {
   setAppointmentDefaults();
   loadAppointments();
 });
