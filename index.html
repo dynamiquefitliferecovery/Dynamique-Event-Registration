@@ -948,9 +948,9 @@ async function deleteAppointment(id) {
 
   loadAppointments();
 }
- 
 
-/* ================= REPORT ================= */
+
+  /* ================= REPORT ================= */
 asyncst).toFixed(2)));async function loadReport() {
     tr.appendChild(td(Number(r.total).toFixed(2)));
     tr.appendChild(td(r.payment_method || ""));
@@ -1065,6 +1065,28 @@ function exportReportExcel() {
     tr.appendChild(td("-"));
     tr.appendChild(td(Number(r.amount).toFixed(2)));
 
+/* ================= LOAD ALL ================= */
+async function loadAll() {
+  await loadClients();
+  await loadPractitioners();
+
+  setAppointmentDefaults();
+  loadAppointments();
+}
+
+  document.getElementById("loginBtn").addEventListener("click", login);
+
+document.addEventListener("DOMContentLoaded", () => {
+  setAppointmentDefaults();
+  loadAppointments();
+});
+
+</script>
+
+    
+</body>
+</html>  
+  
 /* ================= LOAD ALL ================= */
 async function loadAll() {
   await loadClients();
