@@ -735,9 +735,7 @@ function calculateCharges() {
 apptService.addEventListener("change", calculateCharges);
 apptClient.addEventListener("change", calculateCharges);
 
-
 async function saveAppointment() {
-  // ✅ basic validation
   if (
     !apptDate.value ||
     !apptTime.value ||
@@ -758,25 +756,33 @@ async function saveAppointment() {
 
   const startTime = apptDate.value + "T" + apptTime.value;
 
+  // OPTIONAL: 1-hour default duration
+  const endTime = new Date(startTime);
+  endTime.setHours(endTime.getHours() + 1);
+
   const payload = {
     start_time: startTime,
+    end_time: endTime.toISOString(),
+
     client_id: apptClient.value,
     practitioner_id: apptPractitioner.value,
-    service_code: serviceOpt.value,
-    service_name: serviceOpt.textContent,
+
+    // ✅ match actual column names
+    payment_method: apptPayment.value,
+    remarks: apptRemarks.value.trim(),
+
     amount: Number(apptAmount.value),
     sst: Number(apptSST.value),
     total: Number(apptTotal.value),
-    payment: apptPayment.value,
-    remarks: apptRemarks.value.trim()
+
+    // ✅ service linkage
+    service_id: apptService.value,
+    service_fk: apptService.value
   };
 
-  let error;
-
-  // ✅ insert only (editing not implemented yet)
-  ({ error } = await sb
+  const { error } = await sb
     .from("appointments")
-    .insert(payload));
+    .insert(payload);
 
   if (error) {
     console.error(error);
