@@ -682,7 +682,10 @@ const payload = {
 }
   
 document.addEventListener("DOMContentLoaded", () => {
+  loadClients();
+  loadPractitioners();
   loadServices();
+  setAppointmentDefaults();
   loadAppointments();
 });
 
