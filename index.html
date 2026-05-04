@@ -960,11 +960,8 @@ function initServiceDropdown() {
 }
 
 function fillAppointmentDropdowns() {
- .name;  apptClient.innerHTML = '<option value="">Select Client</option>';
-    apptPractitioner.appendChild(opt);
-  });
-}
-
+  // Clients
+  apptClient.innerHTML = '<option value="">Select Client</option>';
   clients.forEach(c => {
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -972,6 +969,7 @@ function fillAppointmentDropdowns() {
     apptClient.appendChild(opt);
   });
 
+  // Practitioners
   apptPractitioner.innerHTML = '<option value="">Select Practitioner</option>';
   practitioners.forEach(p => {
     const opt = document.createElement("option");
@@ -1070,7 +1068,7 @@ apptClient.addEventListener("change", calculateCharges);
     tr.appendChild(td(a.client?.full_name || ""));
 
     // Service ✅
-    tr.appendChild(td(a.service?.name || ""));
+    tr.appendChild(td(a.service?.name || "(no service)"));
 
     // Charges ✅
     tr.appendChild(td(a.amount.toFixed(2)));
