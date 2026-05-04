@@ -736,6 +736,20 @@ function calculateCharges() {
 apptService.addEventListener("change", calculateCharges);
 apptClient.addEventListener("change", calculateCharges);
 
+  function clearAppointmentForm() {
+  setAppointmentDefaults();
+  apptClient.value = "";
+  apptPractitioner.value = "";
+  apptService.value = "";
+  apptPayment.value = "";
+  apptRemarks.value = "";
+
+  apptAmount.value = "0.00";
+  apptSST.value = "0.00";
+  apptTotal.value = "0.00";
+}
+
+
 async function saveAppointment() {
   if (
     !apptDate.value ||
@@ -940,16 +954,18 @@ reportData.push({
    const tr = document.createElement("tr");
 
 tr.innerHTML =
-  "<td>" + new Date(r.start_time).toLocaleDateString() + "</td>" +
-  "<td>" + (r.client?.full_name || "") + "</td>" +
-  "<td>" + age + "</td>" +
-  "<td>" + (r.client?.citizenship || "") + "</td>" +
-  "<td>-</td>" + // service name not stored in appointments table
-  "<td>" + amount.toFixed(2) + "</td>" +
-  "<td>" + sst.toFixed(2) + "</td>" +
-  "<td>" + total.toFixed(2) + "</td>" +
-  "<td>" + (r.payment_method || "") + "</td>" +
-  "<td>" + (r.remarks || "") + "</td>";
+  "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
+  "<td>" + (a.client?.full_name || "") + "</td>" +
+  "<td>-</td>" +
+  "<td>" + a.amount.toFixed(2) + "</td>" +
+  "<td>" + a.sst.toFixed(2) + "</td>" +
+  "<td>" + a.total.toFixed(2) + "</td>" +
+  "<td>" + a.payment_method + "</td>" +
+  "<td>" +
+    "<span class='edit' onclick='editAppointment(" + a.id + ")'>Edit</span> | " +
+    "<span class='edit' onclick='deleteAppointment(" + a.id + ")'>Delete</span>" +
+  "</td>" +
+  "<td>" + (a.remarks || "") + "</td>";
 
 
     tbody.appendChild(tr);
