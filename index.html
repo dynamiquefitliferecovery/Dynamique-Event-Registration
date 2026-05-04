@@ -741,40 +741,27 @@ async function saveAppointment() {
     !apptTime.value ||
     !apptClient.value ||
     !apptPractitioner.value ||
-    !apptService.value ||
     !apptPayment.value
   ) {
     alert("Please complete all required fields");
     return;
   }
 
-  const serviceOpt = apptService.selectedOptions[0];
-  if (!serviceOpt) {
-    alert("Invalid service selected");
-    return;
-  }
-
   const startTime = apptDate.value + "T" + apptTime.value;
 
-  // OPTIONAL: 1-hour default duration
   const endTime = new Date(startTime);
   endTime.setHours(endTime.getHours() + 1);
 
   const payload = {
-  start_time: startTime,
-  end_time: endTime.toISOString(),
-  client_id: apptClient.value,
-  practitioner_id: apptPractitioner.value,
-  payment_method: apptPayment.value,
-  remarks: apptRemarks.value.trim(),
-  amount: Number(apptAmount.value),
-  sst: Number(apptSST.value),
-  total: Number(apptTotal.value)
-};
-
-    // ✅ service linkage
-    service_id: apptService.value,
-    service_fk: apptService.value
+    start_time: startTime,
+    end_time: endTime.toISOString(),
+    client_id: Number(apptClient.value),
+    practitioner_id: Number(apptPractitioner.value),
+    payment_method: apptPayment.value,
+    remarks: apptRemarks.value.trim(),
+    amount: Number(apptAmount.value),
+    sst: Number(apptSST.value),
+    total: Number(apptTotal.value)
   };
 
   const { error } = await sb
@@ -782,7 +769,7 @@ async function saveAppointment() {
     .insert(payload);
 
   if (error) {
-    console.error(error);
+    console.error("saveAppointment error:", error);
     alert("Failed to save appointment");
     return;
   }
