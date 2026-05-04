@@ -735,9 +735,6 @@ function calculateCharges() {
 apptService.addEventListener("change", calculateCharges);
 apptClient.addEventListener("change", calculateCharges);
 
-async function loadAppointments() {
-  apptTable.innerHTML = "";
-}
 
 async function saveAppointment() {
   // ✅ basic validation
