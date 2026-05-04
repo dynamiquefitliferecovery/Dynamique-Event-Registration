@@ -771,6 +771,7 @@ async function saveAppointment() {
     end_time: endTime.toISOString(),
     client_id: Number(apptClient.value),
     practitioner_id: Number(apptPractitioner.value),
+    service: apptService.selectedOptions[0].textContent
     payment_method: apptPayment.value,
     remarks: apptRemarks.value.trim(),
     amount: Number(apptAmount.value),
@@ -809,39 +810,42 @@ async function loadAppointments() {
     .select(`
       id,
       start_time,
+      client_id,
+      service,
       amount,
       sst,
       total,
       payment_method,
-      remarks,
-      client:clients(full_name)
+      remarks
     `)
     .order("start_time", { ascending: false });
 
   if (error) {
-    console.error("loadAppointments error:", error);
+    console.error(error);
     return;
   }
+
+  const clientMap = {};
+  clients.forEach(c => clientMap[c.id] = c.full_name);
 
   apptTable.innerHTML = "";
 
   data.forEach(a => {
     const tr = document.createElement("tr");
 
-tr.innerHTML =
-  "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
-  "<td>" + (a.client?.full_name || "") + "</td>" +
-  "<td>-</td>" +
-  "<td>" + a.amount.toFixed(2) + "</td>" +
-  "<td>" + a.sst.toFixed(2) + "</td>" +
-  "<td>" + a.total.toFixed(2) + "</td>" +
-  "<td>" + a.payment_method + "</td>" +
-  "<td>" +
-    "<span class='edit' onclick='editAppointment(" + a.id + ")'>Edit</span> | " +
-    "<span class='edit' onclick='deleteAppointment(" + a.id + ")'>Delete</span>" +
-  "</td>" +
-  "<td>" + (a.remarks || "") + "</td>";
-
+    tr.innerHTML =
+      "<td>" + new Date(a.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })+ "</td>" +
+      "<td>" + (clientMap[a.client_id] || "") + "</td>" +
+      "<td>" + (a.service || "-") + "</td>" +
+      "<td>" + a.amount.toFixed(2) + "</td>" +
+      "<td>" + a.sst.toFixed(2) + "</td>" +
+      "<td>" + a.total.toFixed(2) + "</td>" +
+      "<td>" + a.payment_method + "</td>" +
+      "<td>" +
+        "<span class='edit' onclick='editAppointment(" + a.id + ")'>Edit</span> | " +
+        "<span class='edit' onclick='deleteAppointment(" + a.id + ")'>Delete</span>" +
+      "</td>" +
+      "<td>" + (a.remarks || "") + "</td>";
 
     apptTable.appendChild(tr);
   });
@@ -955,7 +959,7 @@ reportData.push({
 
 tr.innerHTML =
   "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
-  "<td>" + (a.client?.full_name || "") + "</td>" +
+  "<td>" + (clientMap[a.client_id] || "") + "</td>" +
   "<td>-</td>" +
   "<td>" + a.amount.toFixed(2) + "</td>" +
   "<td>" + a.sst.toFixed(2) + "</td>" +
