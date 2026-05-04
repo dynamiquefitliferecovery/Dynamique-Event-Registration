@@ -897,9 +897,9 @@ async function saveAppointment() {
 const payload = {
   start_time: startTime.toISOString(),
   end_time: endTime.toISOString(),
-  client_id: Number(apptClient.value),
-  practitioner_id: Number(apptPractitioner.value),
-  service_id: Number(apptService.value), 
+  client_id: apptClient.value,              // ✅ UUID (string)
+  practitioner_id: apptPractitioner.value,  // ✅ UUID
+  service_id: apptService.value,             // ✅ UUID
   payment_method: apptPayment.value,
   remarks: apptRemarks.value.trim(),
   amount: Number(apptAmount.value),
