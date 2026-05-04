@@ -771,7 +771,7 @@ const payload = {
   end_time: endTime.toISOString(),
   client_id: Number(apptClient.value),
   practitioner_id: Number(apptPractitioner.value),
-  service: apptService.selectedOptions[0].textContent,
+  service_id: Number(apptService.value), 
   payment_method: apptPayment.value,
   remarks: apptRemarks.value.trim(),
   amount: Number(apptAmount.value),
@@ -805,86 +805,89 @@ const payload = {
 }
   
 async function loadAppointments() {
-  console.log("✅ loadAppointments() is running
+  console.log("✅ loadAppointments() is running");
+
   const { data, error } = await sb
     .from("appointments")
     .select(`
       id,
       start_time,
-      client_id,
-      service,
       amount,
       sst,
       total,
       payment_method,
-      remarks
+      remarks,
+      service:services(name),
+      client:clients(full_name),
+      service_id,
+      client_id,
+      practitioner_id
     `)
     .order("start_time", { ascending: false });
 
   if (error) {
-    console.error(error);
+    console.error("Supabase error:", error);
     return;
   }
-
-  const clientMap = {};
-  clients.forEach(c => clientMap[c.id] = c.full_name);
 
   apptTable.innerHTML = "";
 
   data.forEach(a => {
     const tr = document.createElement("tr");
 
-const tr = document.createElement("tr");
+    const td = (text) => {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      return cell;
+    };
 
-function td(text) {
-  const cell = document.createElement("td");
-  cell.textContent = text;
-  return cell;
+    const dt = new Date(a.start_time);
+
+    // Date + Time ✅
+    tr.appendChild(td(
+      dt.toLocaleDateString() + " " +
+      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    ));
+
+    // Client ✅
+    tr.appendChild(td(a.client?.full_name || ""));
+
+    // Service ✅
+    tr.appendChild(td(a.service?.name || ""));
+
+    // Charges ✅
+    tr.appendChild(td(a.amount.toFixed(2)));
+    tr.appendChild(td(a.sst.toFixed(2)));
+    tr.appendChild(td(a.total.toFixed(2)));
+
+    // Payment ✅
+    tr.appendChild(td(a.payment_method));
+
+    // Actions ✅
+    const actionTd = document.createElement("td");
+
+    const edit = document.createElement("span");
+    edit.textContent = "Edit";
+    edit.className = "edit";
+    edit.onclick = () => editAppointment(a.id);
+
+    const del = document.createElement("span");
+    del.textContent = "Delete";
+    del.className = "edit";
+    del.style.marginLeft = "8px";
+    del.onclick = () => deleteAppointment(a.id);
+
+    actionTd.append(edit, document.createTextNode(" | "), del);
+    tr.appendChild(actionTd);
+
+    // Remarks ✅
+    tr.appendChild(td(a.remarks || ""));
+
+    apptTable.appendChild(tr);
+  });
 }
 
-console.log(tr.innerHTML);
-    
-const dt = new Date(a.start_time);
-tr.appendChild(
-  td(
-    dt.toLocaleDateString() +
-      " " +
-      dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  )
-);
-
-tr.appendChild(td(clientMap[a.client_id] || ""));
-tr.appendChild(td(a.service || "-"));
-tr.appendChild(td(a.amount.toFixed(2)));
-tr.appendChild(td(a.sst.toFixed(2)));
-tr.appendChild(td(a.total.toFixed(2)));
-tr.appendChild(td(a.payment_method));
-
-const actionTd = document.createElement("td");
-
-const edit = document.createElement("span");
-edit.textContent = "Edit";
-edit.className = "edit";
-edit.onclick = () => editAppointment(a.id);
-
-const del = document.createElement("span");
-del.textContent = "Delete";
-del.className = "edit";
-del.style.marginLeft = "8px";
-del.onclick = () => deleteAppointment(a.id);
-
-actionTd.append(edit, document.createTextNode(" | "), del);
-tr.appendChild(actionTd);
-
-tr.appendChild(td(a.remarks || ""));
-
-apptTable.appendChild(tr);
-
-    
-
-
-
-  async function editAppointment(id) {
+ async function editAppointment(id) {
   const { data, error } = await sb
     .from("appointments")
     .select("*")
@@ -899,12 +902,12 @@ apptTable.appendChild(tr);
   editingAppointmentId = id;
 
   const start = new Date(data.start_time);
-
   apptDate.value = start.toISOString().slice(0, 10);
   apptTime.value = start.toTimeString().slice(0, 5);
 
   apptClient.value = data.client_id;
   apptPractitioner.value = data.practitioner_id;
+  apptService.value = data.service_id;
   apptPayment.value = data.payment_method;
   apptRemarks.value = data.remarks || "";
 
@@ -912,11 +915,9 @@ apptTable.appendChild(tr);
   apptSST.value = Number(data.sst).toFixed(2);
   apptTotal.value = Number(data.total).toFixed(2);
 
-  // optional UI hint
   document.querySelector("#appointmentsTab .action").innerText = "Update Appointment";
 }
-
-  async function deleteAppointment(id) {
+async function deleteAppointment(id) {
   if (!confirm("Delete this appointment?")) return;
 
   const { error } = await sb
