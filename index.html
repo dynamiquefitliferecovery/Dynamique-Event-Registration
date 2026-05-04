@@ -692,7 +692,7 @@ function initServiceDropdown() {
 }
 
 function fillAppointmentDropdowns() {
-  apptClient.innerHTML = `<option value="">Select Client</option>`;
+  apptClient.innerHTML = '<option value="">Select Client</option>';
   clients.forEach(c => {
     const opt = document.createElement("option");
     opt.value = c.id;
@@ -700,7 +700,7 @@ function fillAppointmentDropdowns() {
     apptClient.appendChild(opt);
   });
 
-  apptPractitioner.innerHTML = `<option value="">Select Practitioner</option>`;
+  apptPractitioner.innerHTML = '<option value="">Select Practitioner</option>';
   practitioners.forEach(p => {
     const opt = document.createElement("option");
     opt.value = p.id;
@@ -814,7 +814,7 @@ async function loadAppointments() {
   data.forEach(a => {
     const tr = document.createElement("tr");
 
- tr.innerHTML =
+tr.innerHTML =
   "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
   "<td>" + (a.client?.full_name || "") + "</td>" +
   "<td>-</td>" +
