@@ -793,10 +793,17 @@ apptClient.addEventListener("change", calculateCharges);
    const dt = new Date(a.start_time);
 
 
-    // Date + Time ✅
-tr.appendChild(td(
-  dt.toLocaleDate  dt.toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })  dt.toLocaleDateString("en-MY") + " " +
-));
+// Date + Time ✅ (correct, local time)
+tr.appendChild(
+  td(
+    dt.toLocaleDateString("en-MY") + " " +
+    dt.toLocaleTimeString("en-MY", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    })
+  )
+);
 
     // Client ✅
     tr.appendChild(td(a.client?.full_name || ""));
