@@ -792,8 +792,7 @@ apptClient.addEventListener("change", calculateCharges);
 
    const dt = new Date(a.start_time);
 
-
-// Date + Time ✅ (correct, local time)
+// Date + Time (local MY time)
 tr.appendChild(
   td(
     dt.toLocaleDateString("en-MY") + " " +
@@ -951,8 +950,40 @@ async function deleteAppointment(id) {
 }
   
 /* ================= REPORT ================= */
-  async function loadReport() {
-  const from = reportFrom.value;
+async function loadReport() {
+LocaleDateString("en-MY")));  const from = reportFrom.value;
+    tr.appendChild(td(r.client?.full_name || ""));
+    tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
+    tr.appendChild(td(r.client?.citizenship || ""));
+    tr.appendChild(td("-"));
+    tr.appendChild(td(Number(r.amount).toFixed(2)));
+    tr.appendChild(td(Number(r.sst).toFixed(2)));
+    tr.appendChild(td(Number(r.total).toFixed(2)));
+    tr.appendChild(td(r.payment_method || ""));
+    tr.appendChild(td(r.remarks || ""));
+
+    totalAmount += Number(r.total || 0);
+
+    tbody.appendChild(tr);
+
+    reportData.push({
+      date: date.toLocaleDateString("en-MY"),
+      client: r.client?.full_name || "",
+      age: calculateAge(r.client?.date_of_birth),
+      citizenship: r.client?.citizenship || "",
+      service: "-",
+      amount: Number(r.amount),
+      sst: Number(r.sst),
+      total: Number(r.total),
+      payment: r.payment_method || "",
+      remarks: r.remarks || ""
+    });
+  });
+
+  document.querySelector("#reportsTab .total").innerText =
+    "Total: RM " + totalAmount.toFixed(2);
+}
+``
   const to = reportTo.value;
 
   reportData = [];
@@ -985,51 +1016,16 @@ async function deleteAppointment(id) {
   tbody.innerHTML = "";
 
   data.forEach(r => {
-    const age = calculateAge(r.client?.date_of_birth);
-    const amount = Number(r.amount || 0);
-    const sst = Number(r.sst || 0);
-    const total = Number(r.total || 0);
+    const tr = document.createElement("tr");
 
-    totalAmount += total;
+    const td = (text) => {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      return cell;
+    };
 
-// store for Excel (schema-safe)
-reportData.push({
-  date: new Date(r.start_time).toLocaleDateString(),
-  client: r.client?.full_name || "",
-  age: age,
-  citizenship: r.client?.citizenship || "",
-  service: "-", // service name not stored in appointments table
-  amount: amount,
-  sst: sst,
-  total: total,
-  payment: r.payment_method || "",
-  remarks: r.remarks || ""
-});
-
-   const tr = document.createElement("tr");
-
-tr.innerHTML =
-  "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
-  "<td>" + (clientMap[a.client_id] || "") + "</td>" +
-  "<td>-</td>" +
-  "<td>" + a.amount.toFixed(2) + "</td>" +
-  "<td>" + a.sst.toFixed(2) + "</td>" +
-  "<td>" + a.total.toFixed(2) + "</td>" +
-  "<td>" + a.payment_method + "</td>" +
-  "<td>" +
-    "<span class='edit' onclick='editAppointment(" + a.id + ")'>Edit</span> | " +
-    "<span class='edit' onclick='deleteAppointment(" + a.id + ")'>Delete</span>" +
-  "</td>" +
-  "<td>" + (a.remarks || "") + "</td>";
-
-
-    tbody.appendChild(tr);
-  });
-
-  document.querySelector("#reportsTab .total").innerText =
-    "Total: RM " + totalAmount.toFixed(2);
-}
-
+    const date = new Date(r.start_time);
+  
 function exportReportExcel() {
   if (!reportData.length) {
     alert("No data to export");
