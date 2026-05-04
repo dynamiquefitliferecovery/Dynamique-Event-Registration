@@ -348,6 +348,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 /* ================= GLOBAL STATE ================= */
 let editingClientId = null;
   let reportData = [];
+let editingAppointmentId = null;
 
 /* ================= SESSION CHECK ================= */
 (async () => {
@@ -747,12 +748,12 @@ async function saveAppointment() {
     return;
   }
 
-const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
-const endTime = new Date(startTime);
-endTime.setHours(endTime.getHours() + 1);
+  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
+  const endTime = new Date(startTime);
+  endTime.setHours(endTime.getHours() + 1);
 
   const payload = {
-    start_time: startTime,
+    start_time: startTime.toISOString(),
     end_time: endTime.toISOString(),
     client_id: Number(apptClient.value),
     practitioner_id: Number(apptPractitioner.value),
@@ -763,9 +764,18 @@ endTime.setHours(endTime.getHours() + 1);
     total: Number(apptTotal.value)
   };
 
-  const { error } = await sb
-    .from("appointments")
-    .insert(payload);
+  let error;
+
+  if (editingAppointmentId) {
+    ({ error } = await sb
+      .from("appointments")
+      .update(payload)
+      .eq("id", editingAppointmentId));
+  } else {
+    ({ error } = await sb
+      .from("appointments")
+      .insert(payload));
+  }
 
   if (error) {
     console.error("saveAppointment error:", error);
@@ -774,22 +784,10 @@ endTime.setHours(endTime.getHours() + 1);
   }
 
   clearAppointmentForm();
+  editingAppointmentId = null;
+  document.querySelector("#appointmentsTab .action").innerText = "Save Appointment";
   loadAppointments();
 }
-
-  function clearAppointmentForm() {
-  setAppointmentDefaults();
-  apptClient.value = "";
-  apptPractitioner.value = "";
-  apptService.value = "";
-  apptPayment.value = "";
-  apptRemarks.value = "";
-
-  apptAmount.value = "0.00";
-  apptSST.value = "0.00";
-  apptTotal.value = "0.00";
-}
-
   
 async function loadAppointments() {
   const { data, error } = await sb
@@ -816,19 +814,71 @@ async function loadAppointments() {
   data.forEach(a => {
     const tr = document.createElement("tr");
 
-    tr.innerHTML =
-      "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
-      "<td>" + (a.client?.full_name || "") + "</td>" +
-      "<td>-</td>" +
-      "<td>" + a.amount.toFixed(2) + "</td>" +
-      "<td>" + a.sst.toFixed(2) + "</td>" +
-      "<td>" + a.total.toFixed(2) + "</td>" +
-      "<td>" + a.payment_method + "</td>" +
-      "<td>-</td>" +
-      "<td>" + (a.remarks || "") + "</td>";
+ tr.innerHTML =
+  "<td>" + new Date(a.start_time).toLocaleDateString() + "</td>" +
+  "<td>" + (a.client?.full_name || "") + "</td>" +
+  "<td>-</td>" +
+  "<td>" + a.amount.toFixed(2) + "</td>" +
+  "<td>" + a.sst.toFixed(2) + "</td>" +
+  "<td>" + a.total.toFixed(2) + "</td>" +
+  "<td>" + a.payment_method + "</td>" +
+  "<td>" +
+    "<span class='edit' onclick='editAppointment(" + a.id + ")'>Edit</span> | " +
+    "<span class='edit' onclick='deleteAppointment(" + a.id + ")'>Delete</span>" +
+  "</td>" +
+  "<td>" + (a.remarks || "") + "</td>";
+
 
     apptTable.appendChild(tr);
   });
+}
+
+  async function editAppointment(id) {
+  const { data, error } = await sb
+    .from("appointments")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    alert("Failed to load appointment");
+    return;
+  }
+
+  editingAppointmentId = id;
+
+  const start = new Date(data.start_time);
+
+  apptDate.value = start.toISOString().slice(0, 10);
+  apptTime.value = start.toTimeString().slice(0, 5);
+
+  apptClient.value = data.client_id;
+  apptPractitioner.value = data.practitioner_id;
+  apptPayment.value = data.payment_method;
+  apptRemarks.value = data.remarks || "";
+
+  apptAmount.value = Number(data.amount).toFixed(2);
+  apptSST.value = Number(data.sst).toFixed(2);
+  apptTotal.value = Number(data.total).toFixed(2);
+
+  // optional UI hint
+  document.querySelector("#appointmentsTab .action").innerText = "Update Appointment";
+}
+
+  async function deleteAppointment(id) {
+  if (!confirm("Delete this appointment?")) return;
+
+  const { error } = await sb
+    .from("appointments")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Failed to delete appointment");
+    return;
+  }
+
+  loadAppointments();
 }
   
 /* ================= REPORT ================= */
