@@ -949,9 +949,23 @@ async function deleteAppointment(id) {
   loadAppointments();
 }
   
+
 /* ================= REPORT ================= */
-async function loadReport() {
-LocaleDateString("en-MY")));  const from = reportFrom.value;
+async function load const tbody = document.getElementById("reportTable");async function loadReport() {
+  tbody.innerHTML = "";
+
+  data.forEach(r => {
+    const tr = document.createElement("tr");
+
+    const td = (text) => {
+      const cell = document.createElement("td");
+      cell.textContent = text;
+      return cell;
+    };
+
+    const dt = new Date(r.start_time);
+
+    tr.appendChild(td(dt.toLocaleDateString("en-MY")));
     tr.appendChild(td(r.client?.full_name || ""));
     tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
     tr.appendChild(td(r.client?.citizenship || ""));
@@ -967,7 +981,7 @@ LocaleDateString("en-MY")));  const from = reportFrom.value;
     tbody.appendChild(tr);
 
     reportData.push({
-      date: date.toLocaleDateString("en-MY"),
+      date: dt.toLocaleDateString("en-MY"),
       client: r.client?.full_name || "",
       age: calculateAge(r.client?.date_of_birth),
       citizenship: r.client?.citizenship || "",
@@ -983,7 +997,7 @@ LocaleDateString("en-MY")));  const from = reportFrom.value;
   document.querySelector("#reportsTab .total").innerText =
     "Total: RM " + totalAmount.toFixed(2);
 }
-``
+  const from = reportFrom.value;
   const to = reportTo.value;
 
   reportData = [];
@@ -1012,19 +1026,8 @@ LocaleDateString("en-MY")));  const from = reportFrom.value;
     return;
   }
 
-  const tbody = document.getElementById("reportTable");
-  tbody.innerHTML = "";
 
-  data.forEach(r => {
-    const tr = document.createElement("tr");
-
-    const td = (text) => {
-      const cell = document.createElement("td");
-      cell.textContent = text;
-      return cell;
-    };
-
-    const date = new Date(r.start_time);
+  
   
 function exportReportExcel() {
   if (!reportData.length) {
