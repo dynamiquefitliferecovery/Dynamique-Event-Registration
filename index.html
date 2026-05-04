@@ -790,7 +790,7 @@ apptClient.addEventListener("change", calculateCharges);
       return cell;
     };
 
-    const dt = new Date(a.start_time);
+    const dt = new Date(a.start_time + "Z");
 
     // Date + Time ✅
     tr.appendChild(td(
