@@ -142,7 +142,7 @@
     <h2>Login</h2>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
+    <button id="loginBtn" onclick="login()">Login</button>
     <p id="err" style="color:red"></p>
   </div>
 </div>
@@ -390,24 +390,10 @@ window.openApp = async function () {
   await loadAppointments();
 };
 
-  /* ================= AUTH ================= */
+ /* ================= AUTH (FINAL – ONE-TIME FIX) ================= */
 
-sb.auth.onAuthStateChange(async (event, session) => {
-  console.log("AUTH EVENT:", event);
-  
-  if (
-    (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
-    session
-  ) {
-    await window.openApp();
-  }
-
-  if (event === "SIGNED_OUT") {
-    location.reload();
-  }
-});
-
-async function login() {
+// Global login function (required)
+window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const errEl = document.getElementById("err");
@@ -422,13 +408,20 @@ async function login() {
   if (error) {
     errEl.textContent = error.message;
   }
-}
+};
 
-function logout() {
-  sb.auth.signOut();
-}
+// Single auth controller
+sb.auth.onAuthStateChange(async (event, session) => {
+  console.log("AUTH EVENT:", event);
 
-window.login = login;
+  if (event === "SIGNED_IN" && session) {
+    await openApp();
+  }
+
+  if (event === "SIGNED_OUT") {
+    location.reload();
+  }
+});
 
 /* ================= TABS ================= */
 function tab(id) {
