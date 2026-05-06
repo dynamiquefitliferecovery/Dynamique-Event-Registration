@@ -372,7 +372,7 @@ async function loadServices() {
 
 /* ================= APP ENTRY ================= */
 
-async function openApp() {
+window.openApp = async function () {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return;
 
@@ -383,7 +383,8 @@ async function openApp() {
   await loadPractitioners();
   await loadServices();
   await loadAppointments();
-}
+};
+
   
 /* ================= AUTH ================= */
 
@@ -394,37 +395,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
     (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
     session
   ) {
-    await openApp();
+    await window.openApp(); // ✅ CORRECT
   }
 
   if (event === "SIGNED_OUT") {
     location.reload();
   }
 });
-
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const errEl = document.getElementById("err");
-
-  errEl.textContent = "";
-
-  const { error } = await sb.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    errEl.textContent = error.message;
-  }
-}
-
-function logout() {
-  sb.auth.signOut();
-}
-
-window.login = login;
-
+  
 /* ================= TABS ================= */
 function tab(id) {
   document.querySelectorAll("section").forEach(s => {
