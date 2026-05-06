@@ -335,13 +335,12 @@ const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
 
 
+/* ================= AUTH STATE ================= */
 sb.auth.onAuthStateChange(async (event, session) => {
   console.log("AUTH EVENT:", event);
-  
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  sb.auth.onAuthStateChange((event, session) => {
+
   if (event === "SIGNED_IN" && session) {
-    openApp();
+    await openApp();
   }
 
   if (event === "SIGNED_OUT") {
