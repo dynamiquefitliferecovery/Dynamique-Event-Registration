@@ -959,19 +959,24 @@ async function loadReport() {
   reportData = [];
   let totalAmount = 0;
 
-const { data, error } = await sb
-  .from("appointments")
-  .select(`
-    start_time,
-    amount,
-    sst,
-    total,
-    payment_method,
-    remarks,
-    service:services(name),
-    client:clients(full_name, citizenship, date_of_birth)
-  `)
-  .order("start_time", { ascending: true });
+  let query = sb
+    .from("appointments")
+    .select(`
+      start_time,
+      amount,
+      sst,
+      total,
+      payment_method,
+      remarks,
+      service:services(name),
+      client:clients(full_name, citizenship, date_of_birth)
+    `)
+    .order("start_time", { ascending: true });
+
+  if (from) query = query.gte("start_time", from);
+  if (to) query = query.lte("start_time", to + "T23:59:59");
+
+  const { data, error } = await query;
 
   if (error) {
     console.error(error);
@@ -984,7 +989,6 @@ const { data, error } = await sb
 
   data.forEach(r => {
     const tr = document.createElement("tr");
-
     const td = v => {
       const c = document.createElement("td");
       c.textContent = v;
@@ -1005,6 +1009,7 @@ const { data, error } = await sb
     tr.appendChild(td(r.remarks || ""));
 
     tbody.appendChild(tr);
+
     totalAmount += Number(r.total || 0);
 
     reportData.push({
