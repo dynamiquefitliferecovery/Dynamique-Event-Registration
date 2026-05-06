@@ -504,20 +504,23 @@ const saveClientBtn = document.getElementById("saveClientBtn");
 
 /* ===== LOAD CLIENTS ===== */
 async function loadClients() {
-  const { data, error } = await sb
-    .from("clients")
-    .select("id, full_name");
+  // ✅ Confirm auth state
+  const { data: { user } } = await sb.auth.getUser();
+  console.log("Admin user:", user);
 
-  console.log("Clients query result:", data, error);
-}
-  
+  if (!user) {
+    console.warn("Not authenticated — cannot load clients");
+    return;
+  }
+
+  // ✅ Load clients
   const { data, error } = await sb
     .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    console.error("loadClients error:", error);
     return;
   }
 
@@ -528,14 +531,14 @@ async function loadClients() {
     const tr = document.createElement("tr");
 
     tr.innerHTML =
-      "<td>" + c.full_name + "</td>" +
-      "<td>" + c.date_of_birth + "</td>" +
-      "<td>" + calculateAge(c.date_of_birth) + "</td>" +
-      "<td>" + c.gender + "</td>" +
-      "<td>" + c.citizenship + "</td>" +
-      "<td>" + formatIc(c.ic_passport || "") + "</td>" +
-      "<td>" + formatContact(c.contact || "") + "</td>" +
-      "<td>" + (c.email || "") + "</td>";
+      `<td>${c.full_name}</td>
+       <td>${c.date_of_birth}</td>
+       <td>${calculateAge(c.date_of_birth)}</td>
+       <td>${c.gender}</td>
+       <td>${c.citizenship}</td>
+       <td>${formatIc(c.ic_passport || "")}</td>
+       <td>${formatContact(c.contact || "")}</td>
+       <td>${c.email || ""}</td>`;
 
     const actionTd = document.createElement("td");
 
@@ -556,6 +559,7 @@ async function loadClients() {
     clientsTable.appendChild(tr);
   });
 }
+
 
 /* ===== EDIT CLIENT ===== */
 function editClient(id) {
