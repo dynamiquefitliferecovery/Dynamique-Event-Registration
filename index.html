@@ -497,7 +497,10 @@ const saveClientBtn = document.getElementById("saveClientBtn");
 
 
 /* ===== LOAD CLIENTS ===== */
-async function loadClients() {
+const { data: { user } } = await sb.auth.getUser();
+console.log("Admin user:", user);
+  
+  async function loadClients() {
   const { data, error } = await sb
     .from("clients")
     .select("*")
