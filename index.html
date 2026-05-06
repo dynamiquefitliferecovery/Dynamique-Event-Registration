@@ -415,6 +415,33 @@ sb.auth.onAuthStateChange((event, session) => {
   }
 });
 
+/* ================= LOGIN ================= */
+
+window.login = async function () {
+  console.log("🔐 Login clicked");
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const errEl = document.getElementById("err");
+
+  errEl.textContent = "";
+
+  if (!email || !password) {
+    errEl.textContent = "Email and password required";
+    return;
+  }
+
+  const { error } = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    errEl.textContent = error.message;
+    console.error("Login error:", error);
+  }
+};
+  
 /* ================= LOGOUT ================= */
   
 // ✅ LOGOUT
