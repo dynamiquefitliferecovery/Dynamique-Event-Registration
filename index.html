@@ -412,17 +412,18 @@ window.login = async function () {
 
 // Single auth controller
 
-sb.auth.onAuthStateChange(async (event, session) => {
+sb.auth.onAuthStateChange(function (event, session) {
   console.log("AUTH EVENT:", event);
 
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-    await window.openApp();
+    window.openApp();
   }
 
   if (event === "SIGNED_OUT") {
     location.reload();
   }
 });
+
   
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
