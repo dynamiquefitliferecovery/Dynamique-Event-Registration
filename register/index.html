@@ -1,7 +1,141 @@
-<!DOCTYPE html><!DOCTYPE("JS IS RUNNING");
-  </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Client Registration</title>
+
+  <!-- ✅ Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Segoe UI, Arial, sans-serif;
+      background: linear-gradient(135deg, #ff9800, #ffd180);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .box {
+      background: #fff;
+      padding: 28px;
+      width: 360px;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 14px;
+      background: orange;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .msg {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>Client Registration</h2>
+
+  <input id="full_name" placeholder="Full Name">
+  <input id="date_of_birth" type="date">
+  
+  <select id="gender">
+    <option value="">Gender</option>
+    <option>Male</option>
+    <option>Female</option>
+  </select>
+
+  <select id="citizenship">
+    <option value="Malaysian">Malaysian</option>
+    <option value="Foreigner">Foreigner</option>
+  </select>
+
+  <input id="ic_passport" placeholder="IC / Passport">
+  <input id="contact" placeholder="Contact Number">
+  <input id="email" placeholder="Email">
+  <input id="address" placeholder="Address">
+
+  <button onclick="registerClient()">Register</button>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+  console.log("✅ Register page loaded");
+
+  const sb = supabase.createClient(
+    "https://fmwdizyexroiezezitly.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
+  );
+
+  async function registerClient() {
+    console.log("🟢 Register clicked");
+
+    const msg = document.getElementById("msg");
+    msg.textContent = "";
+
+    const data = {
+      full_name: document.getElementById("full_name").value.trim(),
+      date_of_birth: document.getElementById("date_of_birth").value,
+      gender: document.getElementById("gender").value,
+      citizenship: document.getElementById("citizenship").value,
+      ic_passport: document.getElementById("ic_passport").value.trim(),
+      contact: document.getElementById("contact").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      address: document.getElementById("address").value.trim()
+    };
+
+    if (!data.full_name || !data.date_of_birth) {
+      msg.style.color = "red";
+      msg.textContent = "Full name and DOB are required";
+      return;
+    }
+
+    const { error } = await sb
+      .from("clients")
+      .insert(data);
+
+    if (error) {
+      console.error(error);
+      msg.style.color = "red";
+      msg.textContent = error.message;
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.textContent = "✅ Registration successful";
+
+    // Optional: clear form
+    document.querySelectorAll("input, select").forEach(e => e.value = "");
+  }
+</script>
+
 </body>
 </html>
-<html>
-<body>
-  <script>
