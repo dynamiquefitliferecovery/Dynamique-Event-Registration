@@ -334,7 +334,11 @@ const reportTo = document.getElementById("reportTo");
 const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
 
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  console.log("AUTH EVENT:", event);
+  
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   sb.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_IN" && session) {
     openApp();
@@ -378,14 +382,6 @@ async function loadServices() {
   });
 }
 
-/* ================= SESSION CHECK ================= */
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    openApp();
-  }
-})();
-
 /* ================= AUTH ================= */
 async function login() {
   console.log("login() triggered"); // 👈 MUST appear when clicking button
@@ -422,13 +418,20 @@ sb.auth.signOut();
 }
 
 async function openApp() {
+  const { data: { user } } = await sb.auth.getUser();
+
+  if (!user) {
+    console.warn("User not authenticated yet");
+    return;
+  }
+
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
 
-  await loadClients();
+  await loadClients();        // ✅ authenticated now
   await loadPractitioners();
   await loadServices();
-  await loadAppointments(); // ✅ ADD THIS
+  await loadAppointments();
 }
 
 
