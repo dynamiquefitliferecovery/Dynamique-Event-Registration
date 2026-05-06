@@ -372,7 +372,12 @@ async function loadServices() {
 
 /* ================= APP ENTRY ================= */
 
+let appOpened = false;
+
 window.openApp = async function () {
+  if (appOpened) return;     // ✅ prevent double run
+  appOpened = true;
+
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return;
 
@@ -389,7 +394,7 @@ window.openApp = async function () {
 
 sb.auth.onAuthStateChange(async (event, session) => {
   console.log("AUTH EVENT:", event);
-
+  
   if (
     (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
     session
