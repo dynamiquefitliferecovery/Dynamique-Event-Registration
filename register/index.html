@@ -68,32 +68,32 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   window.register = async function () {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const msg = document.getElementById("msg");
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msg = document.getElementById("msg");
 
-    msg.textContent = "";
+  msg.textContent = "";
 
-    const { data, error } = await sb.auth.signUp({
-      email,
-      password
-    });
+  const result = await sb.auth.signUp({
+    email,
+    password
+  });
 
-    console.log("SIGNUP RESULT:", data, error);
+  console.log("FULL SIGNUP RESULT:", result);
 
-    if (error) {
-      msg.textContent = error.message;
-      return;
-    }
+  if (result.error) {
+    msg.textContent = result.error.message;
+    return;
+  }
 
-    if (!data?.user) {
-      msg.textContent = "Signup blocked. Check Supabase Auth settings.";
-      return;
-    }
+  if (!result.data?.user) {
+    msg.textContent = "Signup blocked. Check Auth → Settings → Enable signups.";
+    return;
+  }
 
-    msg.style.color = "green";
-    msg.textContent = "✅ User created successfully";
-  };
+  msg.style.color = "green";
+  msg.textContent = "✅ User created successfully";
+};
 </script>
 
 
