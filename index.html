@@ -413,12 +413,7 @@ window.login = async function () {
 // Single auth controller
 
 sb.auth.onAuthStateChange(async (event, session) => {
-  console.log("AUTH EVENT:", event);
-
-  if (
-    (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
-    session
-  ) {
+  if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
     await window.openApp();
   }
 
@@ -430,12 +425,12 @@ sb.auth.onAuthStateChange(async (event, session) => {
 /* ================= AUTH FALLBACK (IMPORTANT) ================= */
 
 // This guarantees the app opens if a session already exists
-setTimeout(async () => {
+(async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     await window.openApp();
   }
-}, 0);
+})();
 
 
 /* ================= TABS ================= */
@@ -1084,9 +1079,10 @@ async function loadAll() {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  setAppointmentDefaults();
-});
+document.addEventListener("DOMContentLoaded", (async () => {
+  await loadAppointments();
+})();
+
 
 </script>
 
