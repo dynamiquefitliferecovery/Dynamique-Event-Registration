@@ -61,8 +61,36 @@
   <p class="msg" id="msg"></p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  alert("JS is running");
+  console.log("✅ Registration JS loaded");
+
+  const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
+  const SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  window.register = async function () {
+    console.log("🟢 Register clicked");
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const msg = document.getElementById("msg");
+
+    msg.textContent = "";
+
+    const { data, error } = await sb.auth.signUp({ email, password });
+    console.log("✅ SIGNUP RESULT:", data, error);
+
+    if (error) {
+      msg.textContent = error.message;
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.textContent = "✅ User created";
+  };
 </script>
 
 
