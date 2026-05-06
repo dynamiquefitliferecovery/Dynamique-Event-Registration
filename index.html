@@ -374,7 +374,7 @@ async function loadServices() {
 
 let appOpened = false;
 
-async function openApp() {
+window.openApp = async function () {
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
 
@@ -405,11 +405,15 @@ window.login = async function () {
 };
 
 // Single auth controller
+
 sb.auth.onAuthStateChange(async (event, session) => {
   console.log("AUTH EVENT:", event);
 
-  if (event === "SIGNED_IN" && session) {
-    await openApp();
+  if (
+    (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
+    session
+  ) {
+    await window.openApp();
   }
 
   if (event === "SIGNED_OUT") {
@@ -1062,7 +1066,6 @@ async function loadAll() {
   loadAppointments();
 }
 
-  document.getElementById("loginBtn").addEventListener("click", login);
 
 document.addEventListener("DOMContentLoaded", () => {
   setAppointmentDefaults();
