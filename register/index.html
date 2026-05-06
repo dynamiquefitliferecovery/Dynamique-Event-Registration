@@ -62,47 +62,7 @@
 </div>
 
 <script>
-  console.log("✅ Registration JS loaded");
-
-  const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
-
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  window.register = async function () {
-    console.log("🟢 Register button clicked");
-
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const msg = document.getElementById("msg");
-
-    msg.textContent = "";
-
-    if (!email || !password) {
-      msg.textContent = "Email and password required";
-      return;
-    }
-
-    const result = await sb.auth.signUp({
-      email,
-      password
-    });
-
-    console.log("✅ SIGNUP RESULT:", result);
-
-    if (result.error) {
-      msg.textContent = result.error.message;
-      return;
-    }
-
-    if (!result.data || !result.data.user) {
-      msg.textContent = "Signup failed. Check Supabase settings.";
-      return;
-    }
-
-    msg.style.color = "green";
-    msg.textContent = "✅ User created successfully";
-  };
+  alert("JS is running");
 </script>
 
 
