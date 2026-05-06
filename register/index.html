@@ -186,7 +186,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     return;
   }
 
-  const { error } = await supabaseClient.from("clients").insert(payload);
+  const { data, error } = await supabaseClient
+  .from("clients")
+  .insert(payload)
+  .select();
 
   if (error) {
     console.error(error);
