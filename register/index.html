@@ -164,7 +164,9 @@ contactInput.addEventListener("input", () => {
 /* ================= REGISTER CLIENT ================= */
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const msg = document.getElementById("msg");
+  const btn = document.getElementById("registerBtn");
   msg.innerHTML = "";
+  btn.disabled = true;
 
   const payload = {
     full_name: document.getElementById("full_name").value.trim(),
@@ -177,8 +179,10 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     address: document.getElementById("address").value
   };
 
-  if (!payload.full_name || !payload.date_of_birth || !payload.contact || !payload.gender || !payload.citizenship) {
+  if (!payload.full_name || !payload.date_of_birth || !payload.contact ||
+      !payload.gender || !payload.citizenship) {
     msg.innerHTML = "<span class='error'>Please fill all required fields *</span>";
+    btn.disabled = false;
     return;
   }
 
@@ -187,14 +191,26 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   if (error) {
     console.error(error);
     msg.innerHTML = `<span class="error">${error.message}</span>`;
+    btn.disabled = false;
   } else {
-    msg.innerHTML = "<span class='success'>✅ Registration successful</span>";
+    msg.innerHTML = `
+      <span class="success">
+        ✅ Registration successful.<br>
+        Our team will contact you shortly.
+      </span>
+    `;
+
     document.querySelectorAll("input, textarea").forEach(el => el.value = "");
     document.getElementById("gender").value = "";
     document.getElementById("citizenship").value = "";
     document.getElementById("age").value = "";
+
+    setTimeout(() => {
+      window.location.href = "/thank-you.html";
+    }, 2000);
   }
 });
+
 </script>
 </body>
 </html>
