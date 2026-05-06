@@ -754,7 +754,7 @@ apptClient.addEventListener("change", calculateCharges);
   apptTotal.value = "0.00";
 }
 
-  async function loadAppointments() {
+async function loadAppointments() {
   console.log("✅ loadAppointments() is running");
 
   const { data, error } = await sb
@@ -785,41 +785,41 @@ apptClient.addEventListener("change", calculateCharges);
   data.forEach(a => {
     const tr = document.createElement("tr");
 
-    const td = (text) => {
+    const td = text => {
       const cell = document.createElement("td");
       cell.textContent = text;
       return cell;
     };
 
-   const dt = new Date(a.start_time);
+    const dt = new Date(a.start_time);
 
-// Date + Time (local MY time)
-tr.appendChild(
-  td(
-    dt.toLocaleDateString("en-MY") + " " +
-    dt.toLocaleTimeString("en-MY", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    })
-  )
-);
+    // Date + Time
+    tr.appendChild(
+      td(
+        dt.toLocaleDateString("en-MY") + " " +
+        dt.toLocaleTimeString("en-MY", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        })
+      )
+    );
 
-    // Client ✅
+    // Client
     tr.appendChild(td(a.client?.full_name || ""));
 
-    // Service ✅
-   tr.appendChild(td(a.service?.name || ""));
+    // ✅ Service (NO r ANYWHERE)
+    tr.appendChild(td(a.service?.name || ""));
 
-    // Charges ✅
-    tr.appendChild(td(a.amount.toFixed(2)));
-    tr.appendChild(td(a.sst.toFixed(2)));
-    tr.appendChild(td(a.total.toFixed(2)));
+    // Charges
+    tr.appendChild(td(Number(a.amount).toFixed(2)));
+    tr.appendChild(td(Number(a.sst).toFixed(2)));
+    tr.appendChild(td(Number(a.total).toFixed(2)));
 
-    // Payment ✅
-    tr.appendChild(td(a.payment_method));
+    // Payment
+    tr.appendChild(td(a.payment_method || ""));
 
-    // Actions ✅
+    // Actions
     const actionTd = document.createElement("td");
 
     const edit = document.createElement("span");
@@ -836,7 +836,7 @@ tr.appendChild(
     actionTd.append(edit, document.createTextNode(" | "), del);
     tr.appendChild(actionTd);
 
-    // Remarks ✅
+    // Remarks
     tr.appendChild(td(a.remarks || ""));
 
     apptTable.appendChild(tr);
