@@ -370,12 +370,22 @@ async function loadServices() {
   });
 }
 
+/* ================= APP ENTRY ================= */
+
+async function openApp() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  document.getElementById("loginView").classList.add("hidden");
+  document.getElementById("appView").classList.remove("hidden");
+
+  await loadClients();
+  await loadPractitioners();
+  await loadServices();
+  await loadAppointments();
+}
+  
 /* ================= AUTH ================= */
-/*
-  Supabase v2 emits:
-  - INITIAL_SESSION (on page load if already logged in)
-  - SIGNED_IN (on fresh login)
-*/
 
 sb.auth.onAuthStateChange(async (event, session) => {
   console.log("AUTH EVENT:", event);
@@ -407,9 +417,6 @@ async function login() {
   if (error) {
     errEl.textContent = error.message;
   }
-
-  // ✅ DO NOT call openApp() here
-  // Auth listener handles UI transition
 }
 
 function logout() {
@@ -417,6 +424,7 @@ function logout() {
 }
 
 window.login = login;
+
 /* ================= TABS ================= */
 function tab(id) {
   document.querySelectorAll("section").forEach(s => {
