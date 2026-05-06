@@ -410,21 +410,21 @@ sb.auth.onAuthStateChange((event, session) => {
 
   if (event === "SIGNED_OUT") {
     appOpened = false;
-
     document.getElementById("appView").classList.add("hidden");
     document.getElementById("loginView").classList.remove("hidden");
   }
 });
 
+/* ================= LOGOUT ================= */
+  
+// ✅ LOGOUT
 window.logout = async function () {
   console.log("🔴 Logout clicked");
 
   await sb.auth.signOut();
 
-  // Reset app state
   appOpened = false;
 
-  // Switch UI
   document.getElementById("appView").classList.add("hidden");
   document.getElementById("loginView").classList.remove("hidden");
 };
@@ -434,7 +434,8 @@ window.logout = async function () {
 // This guarantees the app opens if a session already exists
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
+  if (session && !appOpened) {
+    appOpened = true;
     await window.openApp();
   }
 })();
