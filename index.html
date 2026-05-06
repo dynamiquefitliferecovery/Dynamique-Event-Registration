@@ -337,14 +337,16 @@ const sb = supabase.createClient(
 );
   
 /* ================= AUTH STATE ================= */
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (event === "SIGNED_IN" && session) {
-    await openApp();
-  }
+// Restore session on load
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) openApp();
+})();
 
-  if (event === "SIGNED_OUT") {
-    location.reload();
-  }
+// Listen for login / logout
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_IN") openApp();
+  if (event === "SIGNED_OUT") location.reload();
 });
 
 /* ================= GLOBAL STATE ================= */
@@ -381,58 +383,47 @@ async function loadServices() {
 }
 
 /* ================= AUTH ================= */
-async function login() {
-  console.log("login() triggered"); // 👈 MUST appear when clicking button
 
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
+/*
+  SINGLE SOURCE OF TRUTH:
+  - login() ONLY signs in
+  - onAuthStateChange controls UI
+*/
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  console.log("AUTH EVENT:", event);
+
+  if (event === "SIGNED_IN" && session) {
+    await openApp();
+  }
+
+  if (event === "SIGNED_OUT") {
+    location.reload();
+  }
+});
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
   const errEl = document.getElementById("err");
 
   errEl.textContent = "";
 
-  const { data, error } = await sb.auth.signInWithPassword({
-    email: emailInput.value,
-    password: passwordInput.value
+  const { error } = await sb.auth.signInWithPassword({
+    email,
+    password
   });
-
-  console.log("Auth response:", data, error);
 
   if (error) {
     errEl.textContent = error.message;
     return;
   }
 
-  if (data.session) {
-    openApp();
-  }
+  // ✅ DO NOT call openApp() here
+  // ✅ UI transition will happen via onAuthStateChange
 }
 
-// ✅ THIS LINE FIXES EVERYTHING
 window.login = login;
-
- 
-function logout() {
-sb.auth.signOut();
-}
-
-async function openApp() {
-  const { data: { user } } = await sb.auth.getUser();
-
-  if (!user) {
-    console.warn("User not authenticated yet");
-    return;
-  }
-
-  document.getElementById("loginView").classList.add("hidden");
-  document.getElementById("appView").classList.remove("hidden");
-
-  await loadClients();        // ✅ authenticated now
-  await loadPractitioners();
-  await loadServices();
-  await loadAppointments();
-}
-
-
 /* ================= TABS ================= */
 function tab(id) {
   document.querySelectorAll("section").forEach(s => {
@@ -450,9 +441,7 @@ function tab(id) {
   if (id === "appointmentsTab") {
     fillAppointmentDropdowns();
   }
-
 }
-
 
 /* ================= FORMATTERS ================= */
 
