@@ -62,14 +62,14 @@
 </div>
 
 <script>
+  console.log("✅ Registration JS loaded");
   const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
 
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   window.register = async function () {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  console.log("🟢 Register button clickedElementById("password").value.trim();  console.log("🟢 Register button clicked");
   const msg = document.getElementById("msg");
 
   msg.textContent = "";
@@ -79,7 +79,7 @@
     password
   });
 
-  console.log("FULL SIGNUP RESULT:", result);
+  console.log("✅ SIGNUP RESULT:", result);
 
   if (result.error) {
     msg.textContent = result.error.message;
@@ -87,13 +87,16 @@
   }
 
   if (!result.data?.user) {
-    msg.textContent = "Signup blocked. Check Auth → Settings → Enable signups.";
+    msg.textContent = "Signup blocked. Contact admin.";
     return;
   }
 
   msg.style.color = "green";
   msg.textContent = "✅ User created successfully";
 };
+
+  const email = document.getElementById("email").value.trim();
+
 </script>
 
 
