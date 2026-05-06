@@ -1,219 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Client Registration | Dynamique Sports Rehab Centre</title>
+  <meta charset="UTF-8" />
+  <title>User Registration</title>
 
-  <!-- ✅ Supabase Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Montserrat", sans-serif;
-      background: radial-gradient(circle at top, #111 0%, #000 60%);
+      font-family: Segoe UI;
+      background: linear-gradient(135deg, #ff9800, #ffd180);
+      height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      padding: 24px;
+      justify-content: center;
     }
-    .card {
+
+    .box {
+      background: white;
+      padding: 30px;
+      width: 340px;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+
+    input {
       width: 100%;
-      max-width: 520px;
-      background: #ffffff;
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-    }
-    h2 { text-align: center; }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    input, select, textarea {
-      width: 100%;
-      margin-top: 6px;
-      padding: 10px;
-      font-size: 14px;
-      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 12px;
       border: 1px solid #ccc;
-      transition: border 0.2s, box-shadow 0.2s;
     }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #ff7a00;
-      box-shadow: 0 0 0 2px rgba(255,122,0,0.25);
-    }
-    input[readonly] { background: #f2f2f2; color: #555; }
-    textarea { resize: vertical; min-height: 70px; }
+
     button {
-      margin-top: 26px;
       width: 100%;
-      padding: 14px;
-      border: none;
+      padding: 12px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #ff7a00, #ff9f43);
-      color: #000;
-      font-weight: 900;
-      font-size: 15px;
-      letter-spacing: 1px;
+      border: none;
+      background: orange;
+      font-weight: bold;
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,122,0,0.45); }
-    .msg { margin-top: 14px; text-align: center; font-weight: 700; font-size: 14px; }
-    .error { color: red; }
-    .success { color: green; }
+
+    .msg {
+      margin-top: 10px;
+      color: red;
+      text-align: center;
+    }
   </style>
 </head>
-
 <body>
-<div class="card">
-  <h2>Client Registration</h2>
 
-  <label>Full Name *</label>
-  <input id="full_name">
+<div class="box">
+  <h2>Register</h2>
 
-  <label>Date of Birth *</label>
-  <input type="date" id="dob">
+  <input id="email" placeholder="Email" />
+  <input id="password" type="password" placeholder="Password (min 6 chars)" />
 
-  <label>Age</label>
-  <input id="age" readonly>
-
-  <label>Gender *</label>
-  <select id="gender">
-    <option value="">Select</option>
-    <option value="Male">Male</option>
-    <option value="Female">Female</option>
-  </select>
-
-  <label>Citizenship *</label>
-  <select id="citizenship">
-    <option value="">Select</option>
-    <option value="Malaysian">Malaysian</option>
-    <option value="Foreigner">Foreigner</option>
-  </select>
-
-  <label>IC / Passport *</label>
-  <input id="ic_passport">
-
-  <label>Contact *</label>
-  <input id="contact">
-
-  <label>Email</label>
-  <input type="email" id="email">
-
-  <label>Address</label>
-  <textarea id="address"></textarea>
-
-  <button id="registerBtn" type="button">REGISTER</button>
-  <div id="msg" class="msg"></div>
+  <button onclick="register()">Create Account</button>
+  <p class="msg" id="msg"></p>
 </div>
 
 <script>
-/* ================= SUPABASE ================= */
-supabase.createClient(
-  "https://fmwdizyexroiezezitly.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo"
-);
+  const SUPABASE_URL = "https://fmwdizyexroiezezitly.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtd2RpenlleHJvaWV6ZXppdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzA3MDYsImV4cCI6MjA5MzEwNjcwNn0.buw3emsGXC9tsHCwCPxDUPINMx2DOYJu8Qu9UmlmyMo";
 
-/* ================= AGE AUTO-COMPUTE ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  const dobInput = document.getElementById("dob");
-  const ageInput = document.getElementById("age");
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  dobInput.addEventListener("change", () => {
-    if (!dobInput.value) { ageInput.value = ""; return; }
-    const dob = new Date(dobInput.value);
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDiff = today.getMonth() - dob.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) { age--; }
-    ageInput.value = age >= 0 ? age : "";
-  });
-});
+  window.register = async function () {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const msg = document.getElementById("msg");
 
-/* ================= IC / PASSPORT FORMAT ================= */
-const icInput = document.getElementById("ic_passport");
-icInput.addEventListener("input", () => {
-  let value = icInput.value;
-  if (/^[A-Za-z]/.test(value)) {
-    icInput.value = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    return;
-  }
-  value = value.replace(/\D/g, "");
-  if (value.length > 6) value = value.slice(0, 6) + "-" + value.slice(6);
-  if (value.length > 8) value = value.slice(0, 9) + "-" + value.slice(9, 13);
-  icInput.value = value;
-});
+    msg.textContent = "";
 
-/* ================= CONTACT FORMAT ================= */
-const contactInput = document.getElementById("contact");
-contactInput.addEventListener("input", () => {
-  let value = contactInput.value.replace(/\D/g, "");
-  if (value.length > 3) value = value.slice(0, 3) + "-" + value.slice(3, 11);
-  contactInput.value = value;
-});
+    if (!email || !password) {
+      msg.textContent = "Email and password required";
+      return;
+    }
 
-/* ================= REGISTER CLIENT ================= */
-document.getElementById("registerBtn").addEventListener("click", async () => {
-  const msg = document.getElementById("msg");
-  const btn = document.getElementById("registerBtn");
-  msg.innerHTML = "";
-  btn.disabled = true;
+    const { error } = await sb.auth.signUp({
+      email,
+      password
+    });
 
-  const payload = {
-    full_name: document.getElementById("full_name").value.trim(),
-    date_of_birth: document.getElementById("dob").value,
-    gender: document.getElementById("gender").value,
-    citizenship: document.getElementById("citizenship").value,
-    ic_passport: document.getElementById("ic_passport").value,
-    contact: document.getElementById("contact").value,
-    email: document.getElementById("email").value,
-    address: document.getElementById("address").value
+    if (error) {
+      msg.textContent = error.message;
+      return;
+    }
+
+    msg.style.color = "green";
+    msg.textContent = "✅ Registration successful. You may now log in.";
   };
-
-  if (!payload.full_name || !payload.date_of_birth || !payload.contact ||
-      !payload.gender || !payload.citizenship) {
-    msg.innerHTML = "<span class='error'>Please fill all required fields *</span>";
-    btn.disabled = false;
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-  .from("clients")
-  .insert(payload)
-  .select();
-
-  if (error) {
-    console.error(error);
-    msg.innerHTML = `<span class="error">${error.message}</span>`;
-    btn.disabled = false;
-  } else {
-    msg.innerHTML = `
-      <span class="success">
-        ✅ Registration successful.<br>
-        Our team will contact you shortly.
-      </span>
-    `;
-
-    document.querySelectorAll("input, textarea").forEach(el => el.value = "");
-    document.getElementById("gender").value = "";
-    document.getElementById("citizenship").value = "";
-    document.getElementById("age").value = "";
-
-    setTimeout(() => {
-      window.location.href = "/thank-you.html";
-    }, 2000);
-  }
-});
-
 </script>
+
 </body>
 </html>
