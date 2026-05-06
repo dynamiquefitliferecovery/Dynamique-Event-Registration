@@ -513,6 +513,11 @@ function formatContact(v = "") {
   return age;
 }
 
+  function toMYTime(dateString) {
+  const d = new Date(dateString);
+  return new Date(d.getTime() + 8 * 60 * 60 * 1000);
+}
+  
 /* ================= CLIENTS ================= */
 
 let clients = [];
@@ -832,7 +837,7 @@ async function loadAppointments() {
       return cell;
     };
 
-    const dt = new Date(a.start_time);
+    const dt = toMYTime(a.start_time);
 
     // Date + Time
     tr.appendChild(
@@ -898,7 +903,7 @@ async function loadAppointments() {
 
   editingAppointmentId = id;
 
-const start = new Date(data.start_time);
+const start = toMYTime(data.start_time);
 
 apptDate.value = start.toLocaleDateString("en-CA"); // YYYY-MM-DD
 apptTime.value = start.toLocaleTimeString("en-GB", {
@@ -1036,7 +1041,7 @@ async function loadReport() {
       return c;
     };
 
-    const d = new Date(r.start_time);
+    const d = toMYTime(r.start_time);
 
     tr.appendChild(td(d.toLocaleDateString("en-MY")));
     tr.appendChild(td(r.client?.full_name || ""));
