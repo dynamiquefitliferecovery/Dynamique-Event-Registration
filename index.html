@@ -428,6 +428,7 @@ async function openApp() {
   await loadClients();
   await loadPractitioners();
   await loadServices();
+  await loadAppointments(); // ✅ ADD THIS
 }
 
 
@@ -808,7 +809,7 @@ tr.appendChild(
     tr.appendChild(td(a.client?.full_name || ""));
 
     // Service ✅
-    tr.appendChild(td(a.service?.name || "(no service)"));
+   tr.appendChild(td(r.service?.name || ""));
 
     // Charges ✅
     tr.appendChild(td(a.amount.toFixed(2)));
@@ -1010,7 +1011,7 @@ async function loadReport() {
       client: r.client?.full_name || "",
       age: calculateAge(r.client?.date_of_birth),
       citizenship: r.client?.citizenship || "",
-      service: "-",
+      service: r.service?.name || "",
       amount: Number(r.amount),
       sst: Number(r.sst),
       total: Number(r.total),
