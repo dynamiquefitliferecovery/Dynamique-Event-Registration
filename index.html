@@ -399,8 +399,6 @@ window.openApp = async function () {
  /* ================= AUTH (FINAL – ONE-TIME FIX) ================= */
 
 sb.auth.onAuthStateChange((event, session) => {
-  console.log("AUTH EVENT:", event);
-
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
     if (!appOpened) {
       appOpened = true;
@@ -414,7 +412,6 @@ sb.auth.onAuthStateChange((event, session) => {
     document.getElementById("loginView").classList.remove("hidden");
   }
 });
-
 /* ================= LOGIN ================= */
 
 window.login = async function () {
