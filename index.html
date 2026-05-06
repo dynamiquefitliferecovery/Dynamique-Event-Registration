@@ -374,13 +374,7 @@ async function loadServices() {
 
 let appOpened = false;
 
-window.openApp = async function () {
-  if (appOpened) return;     // ✅ prevent double run
-  appOpened = true;
-
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
-
+async function openApp() {
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
 
@@ -388,7 +382,7 @@ window.openApp = async function () {
   await loadPractitioners();
   await loadServices();
   await loadAppointments();
-};
+}
 
  /* ================= AUTH (FINAL – ONE-TIME FIX) ================= */
 
