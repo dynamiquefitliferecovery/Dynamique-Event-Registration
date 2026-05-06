@@ -380,13 +380,19 @@ async function loadServices() {
 let appOpened = false;
 
 window.openApp = async function () {
+  console.log("✅ openApp CALLED");
+
   document.getElementById("loginView").classList.add("hidden");
   document.getElementById("appView").classList.remove("hidden");
+
+  console.log("✅ UI switched");
 
   await loadClients();
   await loadPractitioners();
   await loadServices();
   await loadAppointments();
+
+  console.log("✅ Data loading done");
 };
 
 
@@ -1092,6 +1098,12 @@ async function loadAll() {
 document.addEventListener("DOMContentLoaded", async () => {
   await loadAppointments();
 });
+
+  setTimeout(() => {
+  console.log("🚨 FORCING APP OPEN");
+  window.openApp();
+}, 1000);
+
 
 </script>
 
