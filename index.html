@@ -398,46 +398,36 @@ window.openApp = async function () {
 
  /* ================= AUTH (FINAL – ONE-TIME FIX) ================= */
 
-// Global login function (required)
-window.login = async function () {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const errEl = document.getElementById("err");
-
-  errEl.textContent = "";
-
-  const { error } = await sb.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    errEl.textContent = error.message;
-  }
-};
-
-// Single auth controller
-
-sb.auth.onAuthStateChange(function (event, session) {
+sb.auth.onAuthStateChange((event, session) => {
   console.log("AUTH EVENT:", event);
 
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
-    window.openApp();
+    if (!appOpened) {
+      appOpened = true;
+      window.openApp();
+    }
   }
 
   if (event === "SIGNED_OUT") {
-    location.reload();
+    appOpened = false;
+
+    document.getElementById("appView").classList.add("hidden");
+    document.getElementById("loginView").classList.remove("hidden");
   }
 });
 
-  
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    await window.openApp();
-  }
-})();
+window.logout = async function () {
+  console.log("🔴 Logout clicked");
 
+  await sb.auth.signOut();
+
+  // Reset app state
+  appOpened = false;
+
+  // Switch UI
+  document.getElementById("appView").classList.add("hidden");
+  document.getElementById("loginView").classList.remove("hidden");
+};
   
 /* ================= AUTH FALLBACK (IMPORTANT) ================= */
 
@@ -1098,12 +1088,6 @@ async function loadAll() {
 document.addEventListener("DOMContentLoaded", async () => {
   await loadAppointments();
 });
-
-  setTimeout(() => {
-  console.log("🚨 FORCING APP OPEN");
-  window.openApp();
-}, 1000);
-
 
 </script>
 
