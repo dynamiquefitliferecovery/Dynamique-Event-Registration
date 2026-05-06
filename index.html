@@ -413,6 +413,8 @@ window.login = async function () {
 // Single auth controller
 
 sb.auth.onAuthStateChange(async (event, session) => {
+  console.log("AUTH EVENT:", event);
+
   if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session) {
     await window.openApp();
   }
@@ -421,6 +423,14 @@ sb.auth.onAuthStateChange(async (event, session) => {
     location.reload();
   }
 });
+  
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    await window.openApp();
+  }
+})();
+
   
 /* ================= AUTH FALLBACK (IMPORTANT) ================= */
 
@@ -1078,11 +1088,9 @@ async function loadAll() {
   loadAppointments();
 }
 
-
-document.addEventListener("DOMContentLoaded", (async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   await loadAppointments();
-})();
-
+});
 
 </script>
 
