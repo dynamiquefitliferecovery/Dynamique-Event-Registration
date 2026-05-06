@@ -959,18 +959,19 @@ async function loadReport() {
   reportData = [];
   let totalAmount = 0;
 
-  const { data, error } = await sb
-    .from("appointments")
-    .select(`
-      start_time,
-      amount,
-      sst,
-      total,
-      payment_method,
-      remarks,
-      client:clients(full_name, citizenship, date_of_birth)
-    `)
-    .order("start_time", { ascending: true });
+const { data, error } = await sb
+  .from("appointments")
+  .select(`
+    start_time,
+    amount,
+    sst,
+    total,
+    payment_method,
+    remarks,
+    service:services(name),
+    client:clients(full_name, citizenship, date_of_birth)
+  `)
+  .order("start_time", { ascending: true });
 
   if (error) {
     console.error(error);
@@ -996,7 +997,7 @@ async function loadReport() {
     tr.appendChild(td(r.client?.full_name || ""));
     tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
     tr.appendChild(td(r.client?.citizenship || ""));
-    tr.appendChild(td("-"));
+    tr.appendChild(td(r.service?.name || ""));
     tr.appendChild(td(Number(r.amount).toFixed(2)));
     tr.appendChild(td(Number(r.sst).toFixed(2)));
     tr.appendChild(td(Number(r.total).toFixed(2)));
