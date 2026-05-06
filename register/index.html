@@ -74,25 +74,28 @@
 
     msg.textContent = "";
 
-    if (!email || !password) {
-      msg.textContent = "Email and password required";
-      return;
-    }
-
-    const { error } = await sb.auth.signUp({
+    const { data, error } = await sb.auth.signUp({
       email,
       password
     });
+
+    console.log("SIGNUP RESULT:", data, error);
 
     if (error) {
       msg.textContent = error.message;
       return;
     }
 
+    if (!data?.user) {
+      msg.textContent = "Signup blocked. Check Supabase Auth settings.";
+      return;
+    }
+
     msg.style.color = "green";
-    msg.textContent = "✅ Registration successful. You may now log in.";
+    msg.textContent = "✅ User created successfully";
   };
 </script>
+
 
 </body>
 </html>
