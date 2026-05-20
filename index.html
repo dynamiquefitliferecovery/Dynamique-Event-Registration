@@ -127,12 +127,12 @@ header button.active {
   transition:0.2s;
 }
 
-  
 .card {
   margin-left: auto;
   margin-right: auto;
   max-width: 1100px;
-  
+  width: 100%;
+}
 
 .card h3::after {
   content: "";
@@ -343,9 +343,11 @@ th {
   <div class="card">
     <h3>Client</h3>
 
-    <div class="grid">
-      ...
-    </div>
+<div class="grid">
+  <input id="clientName" placeholder="Full Name">
+  <input id="clientDob" type="date">
+  ...
+</div>
 
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button class="action" id="saveClientBtn">Save Client</button>
