@@ -433,15 +433,18 @@ th {
 }
 
 
-#appointmentsTab td:nth-child(10),
-#reportsTab td:nth-child(10) {
-   background: #fff3e0;
-}
-
     #clientsTab td:nth-child(1) {
   white-space: normal;        /* ✅ allow wrapping */
   word-break: break-word;     /* ✅ break long names */
 }
+
+/* ✅ Action column highlight */
+#appointmentsTab td:nth-child(9),
+#reportsTab td:nth-child(9),
+#clientsTab td:nth-child(8) {
+  background: #fff3e0;
+}
+
     
   </style>
 
