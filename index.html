@@ -1357,9 +1357,11 @@ function updateSelectedClientInfo() {
 
 /* ================= REPORT ================= */
 window.loadReport = async function () {
+
+  alert("Generate clicked ✅");   // ✅ ADD THIS LINE
+
   const from = reportFrom.value;
   const to = reportTo.value;
-
   reportData = [];
   let totalAmount = 0;
 let totalSST = 0;
