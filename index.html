@@ -421,28 +421,30 @@ th {
 
     <div class="grid">
 
+<div class="grid">
+
 <input id="apptDate" type="date">
 <input id="apptTime" type="time">
 
 <select id="apptClient"></select>
-<select id="apptService"></select>     <!-- ✅ moved here -->
+<select id="apptPayment">
+  <option value="">Select Payment</option>
+  <option value="Cash">Cash</option>
+  <option value="Card">Card</option>
+  <option value="Online">Online</option>
+</select>
 
-<input id="apptCitizenship" placeholder="Citizenship" readonly>     <!-- ✅ moved down -->
+<select id="apptService"></select>
+<input id="apptCitizenship" placeholder="Citizenship" readonly>
+
 <select id="apptPractitioner"></select>
 
-      <select id="apptPayment">
-        <option value="">Select Payment</option>
-        <option value="Cash">Cash</option>
-        <option value="Card">Card</option>
-        <option value="Online">Online</option>
-      </select>
+<input id="apptAmount" placeholder="Amount (RM)" readonly>
+<input id="apptSST" placeholder="SST (RM)" readonly>
+<input id="apptTotal" placeholder="Total (RM)" readonly>
+<input id="apptRemarks" placeholder="Remarks (optional)">
 
-      <input id="apptAmount" placeholder="Amount (RM)" readonly>
-      <input id="apptSST" placeholder="SST (RM)" readonly>
-      <input id="apptTotal" placeholder="Total (RM)" readonly>
-      <input id="apptRemarks" placeholder="Remarks (optional)">
-    </div>
-
+</div>
     <button class="action" onclick="saveAppointment()">Save Appointment</button>
   </div>
 
@@ -1109,7 +1111,7 @@ apptCitizenship.value = "";
 apptService.addEventListener("change", calculateCharges);
 apptClient.addEventListener("change", () => {
   calculateCharges();
-  updateSelectedClientAge();
+  updateSelectedClientInfo();
 });
 
 
@@ -1331,13 +1333,14 @@ async function deleteAppointment(id) {
   loadAppointments();
 }
 
-function updateSelectedClientInfo()
+function updateSelectedClientInfo() {
   const c = clients.find(x => x.id == apptClient.value);
 
   apptCitizenship.value = c
     ? c.citizenship
     : "";
 }
+
 
 
 /* ================= REPORT ================= */
