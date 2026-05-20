@@ -637,12 +637,16 @@ function tab(e, id) {
 
   e.currentTarget.classList.add("active");
 
-  document.getElementById(id).classList.remove("hidden");
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  target.classList.remove("hidden");
 
   if (id === "appointmentsTab") {
     fillAppointmentDropdowns();
   }
 }
+
 
   const target = document.getElementById(id);
   if (!target) {
