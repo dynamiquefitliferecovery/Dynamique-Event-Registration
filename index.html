@@ -326,14 +326,18 @@ td {
 }
 
 
- 
 td:last-child {
   position: sticky;
   right: 0;
   background: #fff;
   z-index: 2;
 }
-
+/* ✅ FORCE ACTION COLUMN WHITE ALWAYS */
+#clientsTab td:last-child,
+#appointmentsTab td:nth-child(9),
+#reportsTab td:nth-child(9) {
+  background: #fff !important;
+}
 th:last-child {
   position: sticky;
   right: 0;
