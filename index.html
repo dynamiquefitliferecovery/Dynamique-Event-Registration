@@ -94,7 +94,10 @@ header button {
   cursor: pointer;
   font-weight: 500;
   transition: 0.2s;
+
+  touch-action: manipulation;   /* ✅ ADD THIS LINE */
 }
+
 
 /* hover */
 header button:hover {
@@ -322,10 +325,10 @@ th {
 
   <!-- Tabs -->
   <div style="display:flex; gap:10px;">
-    <button onclick="tab(this,'clientsTab')">Clients</button>
-    <button onclick="tab(this,'practitionersTab')">Practitioners</button>
-    <button onclick="tab(this,'appointmentsTab')">Appointments</button>
-    <button onclick="tab(this,'reportsTab')">Sales</button>
+<button class="tabBtn" data-tab="clientsTab">Clients</button>
+<button class="tabBtn" data-tab="practitionersTab">Practitioners</button>
+<button class="tabBtn" data-tab="appointmentsTab">Appointments</button>
+<button class="tabBtn" data-tab="reportsTab">Sales</button>
     <button onclick="logout()">Logout</button>
   </div>
 
@@ -547,7 +550,12 @@ th {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
+  
+document.querySelectorAll(".tabBtn").forEach(btn => {
+  btn.addEventListener("click", function () {
+    tab(this, this.dataset.tab);
+  });
+});
 console.log("JS loaded");
 
 
