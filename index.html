@@ -191,9 +191,9 @@ input:focus, select:focus{
 }
 .action-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-top: 15px;
 }
 
@@ -226,7 +226,7 @@ table {
 
 th {
   padding:6px 8px;
-  font-size:13px;
+  font-size:14px;
   white-space: nowrap;   /* ✅ prevent wrapping */
 }
 
@@ -241,18 +241,18 @@ th:last-child {
 
 /* ================= CLIENT TABLE ================= */
 
-#clientsTab th:nth-child(1) { width: 18%; } /* Name */
+#clientsTab th:nth-child(1) { width: 14%; } /* Name */
 #clientsTab th:nth-child(2) { width: 10%; } /* DOB */
 #clientsTab th:nth-child(3) { width: 6%; }  /* Age */
 #clientsTab th:nth-child(4) { width: 8%; }  /* Gender */
 #clientsTab th:nth-child(5) { width: 10%; } /* Citizenship */
-#clientsTab th:nth-child(6) { width: 14%; } /* IC */
-#clientsTab th:nth-child(7) { width: 12%; } /* Contact */
+#clientsTab th:nth-child(6) { width: 11%; } /* IC */
+#clientsTab th:nth-child(7) { width: 10%; } /* Contact */
 
 
 /* ================= APPOINTMENT TABLE ================= */
 
-#appointmentsTab th:nth-child(1) { width: 11%; } /* Date */
+#appointmentsTab th:nth-child(1) { width: 9%; } /* Date */
 #appointmentsTab th:nth-child(2) { width: 14%; } /* Client */
 #appointmentsTab th:nth-child(3) { width: 10%; } /* Citizenship */
 #appointmentsTab th:nth-child(4) { width: 14%; } /* Service */
@@ -280,7 +280,7 @@ th:last-child {
 
 td {
   padding:6px 8px;   /* ✅ tighter vertical, balanced horizontal */
-  font-size:13px;
+  font-size:14px;
   line-height:1.4;
 }
 
@@ -290,7 +290,7 @@ td {
   right: 0;
   background: #fff;
   z-index: 2;
-  min-width: 70px;   /* ✅ give space for buttons */
+  min-width: 55px;   /* ✅ give space for buttons */
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -391,16 +391,17 @@ th {
 }
 
     /* Highlight remarks */
-#appointmentsTab td:nth-child(10),
-#reportsTab td:nth-child(10) {
-  background: #fff8e1;
-  font-style: italic;
+#appointmentsTab td:nth-child(10),#appointmentsTab td:nth-child(10reportsTab td:nth-child(10) {
+  background: #ffe082;
+  font-weight: 500;
 }
 
 #appointmentsTab th:nth-child(10),
 #reportsTab th:nth-child(10) {
-  background: #ffe0b2;
+  background: #ffb74d;
 }
+
+
 
     
   </style>
