@@ -303,12 +303,20 @@ th {
 <!-- ================= APP ================= -->
 <div id="appView" class="hidden">
 
-<header>
-<button onclick="tab(this,'clientsTab')">Clients</button>
-<button onclick="tab(this,'practitionersTab')">Practitioners</button>
-<button onclick="tab(this,'appointmentsTab')">Appointments</button>
-<button onclick="tab(this,'reportsTab')">Sales Report</button>
-<button onclick="logout()">Logout</button>
+<header style="display:flex; align-items:center; gap:10px;">
+  
+  <div style="font-weight:700; font-size:18px; margin-right:20px;">
+    🏥 Dynamique Sports Rehab Centre
+  </div>
+
+  <button onclick="tab(this,'clientsTab')">Clients</button>
+  <button onclick="tab(this,'practitionersTab')">Practitioners</button>
+  <button onclick="tab(this,'appointmentsTab')">Appointments</button>
+  <button onclick="tab(this,'reportsTab')">Sales</button>
+
+  <div style="margin-left:auto;"></div>
+
+  <button onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
@@ -369,10 +377,10 @@ th {
     <h3>Practitioner</h3>
  <input placeholder="Practitioner Name" style="margin-bottom:10px;">
 <button class="action" onclick="addPractitioner()">Add Practitioner</button>
-<div style="margin-top:15px;">
-  <div id="practitionerList"></div>
+<div style="display:flex; gap:10px;">
+  <input placeholder="Practitioner Name">
+  <button class="action" onclick="addPractitioner()">Add</button>
 </div>
-  </div>
 </section>
 
 <!-- ===== APPOINTMENTS ===== -->
