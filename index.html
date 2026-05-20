@@ -376,7 +376,7 @@ th {
         <tr>
           <th>Name</th>
           <th>DOB</th>
-          <th>Citizenship</th>
+          <th>Age</th>
           <th>Gender</th>
           <th>Citizenship</th>
           <th>IC</th>
@@ -455,7 +455,7 @@ th {
           <tr>
             <th>Date</th>
             <th>Client</th>
-            <th>Age</th>
+            <th>Citizenship</th>
             <th>Service</th>
             <th>Amount</th>
             <th>SST</th>
@@ -1120,7 +1120,7 @@ apptClient.addEventListener("change", () => {
   apptService.value = "";
   apptPayment.value = "";
   apptRemarks.value = "";
-
+apptCitizenship.value = "";
   apptAmount.value = "0.00";
   apptSST.value = "0.00";
   apptTotal.value = "0.00";
@@ -1331,7 +1331,7 @@ async function deleteAppointment(id) {
   loadAppointments();
 }
 
-function updateSelectedClientAge() {
+function updateSelectedClientInfo()
   const c = clients.find(x => x.id == apptClient.value);
 
   apptCitizenship.value = c
