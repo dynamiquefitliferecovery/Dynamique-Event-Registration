@@ -115,13 +115,14 @@ header button.active {
   margin:auto;
 }
 
-.card{
+.card {
   background:#ffffff;
   padding:24px;
   border-radius:20px;
   margin-bottom:24px;
-  box-shadow:0 6px 20px rgba(0,0,0,.06);
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
   border:1px solid #f3f3f3;
+  transition:0.2s;
 }
 
   
@@ -201,8 +202,9 @@ td{
   border-bottom:1px solid #f0f0f0;
 }
 
-tr:hover{
-  background:#fafafa;
+tr:hover {
+  background:#fff8f0;
+  cursor:pointer;
 }
 
 
@@ -330,9 +332,10 @@ th {
       <input id="clientAddress" placeholder="Address">
     </div>
 
-    <button class="action" id="saveClientBtn">Save Client</button>
-    <button class="action" onclick="exportClients()">Export Clients</button>
-  </div>
+   <div style="display:flex; gap:10px; margin-top:10px;">
+  <button class="action">Save Client</button>
+  <button class="action" style="background:#6d6d6d;">Export</button>
+</div>
 
   <div class="card">
     <table>
@@ -360,7 +363,9 @@ th {
     <h3>Practitioner</h3>
  <input placeholder="Practitioner Name" style="margin-bottom:10px;">
 <button class="action" onclick="addPractitioner()">Add Practitioner</button>
-  <div style="margin-top:15px;">
+  <div.style.background = "#ffffff";>
+<div.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";>
+<div.style.border = "none";>
   <div id="practitionerList"></div>
 </div>
   </div>
