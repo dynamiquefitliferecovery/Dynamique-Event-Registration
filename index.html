@@ -171,19 +171,14 @@ input:focus, select:focus{
   border-color:#ff9800;
   box-shadow:0 0 0 2px rgba(255,152,0,.2);
 }
-.action{
-  background:#ff9800;
-  color:white;
-  width: auto;  
-  display: inline-block;
-  border:none;
-  padding:10px 14px;
-  border-radius:16px;
+.action {
+  background:#ffe0b2;    /* ✅ light orange */
+  color:#e65100;
+  padding:8px 14px;      /* ✅ smaller height */
   font-weight:600;
-  cursor:pointer;
-  transition:0.2s;
-    box-shadow: 0 4px 10px rgba(255,152,0,0.3);
+  border-radius:12px;
 }
+
 
 .action:hover{
   background:#fb8c00;
@@ -197,7 +192,7 @@ input:focus, select:focus{
   margin-top: 15px;
 }
 
-.action-bar .action {
+.action-bar.action {
   flex: none;   /* ✅ no full width */
   text-align: center;
 }
@@ -226,7 +221,7 @@ table {
 
 th {
   padding:6px 8px;
-  font-size:14px;
+  font-size:16px;
   white-space: nowrap;   /* ✅ prevent wrapping */
 }
 
@@ -237,6 +232,10 @@ th {
 
 th:last-child {
   border-top-right-radius:12px;
+}
+    
+#clientsTab th:last-child {
+  background: #fff3e0;
 }
 
 /* ================= CLIENT TABLE ================= */
@@ -255,11 +254,11 @@ th:last-child {
 #appointmentsTab th:nth-child(1) { width: 9%; } /* Date */
 #appointmentsTab th:nth-child(2) { width: 14%; } /* Client */
 #appointmentsTab th:nth-child(3) { width: 10%; } /* Citizenship */
-#appointmentsTab th:nth-child(4) { width: 14%; } /* Service */
+#appointmentsTab th:nth-child(4) { width: 11%; } /* Service */
 #appointmentsTab th:nth-child(5) { width: 7%; }  /* Amount */
 #appointmentsTab th:nth-child(6) { width: 7%; }  /* SST */
 #appointmentsTab th:nth-child(7) { width: 7%; }  /* Total */
-#appointmentsTab th:nth-child(8) { width: 9%; }  /* Payment */
+#appointmentsTab th:nth-child(8) { width: 7%; }  /* Payment */
 #appointmentsTab th:nth-child(9) { width: 6%; }  /* Action */
 #appointmentsTab th:nth-child(10) { width: 11%; } /* Remarks */
 
@@ -280,7 +279,7 @@ th:last-child {
 
 td {
   padding:6px 8px;   /* ✅ tighter vertical, balanced horizontal */
-  font-size:14px;
+  font-size:16px;
   line-height:1.4;
 }
 
@@ -373,7 +372,6 @@ button:active{
     
 th {
   background: #fff3e0; /* ✅ light orange */
-  color: #e65100;
 }
 
 .card:hover {
@@ -390,16 +388,6 @@ th {
   text-align: right;
 }
 
-    /* Highlight remarks */
-#appointmentsTab td:nth-child(10),#appointmentsTab td:nth-child(10reportsTab td:nth-child(10) {
-  background: #ffe082;
-  font-weight: 500;
-}
-
-#appointmentsTab th:nth-child(10),
-#reportsTab th:nth-child(10) {
-  background: #ffb74d;
-}
 
 
 
