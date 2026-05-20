@@ -126,8 +126,14 @@ header button.active {
 }
 
   
-.card h3 {
-  color: #ff9800;
+.card h3::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: #ff9800;
+  margin-top: 6px;
+  border-radius: 2px;
 }
 
     
@@ -333,7 +339,7 @@ th {
     </div>
 
    <div style="display:flex; gap:10px; margin-top:10px;">
-  <button class="action">Save Client</button>
+<button class="action" id="saveClientBtn">Save Client</button>
   <button class="action" style="background:#6d6d6d;">Export</button>
 </div>
 
@@ -363,9 +369,9 @@ th {
     <h3>Practitioner</h3>
  <input placeholder="Practitioner Name" style="margin-bottom:10px;">
 <button class="action" onclick="addPractitioner()">Add Practitioner</button>
-  <div.style.background = "#ffffff";>
-<div.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";>
-<div.style.border = "none";>
+<div style="margin-top:15px;">
+  <div id="practitionerList"></div>
+</div>
   <div id="practitionerList"></div>
 </div>
   </div>
@@ -954,7 +960,13 @@ div.style.padding = "10px";
 div.style.border = "1px solid #eee";
 div.style.borderRadius = "12px";
 div.style.marginBottom = "8px";
-div.style.background = "#fafafa";
+div.style.background = "#ffffff";
+div.style.boxShadow = "0 6px 16px rgba(0,0,0,0.08)";
+div.style.border = "none";
+div.style.transition = "0.2s";
+
+    div.onmouseover = () => div.style.transform = "translateY(-2px)";
+div.onmouseout = () => div.style.transform = "translateY(0)";
 
 const name = document.createElement("span");
 name.textContent = p.name;
