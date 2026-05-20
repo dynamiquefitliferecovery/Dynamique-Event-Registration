@@ -402,7 +402,7 @@ th {
   <div class="card">
     <h3>Practitioner</h3>
 <div style="display:flex; gap:10px;">
-  <input placeholder="Practitioner Name">
+   <input id="practitionerInput" placeholder="Practitioner Name">
   <button class="action" onclick="addPractitioner()">Add</button>
 </div>
 
@@ -972,7 +972,7 @@ function clearClientForm() {
 let practitioners = [];
 
 async function addPractitioner() {
-  const input = document.querySelector("#practitionersTab input");
+  const input = document.getElementById("practitionerInput");
   if (!input || !input.value.trim()) {
     alert("Practitioner name required");
     return;
