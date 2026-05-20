@@ -189,9 +189,28 @@ input:focus, select:focus{
   background:#fb8c00;
   transform:translateY(-1px);
 }
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.action-bar .action {
+  flex: 1;
+  text-align: center;
+}
+
+.action-bar .primary {
+  background: #ff9800;
+  color: white;
+  font-weight: 700;
+}
 
 table {
   width:100%;
+   table-layout: fixed;
   border-collapse:collapse;
   margin-top:10px;
   border-radius:12px;
@@ -205,7 +224,7 @@ table {
 }
 
 th{
-  padding:10px;
+  padding:8px;
     font-size:13px;
   background:#fafafa;
   font-weight:600;
@@ -220,12 +239,20 @@ th{
 th:last-child {
   border-top-right-radius:12px;
 }
-    
+
+    th:nth-child(1) { width: 18%; } /* Name */
+th:nth-child(2) { width: 12%; } /* DOB */
+th:nth-child(3) { width: 8%; }  /* Age */
+th:nth-child(4) { width: 10%; } /* Gender */
+th:nth-child(5) { width: 12%; } /* Citizenship */
+th:nth-child(6) { width: 18%; } /* IC */
+th:nth-child(7) { width: 12%; } /* Contact */
 
 td{
-  padding:10px;
-  white-space: normal;   /* ✅ allow wrap */
-  font-size:13px;        /* ✅ smaller text */
+  padding:8px;
+  font-size:13px;
+  white-space: normal;     /* ✅ allow wrap */
+  word-break: break-word;  /* ✅ prevent overflow */
 }
 
 
@@ -389,12 +416,12 @@ th {
   <input id="clientAddress" placeholder="Address">
 </div>
 
-<button class="action" id="saveClientBtn">💾 Save Client</button>
-
-<div style="margin-top:15px; display:flex; gap:10px;">
+<div class="action-bar">
+  <button class="action primary" id="saveClientBtn">💾 Save</button>
   <button class="action" onclick="loadClients()">🔄 Refresh</button>
   <button class="action" onclick="exportClients()">📥 Export</button>
 </div>
+
 
 
 <!-- TABLE -->
