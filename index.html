@@ -195,7 +195,7 @@ table {
   border-collapse:collapse;
   margin-top:10px;
   border-radius:12px;
-  min-width: 1000px;
+  min-width: 1100px;
 }
 
 .table-wrapper {
@@ -363,9 +363,32 @@ th {
 
   <!-- FORM CARD -->
   <div class="card">
-    <h3>Client</h3>
-<div style="margin-bottom:15px; display:flex; gap:10px;">
-  <button class="action" onclick="showAddClient()">➕ Create Client</button>
+   <h3>Client</h3>
+
+<div class="grid">
+  <input id="clientName" placeholder="Full Name">
+  <input id="clientDob" type="date">
+
+  <select id="clientGender">
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+  </select>
+
+  <select id="clientCitizenship">
+    <option value="Malaysian">Malaysian</option>
+    <option value="Foreigner">Foreigner</option>
+  </select>
+
+  <input id="clientIc" placeholder="IC / Passport">
+  <input id="clientContact" placeholder="Contact">
+
+  <input id="clientEmail" placeholder="Email">
+  <input id="clientAddress" placeholder="Address">
+</div>
+
+<button class="action" id="saveClientBtn">💾 Save Client</button>
+
+<div style="margin-top:15px; display:flex; gap:10px;">
   <button class="action" onclick="loadClients()">🔄 Refresh</button>
   <button class="action" onclick="exportClients()">📥 Export</button>
 </div>
@@ -851,7 +874,13 @@ tr.appendChild(actionTd);
 
 /* ===== EDIT CLIENT ===== */
 function editClient(id) {
+  if (!clientName) {
+    alert("Client form not available");
+    return;
+  }
+
   const c = clients.find(x => x.id == id);
+
   if (!c) return;
 
   editingClientId = id;
