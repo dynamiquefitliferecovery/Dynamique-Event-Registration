@@ -106,50 +106,68 @@
 <script>
   console.log("✅ Register page loaded");
 
+/* ✅ PREVENT FUTURE DATE SELECTION */
+document.getElementById("date_of_birth").max =
+  new Date().toISOString().split("T")[0];
+
+/* ✅ AUTO FILL DOB + GENDER FROM IC */
 function autoFillDOB() {
-  const citizenship = document.getElementById("citizenship").value;
-  const ic = document.getElementById("ic_passport").value.replace(/\D/g, "");
+  const msgBox = document.getElementById("msg");
+  msgBox.textContent = "";
+
+const citizenship = document.getElementById("citizenship").value;
+  const icInput = document.getElementById("ic_passport");
   const dobInput = document.getElementById("date_of_birth");
   const genderSelect = document.getElementById("gender");
 
-  // Only apply for Malaysian
-  if (citizenship !== "Malaysian") return;
+  let icRaw = icInput.value;
+  const ic = icRaw.replace(/\D/g, "");
 
-  // Must have at least 12 digits IC
+if (citizenship !== "Malaysian") return;
   if (ic.length < 12) return;
 
-  // ✅ ---------- DOB PART ----------
-  const icPart = ic.substring(0, 6);
+  /* ✅ Extract DOB */
+  const yy = ic.substring(0, 2);
+  const mm = parseInt(ic.substring(2, 4));
+  const dd = parseInt(ic.substring(4, 6));
 
-  let yy = icPart.substring(0, 2);
-  let mm = icPart.substring(2, 4);
-  let dd = icPart.substring(4, 6);
+  const year = 2000 + parseInt(yy);
 
-  let yearNum = parseInt(yy, 10);
-  let year = yearNum <= 24 ? 2000 + yearNum : 1900 + yearNum;
 
-  // ❌ Reject future year (e.g. 2026)
-  const currentYear = new Date().getFullYear();
-  if (year > currentYear) {
-    document.getElementById("msg").style.color = "red";
-    document.getElementById("msg").textContent = "Invalid IC: Year cannot be in the future";
+/* ✅ Validate basic date */
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) {
+    msgBox.style.color = "red";
+    msgBox.textContent = "Invalid IC: Invalid date detected";
     return;
   }
 
-  // Format DOB
-  const formatted = `${year}-${mm}-${dd}`;
+  const formatted = `${year}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+  const inputDate = new Date(formatted);
+  const today = new Date();
+
+  
+/* ✅ BLOCK FUTURE DOB */
+  if (inputDate > today) {
+    msgBox.style.color = "red";
+    msgBox.textContent = "Date of Birth cannot be in the future";
+
+    dobInput.value = "";
+    genderSelect.value = "";
+    return;
+  }
+
+  /* ✅ SET DOB */
   dobInput.type = "date";
   dobInput.value = formatted;
 
-  // ✅ ---------- GENDER PART ----------
+/* ✅ LOCK DOB when IC is valid */
+  dobInput.setAttribute("readonly", true);
+
+  /* ✅ AUTO GENDER */
   const lastDigit = parseInt(ic.charAt(ic.length - 1));
 
   if (!isNaN(lastDigit)) {
-    if (lastDigit % 2 === 0) {
-      genderSelect.value = "Female";
-    } else {
-      genderSelect.value = "Male";
-    }
+    genderSelect.value = (lastDigit % 2 === 0) ? "Female" : "Male";
   }
 }
 
@@ -189,6 +207,17 @@ function autoFillDOB() {
       msg.textContent = "Please fill in all required fields";
       return;
     }
+
+    
+  /* ✅ FINAL DOB CHECK */
+  const today = new Date();
+  const dobDate = new Date(data.date_of_birth);
+
+  if (dobDate > today) {
+    msg.style.color = "red";
+    msg.textContent = "Date of Birth cannot be in the future";
+    return;
+  }
 
     const { error } = await sb.from("clients").insert(data);
 
