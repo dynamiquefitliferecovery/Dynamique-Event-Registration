@@ -865,17 +865,19 @@ async function loadClients() {
   clientsTable.innerHTML = "";
 
   clients.forEach(c => {
-    const tr = document.createElement("tr");
+  const tr = document.createElement("tr");
 
-tr.innerHTML =
-  `<td>${c.full_name}</td>
-   <td>${c.date_of_birth}</td>
-   <td>${calculateAge(c.date_of_birth)}</td>
-   <td>${c.gender}</td>
-   <td>${c.citizenship}</td>
-   <td>${formatIc(c.ic_passport || "")}</td>
-   <td>${formatContact(c.contact || "")}</td>`;
+  tr.innerHTML =
+    `<td>${c.full_name}</td>
+     <td>${c.date_of_birth}</td>
+     <td>${calculateAge(c.date_of_birth)}</td>
+     <td>${c.gender}</td>
+     <td>${c.citizenship}</td>
+     <td>${formatIc(c.ic_passport || "")}</td>
+     <td>${formatContact(c.contact || "")}</td>`;
 
+  clientsTable.appendChild(tr);   // ✅ VERY IMPORTANT
+});  // ✅ THIS WAS MISSING
 
 /* ===== EDIT CLIENT ===== */
 function editClient(id) {
