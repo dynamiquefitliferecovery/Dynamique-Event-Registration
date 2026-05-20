@@ -1356,7 +1356,7 @@ function updateSelectedClientInfo() {
 
 
 /* ================= REPORT ================= */
-async function loadReport() {
+window.loadReport = async function () {
   const from = reportFrom.value;
   const to = reportTo.value;
 
@@ -1441,7 +1441,7 @@ sumSSTEl.textContent = totalSST.toFixed(2);
 sumTotalEl.textContent = totalRevenue.toFixed(2);
 }
 
-function exportReportExcel() {
+window.exportReportExcel = function () {
   if (!reportData.length) return alert("No data to export");
 
   const rows = [
