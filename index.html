@@ -683,34 +683,52 @@ function exportClients() {
     return;
   }
 
-  const rows = [
-    "Name,DOB,Age,Gender,Citizenship,IC,Contact,Email,Address"
-  ];
+  const sortedClients = [...clients].sort((a, b) =>
+    (a.full_name || "").localeCompare(b.full_name || "")
+  );
 
-const sortedClients = [...clients].sort((a, b) =>
-  a.full_name.localeCompare(b.full_name)
-);
+  let html = `
+  <table border="1">
+    <tr style="font-weight:bold;">
+      <th style="width:180px;">Name</th>
+      <th style="width:120px;">DOB (DD-MM-YYYY)</th>
+      <th style="width:60px;">Age</th>
+      <th style="width:80px;">Gender</th>
+      <th style="width:120px;">Citizenship</th>
+      <th style="width:160px;">IC</th>
+      <th style="width:140px;">Contact</th>
+      <th style="width:200px;">Email</th>
+      <th style="width:250px;">Address</th>
+    </tr>
+  `;
 
-sortedClients.forEach(c => {
-    rows.push([
-      `"${c.full_name}"`,
-      c.date_of_birth,
-      calculateAge(c.date_of_birth),
-      c.gender,
-      c.citizenship,
-      c.ic_passport || "",
-      c.contact || "",
-      `"${c.email || ""}"`,
-      `"${c.address || ""}"`
-    ].join(","));
+  sortedClients.forEach(c => {
+    const dob = c.date_of_birth
+      ? new Date(c.date_of_birth).toLocaleDateString("en-GB") // DD/MM/YYYY
+      : "";
+
+    html += `
+      <tr>
+        <td>${c.full_name || ""}</td>
+        <td>${dob}</td>
+        <td>${calculateAge(c.date_of_birth)}</td>
+        <td>${c.gender || ""}</td>
+        <td>${c.citizenship || ""}</td>
+        <td style="mso-number-format:'\\@'">${c.ic_passport || ""}</td>
+        <td style="mso-number-format:'\\@'">${c.contact || ""}</td>
+        <td>${c.email || ""}</td>
+        <td>${c.address || ""}</td>
+      </tr>
+    `;
   });
 
-  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  html += "</table>";
+
+  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "clients.csv";
+  a.download = "clients.xls";
   a.click();
-  URL.revokeObjectURL(a.href);
 }
   
 /* ===== CLEAR FORM ===== */
