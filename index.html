@@ -82,24 +82,29 @@ body {
 
     /* APP */
 header{
-  background:#1f1f1f;
+  background:white;
+  border-bottom:1px solid #eee;
   padding:14px 16px;
   display:flex;
   gap:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
   align-items:center;
 }
 
 
 header button,
 .action{
-  background:orange;
-  border:none;
-  padding:10px 14px;
-  border-radius:16px;
-  font-weight:600;
-  cursor:pointer;
-  transition:0.2s;
+  background:#ff9800;
+  color:white;
+}
+header button{
+  background:none;
+  color:#555;
+}
+
+header button.active{
+  color:#ff9800;
+  border-bottom:3px solid #ff9800;
+  border-radius:0;
 }
 
 header button:hover,
@@ -115,11 +120,12 @@ header button:hover,
 }
 
 .card{
-  background:white;
+  background:#ffffff;
   padding:24px;
   border-radius:20px;
   margin-bottom:24px;
-  box-shadow:0 4px 16px rgba(0,0,0,.08);
+  box-shadow:0 6px 20px rgba(0,0,0,.06);
+  border:1px solid #f3f3f3;
 }
     
 .grid{
@@ -129,7 +135,11 @@ header button:hover,
   margin-bottom:10px;
 }
 
-
+h3{
+  font-size:20px;
+  margin-bottom:18px;
+}
+    
 input, select{
   padding:12px;
   border-radius:14px;
@@ -175,7 +185,7 @@ td{
 }
 
 tr:hover{
-  background:#fff8f0;
+  background:#fafafa;
 }
 
 
@@ -350,17 +360,17 @@ tr:hover{
     <!-- ✅ SUMMARY DASHBOARD -->
 <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin:15px 0;">
 
-  <div style="background:#fff3e0; padding:15px; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.08); transition:0.2s;">
+  <div style="background:#fff3e0; padding:15px; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.08); transition:0.2s;">
     <div style="font-size:14px; color:#666;">Amount</div>
     <div style="font-size:22px; font-weight:700;">RM <span id="sumAmount">0.00</span></div>
   </div>
 
-  <div style="background:#e3f2fd; padding:15px; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.08); transition:0.2s;">
+  <div style="background:#e3f2fd; padding:15px; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.08); transition:0.2s;">
     <div style="font-size:14px; color:#666;">SST</div>
     <div style="font-size:22px; font-weight:700;">RM <span id="sumSST">0.00</span></div>
   </div>
 
-  <div style="background:#e8f5e9; padding:15px; border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.08); transition:0.2s;">
+  <div style="background:#e8f5e9; padding:15px; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.08); transition:0.2s;">
     <div style="font-size:14px; color:#666;">Total</div>
     <div style="font-size:22px; font-weight:700;">RM <span id="sumTotal">0.00</span></div>
   </div>
