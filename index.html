@@ -352,12 +352,11 @@ th {
 <section id="practitionersTab" class="hidden">
   <div class="card">
     <h3>Practitioner</h3>
-    <input placeholder="Practitioner Name">
-    <button class="action" onclick="addPractitioner()">Add Practitioner</button>
-    <div>
-      <div id="practitionerList"></div>
-      <!-- practitioner list -->
-    </div>
+ <input placeholder="Practitioner Name" style="margin-bottom:10px;">
+<button class="action" onclick="addPractitioner()">Add Practitioner</button>
+  <div style="margin-top:15px;">
+  <div id="practitionerList"></div>
+</div>
   </div>
 </section>
 
@@ -952,7 +951,7 @@ name.textContent = p.name;
 div.appendChild(name);
 
 const delBtn = document.createElement("button");
-delBtn.textContent = "Delete";
+delBtn.textContent = "🗑";
 delBtn.className = "btn btn-delete";
 
 delBtn.onclick = async () => {
