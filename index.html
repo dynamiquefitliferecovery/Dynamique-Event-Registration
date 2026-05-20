@@ -233,6 +233,7 @@
       <input id="apptTime" type="time">
 
       <select id="apptClient"></select>
+      <input id="apptAge" placeholder="Age" readonly>
       <select id="apptPractitioner"></select>
       <select id="apptService"></select>
       <select id="apptPayment">
@@ -322,6 +323,7 @@ const apptPractitioner = document.getElementById("apptPractitioner");
 const apptService = document.getElementById("apptService");
 const apptPayment = document.getElementById("apptPayment");
 const apptRemarks = document.getElementById("apptRemarks");
+const apptAge = document.getElementById("apptAge"); // ✅ ADD THIS
 
 const apptAmount = document.getElementById("apptAmount");
 const apptSST = document.getElementById("apptSST");
@@ -812,6 +814,7 @@ function calculateCharges() {
     apptAmount.value = "0.00";
     apptSST.value = "0.00";
     apptTotal.value = "0.00";
+apptAge.value = ""; // ✅ ADD THIS
     return;
   }
 
