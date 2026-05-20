@@ -534,6 +534,11 @@ th {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
+  // ✅ GLOBAL STATE (MOVE HERE)
+let clients = [];
+let practitioners = [];
+  let services = [];
   
 document.querySelectorAll(".tabBtn").forEach(btn => {
   btn.addEventListener("click", function () {
@@ -584,9 +589,6 @@ window.sb = supabase.createClient(
 let editingClientId = null;
   let reportData = [];
 let editingAppointmentId = null;
-
-let services = [];
-
 
 async function loadServices() {
   const { data, error } = await sb
@@ -749,8 +751,6 @@ function formatContact(v = "") {
   
 /* ================= CLIENTS ================= */
 
-let clients = [];
-
 const clientName = document.getElementById("clientName");
 const clientDob = document.getElementById("clientDob");
 const clientGender = document.getElementById("clientGender");
@@ -860,7 +860,10 @@ async function deleteClient(id) {
 }
 
 /* ===== SAVE CLIENT (INSERT + UPDATE) ===== */
-saveClientBtn.addEventListener("click", saveClient);
+if (saveClientBtn) {
+  saveClientBtn.addEventListener("click", saveClient);
+}
+
 
 async function saveClient() {
   if (!clientName.value || !clientDob.value) {
@@ -971,8 +974,6 @@ function clearClientForm() {
 }
 
 /* ================= PRACTITIONERS ================= */
-
-let practitioners = [];
 
 async function addPractitioner() {
   const input = document.getElementById("practitionerInput");
@@ -1104,11 +1105,16 @@ apptCitizenship.value = "";
   apptTotal.value = (price + sst).toFixed(2);
 }
 
-apptService.addEventListener("change", calculateCharges);
-apptClient.addEventListener("change", () => {
-  calculateCharges();
-  updateSelectedClientInfo();
-});
+if (apptService) {
+  apptService.addEventListener("change", calculateCharges);
+}
+
+if (apptClient) {
+  apptClient.addEventListener("change", () => {
+    calculateCharges();
+    updateSelectedClientInfo();
+  });
+}
 
 
   function clearAppointmentForm() {
