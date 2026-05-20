@@ -432,19 +432,19 @@ th {
 
 <div class="grid">
 
-<!-- Date & Time -->
+<!-- Row 1 -->
 <input id="apptDate" type="date">
 <input id="apptTime" type="time">
 
-<!-- Client -->
+<!-- Row 2 -->
 <select id="apptClient"></select>
 <input id="apptCitizenship" placeholder="Citizenship" readonly>
 
-<!-- Service & Practitioner -->
+<!-- Row 3 -->
 <select id="apptService"></select>
 <select id="apptPractitioner"></select>
 
-<!-- Payment -->
+<!-- Row 4 -->
 <select id="apptPayment">
   <option value="">Select Payment</option>
   <option value="Cash">Cash</option>
@@ -452,15 +452,17 @@ th {
   <option value="Online">Online</option>
 </select>
 
-<!-- Charges -->
 <input id="apptAmount" placeholder="Amount (RM)" readonly>
+
+<!-- Row 5 -->
 <input id="apptSST" placeholder="SST (RM)" readonly>
 <input id="apptTotal" placeholder="Total (RM)" readonly>
 
-<!-- Remarks -->
-<input id="apptRemarks" placeholder="Remarks (optional)">
+<!-- Row 6 (FULL WIDTH) -->
+<input id="apptRemarks" placeholder="Remarks (optional)" style="grid-column: span 2;">
 
 </div>
+
     <button class="action" onclick="saveAppointment()">Save Appointment</button>
   </div>
 
