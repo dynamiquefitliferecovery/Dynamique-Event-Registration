@@ -70,33 +70,33 @@
 <div class="box">
   <h2>Client Registration</h2>
 
-  <input id="full_name" placeholder="Full Name">
+<input id="full_name" placeholder="Full Name">
 
-  <!-- ✅ DOB placeholder-style input -->
-  <input
-    id="date_of_birth"
-    type="text"
-    placeholder="Date of Birth"
-    onfocus="this.type='date'"
-    onblur="if(!this.value) this.type='text'"
-  >
+<select id="citizenship">
+  <option value="">Citizenship</option>
+  <option value="Malaysian">Malaysian</option>
+  <option value="Foreigner">Foreigner</option>
+</select>
 
-  <select id="gender">
-    <option value="">Gender</option>
-    <option>Male</option>
-    <option>Female</option>
-  </select>
+<input id="ic_passport" placeholder="IC / Passport" oninput="autoFillDOB()">
 
-  <select id="citizenship">
-    <option value="">Citizenship</option>
-    <option value="Malaysian">Malaysian</option>
-    <option value="Foreigner">Foreigner</option>
-  </select>
+<input
+  id="date_of_birth"
+  type="text"
+  placeholder="Date of Birth"
+  onfocus="this.type='date'"
+  onblur="if(!this.value) this.type='text'"
+>
 
-  <input id="ic_passport" placeholder="IC / Passport">
-  <input id="contact" placeholder="Contact Number">
-  <input id="email" placeholder="Email">
-  <input id="address" placeholder="Address (Optional)">
+<select id="gender">
+  <option value="">Gender</option>
+  <option>Male</option>
+  <option>Female</option>
+</select>
+
+<input id="contact" placeholder="Contact Number">
+<input id="email" placeholder="Email">
+<input id="address" placeholder="Address (Optional)">
 
   <button onclick="registerClient()">Register</button>
 
@@ -105,6 +105,53 @@
 
 <script>
   console.log("✅ Register page loaded");
+
+function autoFillDOB() {
+  const citizenship = document.getElementById("citizenship").value;
+  const ic = document.getElementById("ic_passport").value.replace(/\D/g, "");
+  const dobInput = document.getElementById("date_of_birth");
+  const genderSelect = document.getElementById("gender");
+
+  // Only apply for Malaysian
+  if (citizenship !== "Malaysian") return;
+
+  // Must have at least 12 digits IC
+  if (ic.length < 12) return;
+
+  // ✅ ---------- DOB PART ----------
+  const icPart = ic.substring(0, 6);
+
+  let yy = icPart.substring(0, 2);
+  let mm = icPart.substring(2, 4);
+  let dd = icPart.substring(4, 6);
+
+  let yearNum = parseInt(yy, 10);
+  let year = yearNum <= 24 ? 2000 + yearNum : 1900 + yearNum;
+
+  // ❌ Reject future year (e.g. 2026)
+  const currentYear = new Date().getFullYear();
+  if (year > currentYear) {
+    document.getElementById("msg").style.color = "red";
+    document.getElementById("msg").textContent = "Invalid IC: Year cannot be in the future";
+    return;
+  }
+
+  // Format DOB
+  const formatted = `${year}-${mm}-${dd}`;
+  dobInput.type = "date";
+  dobInput.value = formatted;
+
+  // ✅ ---------- GENDER PART ----------
+  const lastDigit = parseInt(ic.charAt(ic.length - 1));
+
+  if (!isNaN(lastDigit)) {
+    if (lastDigit % 2 === 0) {
+      genderSelect.value = "Female";
+    } else {
+      genderSelect.value = "Male";
+    }
+  }
+}
 
   const sb = supabase.createClient(
     "https://fmwdizyexroiezezitly.supabase.co",
