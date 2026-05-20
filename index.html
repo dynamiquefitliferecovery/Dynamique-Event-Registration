@@ -376,7 +376,7 @@ th {
         <tr>
           <th>Name</th>
           <th>DOB</th>
-          <th>Age</th>
+          <th>Citizenship</th>
           <th>Gender</th>
           <th>Citizenship</th>
           <th>IC</th>
@@ -427,7 +427,7 @@ th {
 <select id="apptClient"></select>
 <select id="apptService"></select>     <!-- ✅ moved here -->
 
-<input id="apptAge" readonly>          <!-- ✅ moved down -->
+<input id="apptCitizenship" placeholder="Citizenship" readonly>     <!-- ✅ moved down -->
 <select id="apptPractitioner"></select>
 
       <select id="apptPayment">
@@ -554,7 +554,8 @@ const apptPractitioner = document.getElementById("apptPractitioner");
 const apptService = document.getElementById("apptService");
 const apptPayment = document.getElementById("apptPayment");
 const apptRemarks = document.getElementById("apptRemarks");
-const apptAge = document.getElementById("apptAge"); // ✅ ADD THIS
+const apptCitizenship = document.getElementById("apptCitizenship");
+
 
 const apptAmount = document.getElementById("apptAmount");
 const apptSST = document.getElementById("apptSST");
@@ -1087,7 +1088,7 @@ function calculateCharges() {
     apptAmount.value = "0.00";
     apptSST.value = "0.00";
     apptTotal.value = "0.00";
-apptAge.value = ""; // ✅ ADD THIS
+apptCitizenship.value = "";
     return;
   }
 
@@ -1139,7 +1140,7 @@ async function loadAppointments() {
       payment_method,
       remarks,
       service:services(name),
-      client:clients(full_name, date_of_birth),
+      client:clients(full_name, citizenship),
       service_id,
       client_id,
       practitioner_id
@@ -1179,8 +1180,8 @@ async function loadAppointments() {
 // Client
 tr.appendChild(td(a.client?.full_name || ""));
 
-// ✅ Age
-tr.appendChild(td(calculateAge(a.client?.date_of_birth)));
+// Citizenship
+tr.appendChild(td(a.client?.citizenship || ""));
 
 
     // ✅ Service (NO r ANYWHERE)
@@ -1330,13 +1331,14 @@ async function deleteAppointment(id) {
   loadAppointments();
 }
 
-  function updateSelectedClientAge() {
+function updateSelectedClientAge() {
   const c = clients.find(x => x.id == apptClient.value);
 
-  apptAge.value = c
-    ? calculateAge(c.date_of_birth)
+  apptCitizenship.value = c
+    ? c.citizenship
     : "";
 }
+
 
 /* ================= REPORT ================= */
 async function loadReport() {
