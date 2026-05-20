@@ -88,11 +88,12 @@ header {
 header button {
   border: none;
   background: #f5f5f5;
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-radius: 12px;
   color: #555;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 17px;
   transition: 0.2s;
 
   touch-action: manipulation;   /* ✅ ADD THIS LINE */
@@ -171,13 +172,16 @@ input:focus, select:focus{
   border-color:#ff9800;
   box-shadow:0 0 0 2px rgba(255,152,0,.2);
 }
+
 .action {
-  background:#ffe0b2;    /* ✅ light orange */
+  background:#ffe0b2;
   color:#e65100;
-  padding:8px 14px;      /* ✅ smaller height */
+  padding:8px 14px;
   font-weight:600;
   border-radius:12px;
+  border:none;          /* ✅ REMOVE OUTLINE */
 }
+
 
 
 .action:hover{
@@ -240,20 +244,20 @@ th:last-child {
 
 /* ================= CLIENT TABLE ================= */
 
-#clientsTab th:nth-child(1) { width: 16%; } /* Name */
+#clientsTab th:nth-child(1) { width: 18%; } /* Name */
 #clientsTab th:nth-child(2) { width: 10%; } /* DOB */
 #clientsTab th:nth-child(3) { width: 6%; }  /* Age */
 #clientsTab th:nth-child(4) { width: 8%; }  /* Gender */
 #clientsTab th:nth-child(5) { width: 10%; } /* Citizenship */
-#clientsTab th:nth-child(6) { width: 14%; } /* IC */
-#clientsTab th:nth-child(7) { width: 12%; } /* Contact */
+#clientsTab th:nth-child(6) { width: 16%; } /* IC */
+#clientsTab th:nth-child(7) { width: 14%; } /* Contact */
 
 
 /* ================= APPOINTMENT TABLE ================= */
 
 #appointmentsTab th:nth-child(1) { width: 9%; } /* Date */
-#appointmentsTab th:nth-child(2) { width: 14%; } /* Client */
-#appointmentsTab th:nth-child(3) { width: 10%; } /* Citizenship */
+#appointmentsTab th:nth-child(2) { width: 12%; } /* Client */
+#appointmentsTab th:nth-child(3) { width: 9%; } /* Citizenship */
 #appointmentsTab th:nth-child(4) { width: 10%; } /* Service */
 #appointmentsTab th:nth-child(5) { width: 7%; }  /* Amount */
 #appointmentsTab th:nth-child(6) { width: 7%; }  /* SST */
