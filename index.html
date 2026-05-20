@@ -199,6 +199,8 @@ table {
 
 .table-wrapper {
   overflow-x: auto;
+  max-height: 400px;     /* ✅ limit height */
+  overflow-y: auto;      /* ✅ vertical scroll */
 }
 
 th{
@@ -220,7 +222,16 @@ th:last-child {
 td{
   padding:14px;
   border-bottom:1px solid #f0f0f0;
+    white-space: nowrap;
 }
+
+    td:last-child, th:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  z-index: 2;
+}
+
 
 tr:hover {
   background:#fff8f0;
@@ -344,7 +355,10 @@ th {
   <!-- FORM CARD -->
   <div class="card">
     <h3>Client</h3>
-
+<div style="margin-bottom:15px; display:flex; gap:10px;">
+  <button class="action" onclick="loadClients()">🔄 Refresh</button>
+  <button class="action" onclick="exportClients()">📥 Export</button>
+</div>
 
 <!-- TABLE -->
 
