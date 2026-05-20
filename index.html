@@ -186,6 +186,7 @@
     </div>
 
     <button class="action" id="saveClientBtn">Save Client</button>
+    <button class="action" onclick="exportClients()">Export Clients</button>
   </div>
 
   <div class="card">
@@ -258,6 +259,7 @@
   <tr>
     <th>Date</th>
     <th>Client</th>
+    <th>Age</th>
     <th>Service</th>
     <th>Amount</th>
     <th>SST</th>
@@ -672,6 +674,43 @@ async function saveClient() {
   loadClients();
 }
 
+  /* =====EXPORT CLIENTS ===== */
+function exportClients() {
+  if (!clients.length) {
+    alert("No clients to export");
+    return;
+  }
+
+  const rows = [
+    "Name,DOB,Age,Gender,Citizenship,IC,Contact,Email,Address"
+  ];
+
+const sortedClients = [...clients].sort((a, b) =>
+  a.full_name.localeCompare(b.full_name)
+);
+
+sortedClients.forEach(c => {
+    rows.push([
+      `"${c.full_name}"`,
+      c.date_of_birth,
+      calculateAge(c.date_of_birth),
+      c.gender,
+      c.citizenship,
+      c.ic_passport || "",
+      c.contact || "",
+      `"${c.email || ""}"`,
+      `"${c.address || ""}"`
+    ].join(","));
+  });
+
+  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "clients.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+  
 /* ===== CLEAR FORM ===== */
 function clearClientForm() {
   clientName.value = "";
@@ -742,13 +781,19 @@ async function loadPractitioners() {
 function fillAppointmentDropdowns() {
     console.log("Clients loaded:", clients);
   // Clients
-  apptClient.innerHTML = '<option value="">Select Client</option>';
-  clients.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.id;
-    opt.textContent = c.full_name;
-    apptClient.appendChild(opt);
-  });
+apptClient.innerHTML = '<option value="">Select Client</option>';
+
+// ✅ SORT CLIENTS A → Z
+const sortedClients = [...clients].sort((a, b) =>
+  (a.full_name || "").localeCompare(b.full_name || "")
+);
+
+sortedClients.forEach(c => {
+  const opt = document.createElement("option");
+  opt.value = c.id;
+  opt.textContent = c.full_name;
+  apptClient.appendChild(opt);
+});
 
   // Practitioners
   apptPractitioner.innerHTML = '<option value="">Select Practitioner</option>';
@@ -785,7 +830,11 @@ function calculateCharges() {
 }
 
 apptService.addEventListener("change", calculateCharges);
-apptClient.addEventListener("change", calculateCharges);
+apptClient.addEventListener("change", () => {
+  calculateCharges();
+  updateSelectedClientAge();
+});
+
 
   function clearAppointmentForm() {
   setAppointmentDefaults();
@@ -814,7 +863,7 @@ async function loadAppointments() {
       payment_method,
       remarks,
       service:services(name),
-      client:clients(full_name),
+      client:clients(full_name, date_of_birth),
       service_id,
       client_id,
       practitioner_id
@@ -851,8 +900,12 @@ async function loadAppointments() {
       )
     );
 
-    // Client
-    tr.appendChild(td(a.client?.full_name || ""));
+// Client
+tr.appendChild(td(a.client?.full_name || ""));
+
+// ✅ Age
+tr.appendChild(td(calculateAge(a.client?.date_of_birth)));
+
 
     // ✅ Service (NO r ANYWHERE)
     tr.appendChild(td(a.service?.name || ""));
@@ -996,6 +1049,13 @@ async function deleteAppointment(id) {
   loadAppointments();
 }
 
+  function updateSelectedClientAge() {
+  const c = clients.find(x => x.id == apptClient.value);
+
+  apptAge.value = c
+    ? calculateAge(c.date_of_birth)
+    : "";
+}
 
 /* ================= REPORT ================= */
 async function loadReport() {
