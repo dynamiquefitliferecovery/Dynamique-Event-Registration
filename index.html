@@ -219,26 +219,25 @@ tr:hover{
   transition:0.2s;
 }
 
-/* EDIT */
-.btn-edit{
-  background:#f5f5f5;
-  color:#333;
+.btn {
+  padding:6px 8px;
+  border-radius:8px;
+  font-size:14px;
 }
 
-.btn-edit:hover{
-  background:#e0e0e0;
+.btn-edit {
+  background: #fff;
+  border: 1px solid #ddd;
 }
 
-/* DELETE */
-.btn-delete{
-  background:#ffeaea;
-  color:#d32f2f;
+.btn-delete {
+  background: #fff;
+  border: 1px solid #f5c2c2;
 }
 
-.btn-delete:hover{
-  background:#ffcdd2;
+.btn:hover {
+  transform: scale(1.05);
 }
-
 
 button:active{
   transform:scale(0.97);
@@ -254,6 +253,18 @@ button:active{
       font-size:18px;
       margin-top:10px;
     }
+
+    
+th {
+  background: #fff3e0; /* ✅ light orange */
+  color: #e65100;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+    
   </style>
 
 
@@ -276,10 +287,10 @@ button:active{
 <div id="appView" class="hidden">
 
 <header>
-  <button onclick="tab('clientsTab')">Clients</button>
-<button onclick="tab('practitionersTab')">Practitioners</button>
-<button onclick="tab('appointmentsTab')">Appointments</button>
-<button onclick="tab('reportsTab')">Sales Report</button>
+<button onclick="tab(event,'clientsTab')">Clients</button>
+<button onclick="tab(event,'practitionersTab')">Practitioners</button>
+<button onclick="tab(event,'appointmentsTab')">Appointments</button>
+<button onclick="tab(event,'reportsTab')">Sales Report</button>
 <button onclick="logout()">Logout</button>
 </header>
 
@@ -620,16 +631,18 @@ window.logout = async function () {
 
 
 /* ================= TABS ================= */
-function tab(id) {
-  document.querySelectorAll("section").forEach(s => {
-    s.classList.add("hidden");
-  });
+function tab(e, id) {
+  document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+  document.querySelectorAll("header button").forEach(b => b.classList.remove("active"));
 
-  document.querySelectorAll("header button").forEach(b => {
-  b.classList.remove("active");
-});
+  e.currentTarget.classList.add("active");
 
-event.target.classList.add("active");
+  document.getElementById(id).classList.remove("hidden");
+
+  if (id === "appointmentsTab") {
+    fillAppointmentDropdowns();
+  }
+}
 
   const target = document.getElementById(id);
   if (!target) {
@@ -738,12 +751,12 @@ const wrapper = document.createElement("div");
 wrapper.className = "action-group";
 
 const editBtn = document.createElement("button");
-editBtn.textContent = "Edit";
+editBtn.textContent = "✏️";
 editBtn.className = "btn btn-edit";
 editBtn.onclick = () => editClient(c.id);
 
 const delBtn = document.createElement("button");
-delBtn.textContent = "Delete";
+delBtn.textContent = "🗑";
 delBtn.className = "btn btn-delete";
 delBtn.onclick = () => deleteClient(c.id);
 
@@ -930,8 +943,20 @@ async function loadPractitioners() {
   list.innerHTML = "";
 
   practitioners.forEach(p => {
-    const div = document.createElement("div");
-    div.textContent = p.name + " ";
+const div = document.createElement("div");
+div.style.display = "flex";
+div.style.justifyContent = "space-between";
+div.style.alignItems = "center";
+div.style.padding = "10px";
+div.style.border = "1px solid #eee";
+div.style.borderRadius = "12px";
+div.style.marginBottom = "8px";
+div.style.background = "#fafafa";
+
+const name = document.createElement("span");
+name.textContent = p.name;
+
+div.appendChild(name);
 
 const delBtn = document.createElement("button");
 delBtn.textContent = "Delete";
@@ -1101,22 +1126,17 @@ tr.appendChild(td(calculateAge(a.client?.date_of_birth)));
     // Actions
     const actionTd = document.createElement("td");
 
-  
-    edit.onclick = () => editAppointment(a.id);
-
-    del.style.marginLeft = "8px";
-    del.onclick = () => deleteAppointment(a.id);
 
     const wrapper = document.createElement("div");
 wrapper.className = "action-group";
 
 const editBtn = document.createElement("button");
-editBtn.textContent = "Edit";
+editBtn.textContent = "✏️";
 editBtn.className = "btn btn-edit";
 editBtn.onclick = () => editAppointment(a.id);
 
 const delBtn = document.createElement("button");
-delBtn.textContent = "Delete";
+delBtn.textContent = "🗑";
 delBtn.className = "btn btn-delete";
 delBtn.onclick = () => deleteAppointment(a.id);
 
@@ -1128,8 +1148,9 @@ actionTd.appendChild(wrapper);
     tr.appendChild(td(a.remarks || ""));
 
     apptTable.appendChild(tr);
-  });
-}
+ }); // end forEach
+
+} // ✅ CLOSE loadAppointments ✅
 
  async function editAppointment(id) {
   const { data, error } = await sb
@@ -1386,7 +1407,7 @@ async function loadAll() {
 document.addEventListener("DOMContentLoaded", async () => {
   await loadAppointments();
 });
-}
+
 </script>
 
     
