@@ -115,9 +115,9 @@ header button.active {
 
 .container{
   padding:30px;
-  max-width:1300px;   /* ✅ wider = better balance */
-  margin:auto;
+  max-width:1500px;   /* ✅ wider */
 }
+
 
 
 .card {
@@ -195,6 +195,7 @@ table {
   border-collapse:collapse;
   margin-top:10px;
   border-radius:12px;
+  min-width: 1000px;
 }
 
 .table-wrapper {
@@ -230,6 +231,9 @@ td{
   right: 0;
   background: #fff;
   z-index: 2;
+  min-width: 100px;   /* ✅ give space for buttons */
+  text-align: center;
+
 }
 
 
@@ -238,6 +242,11 @@ tr:hover {
   cursor:pointer;
 }
 
+th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
 
 .edit{
   color:#fb8c00;
@@ -356,9 +365,11 @@ th {
   <div class="card">
     <h3>Client</h3>
 <div style="margin-bottom:15px; display:flex; gap:10px;">
+  <button class="action" onclick="showAddClient()">➕ Create Client</button>
   <button class="action" onclick="loadClients()">🔄 Refresh</button>
   <button class="action" onclick="exportClients()">📥 Export</button>
 </div>
+
 
 <!-- TABLE -->
 
@@ -1505,6 +1516,30 @@ async function loadAll() {
 
 
 });
+
+  window.showAddClient = async function () {
+  const name = prompt("Enter client name");
+  if (!name) return;
+
+  const dob = prompt("Enter DOB (YYYY-MM-DD)");
+  if (!dob) return;
+
+  const { error } = await sb.from("clients").insert({
+    full_name: name,
+    date_of_birth: dob,
+    gender: "Male",
+    citizenship: "Malaysian"
+  });
+
+  if (error) {
+    alert("Failed to add client");
+    console.error(error);
+    return;
+  }
+
+  loadClients();
+};
+
 </script>
 
 
