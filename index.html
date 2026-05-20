@@ -300,8 +300,10 @@
 
 </div>
 
-    <input type="date" id="reportFrom">
-    <input type="date" id="reportTo">
+<div style="display:flex; gap:10px; margin-bottom:10px;">
+  <input type="date" id="reportFrom">
+  <input type="date" id="reportTo">
+</div>
 
     <button class="action" onclick="loadReport()">Generate</button>
     <button class="action" onclick="exportReportExcel()">Export Excel</button>
@@ -324,7 +326,6 @@
       <tbody id="reportTable"></tbody>
     </table>
 
-    <p class="total">Total: RM 0.00</p>
   </div>
 </section>
 
