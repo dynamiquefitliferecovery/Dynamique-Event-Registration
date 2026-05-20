@@ -276,7 +276,23 @@ th:last-child {
 #reportsTab th:nth-child(9) { width: 10%; }
 #reportsTab th:nth-child(10) { width: 11%; }
 
+/* Default center */
+td, th {
+  text-align: center;
+}
 
+/* Numbers right (keep neat) */
+#appointmentsTab td:nth-child(5),
+#appointmentsTab td:nth-child(6),
+#appointmentsTab td:nth-child(7),
+#reportsTab td:nth-child(6),
+#reportsTab td:nth-child(7),
+#reportsTab td:nth-child(8) {
+  text-align: right;
+}
+
+
+    
 td {
   padding:6px 8px;   /* ✅ tighter vertical, balanced horizontal */
   font-size:16px;
@@ -1632,6 +1648,8 @@ async function loadAll() {
 // ✅ KEEP THIS LAST
 });
 
+
+  
 </script>
 
 
