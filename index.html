@@ -287,16 +287,19 @@ th:last-child {
 /* Default center */
 
 /* default left */
+/* Default left (for client readability) */
 td, th {
   text-align: left;
 }
 
-/* center only appointment + sales */
-
-#appointmentsTab td, #appointmentsTab th,
-#reportsTab td, #reportsTab th {
+/* Center everything except text-heavy columns */
+#appointmentsTab td:not(:nth-child(2)):not(:nth-child(10)),
+#appointmentsTab th:not(:nth-child(2)):not(:nth-child(10)),
+#reportsTab td:not(:nth-child(2)):not(:nth-child(10)),
+#reportsTab th:not(:nth-child(2)):not(:nth-child(10)) {
   text-align: center;
 }
+
 
 
 /* Numbers right (keep neat) */
@@ -307,12 +310,6 @@ td, th {
 #reportsTab td:nth-child(7),
 #reportsTab td:nth-child(8) {
   text-align: right;
-}
-
-#appointmentsTab td:nth-child(2) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 #clientsTab td:nth-child(1),
@@ -438,7 +435,12 @@ th {
 
 #appointmentsTab td:nth-child(10),
 #reportsTab td:nth-child(10) {
-  background: transparent;   /* ✅ no highlight */
+   background: #fff3e0;
+}
+
+    #clientsTab td:nth-child(1) {
+  white-space: normal;        /* ✅ allow wrapping */
+  word-break: break-word;     /* ✅ break long names */
 }
     
   </style>
