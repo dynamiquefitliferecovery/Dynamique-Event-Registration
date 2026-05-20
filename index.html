@@ -706,7 +706,7 @@ function tab(el, id) {
 
 if (id === "appointmentsTab") {
   fillAppointmentDropdowns();
-  setAppointmentDefaults(); // ✅ ADD THIS LINE
+  clearAppointmentForm();  // ✅ USE THIS INSTEAD
   loadAppointments();
 }
 
