@@ -290,10 +290,10 @@ th {
 <div id="appView" class="hidden">
 
 <header>
-<button onclick="tab(event,'clientsTab')">Clients</button>
-<button onclick="tab(event,'practitionersTab')">Practitioners</button>
-<button onclick="tab(event,'appointmentsTab')">Appointments</button>
-<button onclick="tab(event,'reportsTab')">Sales Report</button>
+<button onclick="tab(this,'clientsTab')">Clients</button>
+<button onclick="tab(this,'practitionersTab')">Practitioners</button>
+<button onclick="tab(this,'appointmentsTab')">Appointments</button>
+<button onclick="tab(this,'reportsTab')">Sales Report</button>
 <button onclick="logout()">Logout</button>
 </header>
 
@@ -634,21 +634,19 @@ window.logout = async function () {
 
 
 /* ================= TABS ================= */
-function tab(e, id) {
+function tab(el, id) {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
   document.querySelectorAll("header button").forEach(b => b.classList.remove("active"));
 
-  e.currentTarget.classList.add("active");
+  el.classList.add("active");
 
-  const target = document.getElementById(id);
-  if (!target) return;
-
-  target.classList.remove("hidden");
+  document.getElementById(id).classList.remove("hidden");
 
   if (id === "appointmentsTab") {
     fillAppointmentDropdowns();
   }
 }
+
 
 
 
