@@ -714,10 +714,12 @@ function tab(el, id) {
 
   document.getElementById(id).classList.remove("hidden");
 
-if (id === "appointmentsTab") {
-  fillAppointmentDropdowns();
-  loadAppointments();   // ✅ ADD THIS LINE
-}
+  if (id === "appointmentsTab") {
+    fillAppointmentDropdowns();
+    loadAppointments();
+  }
+
+} // ✅ ADD THIS LINE
 
 
 /* ================= FORMATTERS ================= */
