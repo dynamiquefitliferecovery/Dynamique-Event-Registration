@@ -231,7 +231,7 @@ table {
 
 th {
   padding:6px 8px;
-  font-size:14px;
+  font-size:15px;
   white-space: nowrap;   /* ✅ prevent wrapping */
 }
 
@@ -244,16 +244,14 @@ th:last-child {
   border-top-right-radius:12px;
 }
     
-#clientsTab th:last-child {
-  background: #fff3e0;
-}
+
 
 /* ================= CLIENT TABLE ================= */
 
-#clientsTab th:nth-child(1) { width: 10%; } /* Name */
-#clientsTab th:nth-child(2) { width: 10%; } /* DOB */
-#clientsTab th:nth-child(3) { width: 6%; }  /* Age */
-#clientsTab th:nth-child(4) { width: 8%; }  /* Gender */
+#clientsTab th:nth-child(1) { width: 14%; } /* Name */
+#clientsTab th:nth-child(2) { width: 12%; } /* DOB */
+#clientsTab th:nth-child(3) { width: 8%; }  /* Age */
+#clientsTab th:nth-child(4) { width: 10%; }  /* Gender */
 #clientsTab th:nth-child(5) { width: 12%; } /* Citizenship */
 #clientsTab th:nth-child(6) { width: 18%; } /* IC */
 #clientsTab th:nth-child(7) { width: 16%; } /* Contact */
@@ -294,9 +292,11 @@ td, th {
 }
 
 /* center only appointment + sales */
+
 #appointmentsTab td, #appointmentsTab th,
 #reportsTab td, #reportsTab th {
-  text-align: center
+  text-align: center;
+}
 
 
 /* Numbers right (keep neat) */
@@ -324,7 +324,7 @@ td, th {
     
 td {
   padding:6px 8px;   /* ✅ tighter vertical, balanced horizontal */
-  font-size:14px;
+  font-size:15px;
   line-height:1.4;
 }
 
@@ -385,15 +385,17 @@ th {
   font-size:14px;
 }
 
+
 .btn-edit {
   background: #fff;
-  border: 1px solid #ddd;
+  border: none;   /* ✅ remove */
 }
 
 .btn-delete {
   background: #fff;
-  border: 1px solid #f5c2c2;
+  border: none;   /* ✅ remove */
 }
+
 
 .btn:hover {
   transform: scale(1.05);
@@ -434,12 +436,10 @@ th {
 }
 
 
-
-#appointmentsTab th:nth-child(10),#appointmentsTab th:nth-child((10) {
-  background: #fff3e0;   /* ✅ same as others */
+#appointmentsTab td:nth-child(10),
+#reportsTab td:nth-child(10) {
+  background: transparent;   /* ✅ no highlight */
 }
-
-
     
   </style>
 
@@ -649,17 +649,17 @@ th {
     <!-- SUMMARY -->
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin:15px 0;">
       <div style="background:#fff3e0; padding:15px; border-radius:16px;">
-        <div style="font-size:14px; color:#666;">Amount</div>
+        <div style="font-size:15px; color:#666;">Amount</div>
         <div style="font-size:22px; font-weight:700;">RM <span id="sumAmount">0.00</span></div>
       </div>
 
       <div style="background:#e3f2fd; padding:15px; border-radius:16px;">
-        <div style="font-size:14px; color:#666;">SST</div>
+        <div style="font-size:15px; color:#666;">SST</div>
         <div style="font-size:22px; font-weight:700;">RM <span id="sumSST">0.00</span></div>
       </div>
 
       <div style="background:#e8f5e9; padding:15px; border-radius:16px;">
-        <div style="font-size:14px; color:#666;">Total</div>
+        <div style="font-size:15px; color:#666;">Total</div>
         <div style="font-size:22px; font-weight:700;">RM <span id="sumTotal">0.00</span></div>
       </div>
     </div>
