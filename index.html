@@ -710,9 +710,10 @@ window.logout = async function () {
 
 
 /* ================= TABS ================= */
-function tab(el, id) {
+window.tab = function (el, id) {
   document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
-  document.querySelectorAll("header button").forEach(b => b.classList.remove("active"));
+document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
+
 
   el.classList.add("active");
 
