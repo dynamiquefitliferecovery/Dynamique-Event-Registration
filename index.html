@@ -648,18 +648,6 @@ function tab(e, id) {
 }
 
 
-  const target = document.getElementById(id);
-  if (!target) {
-    console.error("Tab not found:", id);
-    return;
-  }
-
-  target.classList.remove("hidden");
-
-  if (id === "appointmentsTab") {
-    fillAppointmentDropdowns();
-  }
-}
 
 /* ================= FORMATTERS ================= */
 
