@@ -7,11 +7,24 @@
   <!-- Supabase JS (logic will come later) -->
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
+
+    
+* {
+  box-sizing: border-box;
+}
+
+header button.active{
+  background:#ffb74d;
+  color:black;
+}
+    
+body {
   margin: 0;
   font-family: Segoe UI;
   background: #f4f6f8;
+  -webkit-font-smoothing:antialiased;
 }
+
 
 .hidden {
   display: none;
@@ -50,15 +63,22 @@
       border-radius:14px;
       border:1px solid #ddd;
     }
-    .login-box button{
-      width:100%;
-      padding:12px;
-      border:none;
-      border-radius:16px;
-      background:orange;
-      font-weight:600;
-      cursor:pointer;
-    }
+.login-box button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:16px;
+  background:orange;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.login-box button:hover{
+  background:#fb8c00;
+  transform:translateY(-1px);
+}
+
 
     /* APP */
 header{
@@ -67,7 +87,9 @@ header{
   display:flex;
   gap:10px;
   box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  align-items:center;
 }
+
 
 header button,
 .action{
@@ -86,8 +108,11 @@ header button:hover,
   transform:translateY(-1px);
   box-shadow:0 3px 8px rgba(0,0,0,.15);
 }
-
-    .container{padding:20px}
+.container{
+  padding:20px;
+  max-width:1100px;
+  margin:auto;
+}
 
 .card{
   background:white;
@@ -96,12 +121,14 @@ header button:hover,
   margin-bottom:24px;
   box-shadow:0 4px 16px rgba(0,0,0,.08);
 }
+    
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  margin-bottom:10px;
+}
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-    }
 
 input, select{
   padding:12px;
@@ -117,12 +144,6 @@ input:focus, select:focus{
   box-shadow:0 0 0 2px rgba(255,152,0,.2);
 }
 
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:10px;
-    }
 
 table{
   width:100%;
@@ -140,6 +161,14 @@ th{
   text-align:left;
 }
 
+  th:first-child {
+  border-top-left-radius:12px;
+}
+
+th:last-child {
+  border-top-right-radius:12px;
+}
+    
 td{
   padding:12px;
   border-bottom:1px solid #f0f0f0;
@@ -149,20 +178,18 @@ tr:hover{
   background:#fff8f0;
 }
 
-    .action{
-      background:orange;
-      border:none;
-      padding:12px;
-      border-radius:16px;
-      font-weight:600;
-      cursor:pointer;
-    }
 
-    .edit{
-      color:orange;
-      cursor:pointer;
-      font-weight:600;
-    }
+.edit{
+  color:#fb8c00;
+  cursor:pointer;
+  font-weight:600;
+  transition:0.2s;
+}
+
+.edit:hover{
+  text-decoration:underline;
+  opacity:0.8;
+}
 
     .total{
       font-weight:700;
@@ -170,6 +197,8 @@ tr:hover{
       margin-top:10px;
     }
   </style>
+
+
 </head>
 
 <body>
@@ -537,6 +566,12 @@ function tab(id) {
   document.querySelectorAll("section").forEach(s => {
     s.classList.add("hidden");
   });
+
+  document.querySelectorAll("header button").forEach(b => {
+  b.classList.remove("active");
+});
+
+event.target.classList.add("active");
 
   const target = document.getElementById(id);
   if (!target) {
