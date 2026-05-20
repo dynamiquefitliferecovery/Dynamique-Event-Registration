@@ -125,9 +125,6 @@ header button.active {
   box-shadow:0 10px 30px rgba(0,0,0,.08);
   border:1px solid #f3f3f3;
   transition:0.2s;
-}
-
-.card {
   margin-left: auto;
   margin-right: auto;
   max-width: 1100px;
@@ -311,18 +308,15 @@ th {
 
 <!-- ================= APP ================= -->
 <div id="appView" class="hidden">
-<header style="display:flex; flex-direction:column; align-items:center; padding:20px;">
+<header style="display:flex; align-items:center; padding:15px 25px;">
 
-<div style="display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
-  
+  <!-- LEFT (Company name) -->
   <div style="font-weight:700; font-size:18px;">
     Dynamique Sports Rehab Centre
   </div>
 
-</div>
-
-
-  <div style="display:flex; gap:10px;">
+  <!-- RIGHT (Tabs) -->
+  <div style="margin-left:auto; display:flex; gap:10px;">
     <button onclick="tab(this,'clientsTab')">Clients</button>
     <button onclick="tab(this,'practitionersTab')">Practitioners</button>
     <button onclick="tab(this,'appointmentsTab')">Appointments</button>
@@ -368,15 +362,30 @@ th {
     </div>
   </div>
 
-  <!-- TABLE CARD -->
-  <div class="card">
-    <table>
-      ...
-    </table>
-  </div>
+ <!-- TABLE CARD -->
+<div class="card">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>DOB</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Citizenship</th>
+        <th>IC</th>
+        <th>Contact</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="clientsTable"></tbody>
+  </table>
+
+</div>   <!-- ✅ THIS WAS MISSING -->
 
 </section>
-
 
 <!-- ===== PRACTITIONERS ===== -->
 <section id="practitionersTab" class="hidden">
