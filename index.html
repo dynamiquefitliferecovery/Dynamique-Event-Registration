@@ -121,7 +121,7 @@ header button.active {
   background:#ffffff;
   padding:24px;
   border-radius:20px;
-  margin-bottom:24px;
+  margin-bottom:20px;
   box-shadow:0 10px 30px rgba(0,0,0,.08);
   border:1px solid #f3f3f3;
   transition:0.2s;
@@ -422,6 +422,7 @@ th {
 <!-- ===== APPOINTMENTS ===== -->
 <section id="appointmentsTab" class="hidden">
 
+  <!-- FORM CARD -->
   <div class="card">
     <h3>Appointment</h3>
 
@@ -433,14 +434,13 @@ th {
       <input id="apptAge" placeholder="Age" readonly>
       <select id="apptPractitioner"></select>
       <select id="apptService"></select>
+
       <select id="apptPayment">
-  <option value="">Select Payment</option>
-  <option value="Cash">Cash</option>
-  <option value="Card">Card</option>
-  <option value="Online">Online</option>
-</select>
-
-
+        <option value="">Select Payment</option>
+        <option value="Cash">Cash</option>
+        <option value="Card">Card</option>
+        <option value="Online">Online</option>
+      </select>
 
       <input id="apptAmount" placeholder="Amount (RM)" readonly>
       <input id="apptSST" placeholder="SST (RM)" readonly>
@@ -451,32 +451,36 @@ th {
     <button class="action" onclick="saveAppointment()">Save Appointment</button>
   </div>
 
- 
-<div class="table-wrapper">
-  <table>
-      <thead>
-  <tr>
-    <th>Date</th>
-    <th>Client</th>
-    <th>Age</th>
-    <th>Service</th>
-    <th>Amount</th>
-    <th>SST</th>
-    <th>Total</th>
-    <th>Payment</th>
-    <th>Action</th>
-    <th>Remarks</th>
-  </tr>
-</thead>
-     <tbody id="apptTable">
-  <tr>
-    <td colspan="10" style="text-align:center; color:#888; padding:20px;">
-      No appointments yet
-    </td>
-  </tr>
-</tbody>
+  <!-- ✅ TABLE CARD (MATCH WIDTH) -->
+  <div class="card">
 
-    </table>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Age</th>
+            <th>Service</th>
+            <th>Amount</th>
+            <th>SST</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Action</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+
+        <tbody id="apptTable">
+          <tr>
+            <td colspan="10" style="text-align:center; color:#888; padding:20px;">
+              Loading appointments...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 
 </section>
