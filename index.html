@@ -313,15 +313,14 @@ th {
 <div id="appView" class="hidden">
 <header style="display:flex; flex-direction:column; align-items:center; padding:20px;">
 
-  <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-    
-    <img src="logo.jpeg" style="height:45px;">
-
-    <div style="font-weight:700; font-size:18px;">
-      Dynamique Sports Rehab Centre
-    </div>
-
+<div style="display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+  
+  <div style="font-weight:700; font-size:18px;">
+    Dynamique Sports Rehab Centre
   </div>
+
+</div>
+
 
   <div style="display:flex; gap:10px;">
     <button onclick="tab(this,'clientsTab')">Clients</button>
@@ -346,7 +345,21 @@ th {
 <div class="grid">
   <input id="clientName" placeholder="Full Name">
   <input id="clientDob" type="date">
-  ...
+
+  <select id="clientGender">
+    <option>Male</option>
+    <option>Female</option>
+  </select>
+
+  <select id="clientCitizenship">
+    <option value="Malaysian">Malaysian</option>
+    <option value="Foreigner">Foreigner</option>
+  </select>
+
+  <input id="clientIc" placeholder="IC">
+  <input id="clientContact" placeholder="Contact">
+  <input id="clientEmail" placeholder="Email">
+  <input id="clientAddress" placeholder="Address">
 </div>
 
     <div style="display:flex; gap:10px; margin-top:10px;">
