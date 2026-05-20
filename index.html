@@ -702,10 +702,12 @@ function tab(el, id) {
 
   document.getElementById(id).classList.remove("hidden");
 
-  if (id === "appointmentsTab") {
-    fillAppointmentDropdowns();
-    loadAppointments();
-  }
+if (id === "appointmentsTab") {
+  fillAppointmentDropdowns();
+  setAppointmentDefaults(); // ✅ ADD THIS LINE
+  loadAppointments();
+}
+
 
 } // ✅ ADD THIS LINE
 
