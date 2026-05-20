@@ -346,31 +346,37 @@ th {
     <h3>Client</h3>
 
 <div class="grid">
-  <input id="clientName" placeholder="Full Name">
-  <input id="clientDob" type="date">
 
-  <select id="clientGender">
-    <option>Male</option>
-    <option>Female</option>
-  </select>
+<!-- Date & Time -->
+<input id="apptDate" type="date">
+<input id="apptTime" type="time">
 
-  <select id="clientCitizenship">
-    <option value="Malaysian">Malaysian</option>
-    <option value="Foreigner">Foreigner</option>
-  </select>
+<!-- Client -->
+<select id="apptClient"></select>
+<input id="apptCitizenship" placeholder="Citizenship" readonly>
 
-  <input id="clientIc" placeholder="IC">
-  <input id="clientContact" placeholder="Contact">
-  <input id="clientEmail" placeholder="Email">
-  <input id="clientAddress" placeholder="Address">
+<!-- Service & Practitioner -->
+<select id="apptService"></select>
+<select id="apptPractitioner"></select>
+
+<!-- Payment -->
+<select id="apptPayment">
+  <option value="">Select Payment</option>
+  <option value="Cash">Cash</option>
+  <option value="Card">Card</option>
+  <option value="Online">Online</option>
+</select>
+
+<!-- Charges -->
+<input id="apptAmount" placeholder="Amount (RM)" readonly>
+<input id="apptSST" placeholder="SST (RM)" readonly>
+<input id="apptTotal" placeholder="Total (RM)" readonly>
+
+<!-- Remarks -->
+<input id="apptRemarks" placeholder="Remarks (optional)">
+
 </div>
-
-    <div style="display:flex; gap:10px; margin-top:10px;">
-      <button class="action" id="saveClientBtn">Save Client</button>
-      <button class="action" style="background:#6d6d6d;" onclick="exportClients()">Export</button>
-    </div>
-  </div>
-
+    
 <!-- TABLE -->
 
 <div class="card">
