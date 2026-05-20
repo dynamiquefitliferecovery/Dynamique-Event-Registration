@@ -420,13 +420,15 @@ th {
     <h3>Appointment</h3>
 
     <div class="grid">
-      <input id="apptDate" type="date">
-      <input id="apptTime" type="time">
+
+<input id="apptDate" type="date">
+<input id="apptTime" type="time">
 
 <select id="apptClient"></select>
-<input id="apptAge" placeholder="Age" readonly>
-<select id="apptService"></select>        <!-- ✅ moved up -->
-<select id="apptPractitioner"></select>   <!-- ✅ moved down -->
+<select id="apptService"></select>     <!-- ✅ moved here -->
+
+<input id="apptAge" readonly>          <!-- ✅ moved down -->
+<select id="apptPractitioner"></select>
 
       <select id="apptPayment">
         <option value="">Select Payment</option>
