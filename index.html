@@ -148,7 +148,7 @@ header button.active {
     
 .grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+   grid-template-columns:1fr;
   gap:12px;
   margin-bottom:10px;
 }
@@ -426,10 +426,19 @@ th {
 
 <div class="grid">
 
+<!-- Date & Time -->
 <input id="apptDate" type="date">
 <input id="apptTime" type="time">
 
+<!-- Client -->
 <select id="apptClient"></select>
+<input id="apptCitizenship" placeholder="Citizenship" readonly>
+
+<!-- Service & Practitioner -->
+<select id="apptService"></select>
+<select id="apptPractitioner"></select>
+
+<!-- Payment -->
 <select id="apptPayment">
   <option value="">Select Payment</option>
   <option value="Cash">Cash</option>
@@ -437,14 +446,12 @@ th {
   <option value="Online">Online</option>
 </select>
 
-<select id="apptService"></select>
-<input id="apptCitizenship" placeholder="Citizenship" readonly>
-
-<select id="apptPractitioner"></select>
-
+<!-- Charges -->
 <input id="apptAmount" placeholder="Amount (RM)" readonly>
 <input id="apptSST" placeholder="SST (RM)" readonly>
 <input id="apptTotal" placeholder="Total (RM)" readonly>
+
+<!-- Remarks -->
 <input id="apptRemarks" placeholder="Remarks (optional)">
 
 </div>
