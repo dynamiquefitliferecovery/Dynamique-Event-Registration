@@ -692,17 +692,7 @@ window.logout = async function () {
   document.getElementById("appView").classList.add("hidden");
   document.getElementById("loginView").classList.remove("hidden");
 };
-  
-/* ================= AUTH FALLBACK (IMPORTANT) ================= */
 
-// This guarantees the app opens if a session already exists
-(async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session && !appOpened) {
-    appOpened = true;
-    await window.openApp();
-  }
-})();
 
 
 /* ================= TABS ================= */
