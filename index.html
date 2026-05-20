@@ -326,17 +326,21 @@ td {
 }
 
 
-    td:last-child, th:last-child {
+ 
+td:last-child {
   position: sticky;
   right: 0;
   background: #fff;
   z-index: 2;
-  min-width: 55px;   /* ✅ give space for buttons */
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
 }
+
+th:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff3e0;   /* ✅ FIX: keep header orange */
+  z-index: 3;
+}
+
 
 tr td {
   border-bottom: 1px solid #f0f0f0;
@@ -438,12 +442,7 @@ th {
   word-break: break-word;     /* ✅ break long names */
 }
 
-/* ✅ Action column highlight */
-#appointmentsTab td:nth-child(9),
-#reportsTab td:nth-child(9),
-#clientsTab td:nth-child(8) {
-  background: #fff3e0;
-}
+
 
     
   </style>
