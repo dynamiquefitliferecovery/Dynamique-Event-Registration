@@ -1105,8 +1105,11 @@ apptCitizenship.value = "";
   apptTotal.value = (price + sst).toFixed(2);
 }
 
+// ✅ SAFE EVENT BINDING (PUT HERE)
 if (apptService) {
   apptService.addEventListener("change", calculateCharges);
+} else {
+  console.warn("apptService not found");
 }
 
 if (apptClient) {
@@ -1114,6 +1117,8 @@ if (apptClient) {
     calculateCharges();
     updateSelectedClientInfo();
   });
+} else {
+  console.warn("apptClient not found");
 }
 
 
