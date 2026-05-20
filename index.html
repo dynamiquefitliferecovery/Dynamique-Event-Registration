@@ -280,6 +280,25 @@
 <section id="reportsTab" class="hidden">
   <div class="card">
     <h3>Sales Report</h3>
+    <!-- ✅ SUMMARY DASHBOARD -->
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin:15px 0;">
+
+  <div style="background:#fff3e0; padding:15px; border-radius:16px; box-shadow:0 2px 10px rgba(0,0,0,.08);">
+    <div style="font-size:14px; color:#666;">Amount</div>
+    <div style="font-size:22px; font-weight:700;">RM <span id="sumAmount">0.00</span></div>
+  </div>
+
+  <div style="background:#e3f2fd; padding:15px; border-radius:16px; box-shadow:0 2px 10px rgba(0,0,0,.08);">
+    <div style="font-size:14px; color:#666;">SST</div>
+    <div style="font-size:22px; font-weight:700;">RM <span id="sumSST">0.00</span></div>
+  </div>
+
+  <div style="background:#e8f5e9; padding:15px; border-radius:16px; box-shadow:0 2px 10px rgba(0,0,0,.08);">
+    <div style="font-size:14px; color:#666;">Total</div>
+    <div style="font-size:22px; font-weight:700;">RM <span id="sumTotal">0.00</span></div>
+  </div>
+
+</div>
 
     <input type="date" id="reportFrom">
     <input type="date" id="reportTo">
@@ -333,6 +352,11 @@ const apptTable = document.getElementById("apptTable");
 
 const reportFrom = document.getElementById("reportFrom");
 const reportTo = document.getElementById("reportTo");
+
+const sumAmountEl = document.getElementById("sumAmount");
+const sumSSTEl = document.getElementById("sumSST");
+const sumTotalEl = document.getElementById("sumTotal");
+
   
 /* ================= SUPABASE ================= */
 // supabaseClient.js
@@ -1085,6 +1109,8 @@ async function loadReport() {
 
   reportData = [];
   let totalAmount = 0;
+let totalSST = 0;
+let totalRevenue = 0;
 
   let query = sb
     .from("appointments")
@@ -1098,7 +1124,7 @@ async function loadReport() {
       service:services(name),
       client:clients(full_name, citizenship, date_of_birth, gender, contact)
     `)
-    .order("start_time", { ascending: true });
+    .order("start_time", { ascending: false });
 
   if (from) query = query.gte("start_time", from);
   if (to) query = query.lte("start_time", to + "T23:59:59");
@@ -1137,7 +1163,9 @@ async function loadReport() {
 
     tbody.appendChild(tr);
 
-    totalAmount += Number(r.total || 0);
+    totalAmount += Number(r.amount || 0);
+totalSST += Number(r.sst || 0);
+totalRevenue += Number(r.total || 0);
 
     reportData.push({
       date: d.toLocaleDateString("en-MY"),
@@ -1155,8 +1183,9 @@ async function loadReport() {
     });
   });
 
-  document.querySelector("#reportsTab .total").innerText =
-    "Total: RM " + totalAmount.toFixed(2);
+sumAmountEl.textContent = totalAmount.toFixed(2);
+sumSSTEl.textContent = totalSST.toFixed(2);
+sumTotalEl.textContent = totalRevenue.toFixed(2);
 }
 
 function exportReportExcel() {
