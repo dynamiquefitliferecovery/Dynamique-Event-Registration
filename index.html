@@ -198,7 +198,7 @@ input:focus, select:focus{
 }
 
 .action-bar .action {
-  flex: 1;
+  flex: none;   /* ✅ no full width */
   text-align: center;
 }
 
@@ -226,7 +226,7 @@ table {
 
 th {
   padding:6px 8px;
-  font-size:12px;
+  font-size:13px;
   white-space: nowrap;   /* ✅ prevent wrapping */
 }
 
@@ -241,18 +241,18 @@ th:last-child {
 
 /* ================= CLIENT TABLE ================= */
 
-#clientsTab th:nth-child(1) { width: 22%; } /* Name */
+#clientsTab th:nth-child(1) { width: 18%; } /* Name */
 #clientsTab th:nth-child(2) { width: 10%; } /* DOB */
 #clientsTab th:nth-child(3) { width: 6%; }  /* Age */
 #clientsTab th:nth-child(4) { width: 8%; }  /* Gender */
 #clientsTab th:nth-child(5) { width: 10%; } /* Citizenship */
-#clientsTab th:nth-child(6) { width: 18%; } /* IC */
-#clientsTab th:nth-child(7) { width: 14%; } /* Contact */
+#clientsTab th:nth-child(6) { width: 14%; } /* IC */
+#clientsTab th:nth-child(7) { width: 12%; } /* Contact */
 
 
 /* ================= APPOINTMENT TABLE ================= */
 
-#appointmentsTab th:nth-child(1) { width: 12%; } /* Date */
+#appointmentsTab th:nth-child(1) { width: 11%; } /* Date */
 #appointmentsTab th:nth-child(2) { width: 14%; } /* Client */
 #appointmentsTab th:nth-child(3) { width: 10%; } /* Citizenship */
 #appointmentsTab th:nth-child(4) { width: 14%; } /* Service */
@@ -280,7 +280,7 @@ th:last-child {
 
 td {
   padding:6px 8px;   /* ✅ tighter vertical, balanced horizontal */
-  font-size:12px;
+  font-size:13px;
   line-height:1.4;
 }
 
@@ -388,8 +388,20 @@ th {
 #reportsTab td:nth-child(7),
 #reportsTab td:nth-child(8) {
   text-align: right;
-  padding-right: 10px;
 }
+
+    /* Highlight remarks */
+#appointmentsTab td:nth-child(10),
+#reportsTab td:nth-child(10) {
+  background: #fff8e1;
+  font-style: italic;
+}
+
+#appointmentsTab th:nth-child(10),
+#reportsTab th:nth-child(10) {
+  background: #ffe0b2;
+}
+
     
   </style>
 
@@ -484,6 +496,7 @@ th {
           <th>Citizenship</th>
           <th>IC</th>
           <th>Contact</th>
+<th>Action</th>
         </tr>
       </thead>
 
@@ -912,14 +925,21 @@ async function loadClients() {
   clients.forEach(c => {
   const tr = document.createElement("tr");
 
-  tr.innerHTML =
-    `<td>${c.full_name}</td>
-     <td>${c.date_of_birth}</td>
-     <td>${calculateAge(c.date_of_birth)}</td>
-     <td>${c.gender}</td>
-     <td>${c.citizenship}</td>
-     <td>${formatIc(c.ic_passport || "")}</td>
-     <td>${formatContact(c.contact || "")}</td>`;
+tr.innerHTML =
+  `<td>${c.full_name}</td>
+   <td>${c.date_of_birth}</td>
+   <td>${calculateAge(c.date_of_birth)}</td>
+   <td>${c.gender}</td>
+   <td>${c.citizenship}</td>
+   <td>${formatIc(c.ic_passport || "")}</td>
+   <td>${formatContact(c.contact || "")}</td>
+   <td>
+     <div class="action-group">
+       <button class="btn btn-edit" onclick="editClient(${c.id})">✏️</button>
+       <button class="btn btn-delete" onclick="deleteClient(${c.id})">🗑</button>
+     </div>
+   </td>`;
+
 
   clientsTable.appendChild(tr);   // ✅ VERY IMPORTANT
 });  // ✅ THIS WAS MISSING
