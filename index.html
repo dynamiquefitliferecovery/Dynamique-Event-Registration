@@ -752,8 +752,7 @@ actionTd.appendChild(wrapper);
 
 tr.appendChild(actionTd);
     clientsTable.appendChild(tr);
-}
-
+});
 
 /* ===== EDIT CLIENT ===== */
 function editClient(id) {
@@ -1101,13 +1100,9 @@ tr.appendChild(td(calculateAge(a.client?.date_of_birth)));
     // Actions
     const actionTd = document.createElement("td");
 
-    edit.textContent = "Edit";
-    edit.className = "edit";
+  
     edit.onclick = () => editAppointment(a.id);
 
-
-    del.textContent = "Delete";
-    del.className = "edit";
     del.style.marginLeft = "8px";
     del.onclick = () => deleteAppointment(a.id);
 
