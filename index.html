@@ -98,9 +98,6 @@ header button {
 }
 
 /* Hover */
-header button:hover {
-  background: #ffe0b2;
-}
 
 /* Active tab */
 header button.active {
@@ -125,13 +122,6 @@ header button:hover {
 }
 
 /* ACTIVE TAB */
-
-header button.active {
-  background: #ffb74d;   /* softer orange */
-  color: #e65100;        /* dark orange text */
-  box-shadow: 0 4px 10px rgba(255,152,0,0.25);
-}
-
 
 
 .container{
@@ -201,6 +191,7 @@ input:focus, select:focus{
   border-radius: 14px;        /* ✅ rounded */
   border: none;
   cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255,152,0,0.25);
   transition: all 0.2s ease;
 }
 
@@ -529,7 +520,7 @@ button, input, select {
 <button class="tabBtn" data-tab="practitionersTab">Practitioners</button>
 <button class="tabBtn" data-tab="appointmentsTab">Appointments</button>
 <button class="tabBtn" data-tab="reportsTab">Sales</button>
-    <button onclick="logout()">Logout</button>
+    <button class="action" onclick="logout()">Logout</button>
   </div>
 
 </header>
@@ -1045,14 +1036,13 @@ tr.innerHTML =
   
 /* ===== EDIT CLIENT ===== */
 function editClient(id) {
-  if (!clientName) {
-    alert("Client form not available");
+  const c = clients.find(x => String(x.id) === String(id));
+
+  if (!c) {
+    console.error("Client not found:", id);
+    alert("Client not found");
     return;
   }
-
-  const c = clients.find(x => x.id == id);
-
-  if (!c) return;
 
   editingClientId = id;
 
@@ -1065,6 +1055,7 @@ function editClient(id) {
   clientEmail.value = c.email || "";
   clientAddress.value = c.address || "";
 }
+
 
 /* ===== DELETE CLIENT ===== */
 async function deleteClient(id) {
