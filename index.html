@@ -1482,7 +1482,6 @@ apptClient.value = data.client_id;
 
 updateSelectedClientInfo();
 calculateCharges();
-  updateSelectedClientInfo();
 
   apptPractitioner.value = data.practitioner_id;
   apptService.value = data.service_id;
@@ -1568,11 +1567,9 @@ async function deleteAppointment(id) {
 }
 
 function updateSelectedClientInfo() {
-  const c = clients.find(x => x.id == apptClient.value);
+  const c = clients.find(x => String(x.id) === String(apptClient.value));
 
-  apptCitizenship.value = c
-    ? c.citizenship
-    : "";
+  apptCitizenship.value = c ? c.citizenship : "";
 }
 
 
