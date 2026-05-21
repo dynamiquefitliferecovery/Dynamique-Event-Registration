@@ -223,10 +223,11 @@ table {
 
 
 .table-wrapper {
-  overflow-x: hidden;   /* ✅ remove side scroll */
+  overflow-x: auto;
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
-
 
 
 th {
@@ -361,6 +362,14 @@ th {
   top: 0;
   z-index: 3;
 }
+
+    
+button {
+  position: relative;
+  z-index: 9999;
+  touch-action: manipulation;
+}
+
 
 .edit{
   color:#fb8c00;
@@ -678,8 +687,11 @@ th {
       <input type="date" id="reportTo">
     </div>
 
-    <button class="action" onclick="loadReport()">Generate</button>
-    <button class="action" onclick="exportReportExcel()">Export Excel</button>
+<div style="position: relative; z-index: 9999;">
+  <button class="action" onclick="loadReport()">Generate</button>
+  <button class="action" onclick="exportReportExcel()">Export Excel</button>
+</div>
+
 
     <!-- ✅ TABLE FIXED -->
     <div class="table-wrapper">
@@ -719,6 +731,11 @@ document.addEventListener("DOMContentLoaded", () => {
 let clients = [];
 let practitioners = [];
   let services = [];
+
+  
+button, input, select {
+  touch-action: manipulation;
+}
   
 document.querySelectorAll(".tabBtn").forEach(btn => {
   btn.addEventListener("click", function () {
