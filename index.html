@@ -1552,7 +1552,7 @@ const payload = {
 }
   
 
-window.deleteAppointment = async function(id
+window.deleteAppointment = async function(id) {
   if (!confirm("Delete this appointment?")) return;
 
   const { error } = await sb
@@ -1567,6 +1567,7 @@ window.deleteAppointment = async function(id
 
   loadAppointments();
 }
+
 
 function updateSelectedClientInfo() {
   const c = clients.find(x => String(x.id) === String(apptClient.value));
