@@ -1497,7 +1497,7 @@ calculateCharges();
   document.querySelector("#appointmentsTab .action").innerText = "Update Appointment";
 }
 
-async function saveAppointment() {
+window.saveAppointment = async function(){
   if (
     !apptDate.value ||
     !apptTime.value ||
