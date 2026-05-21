@@ -110,6 +110,9 @@
 document.getElementById("date_of_birth").max =
   new Date().toISOString().split("T")[0];
 
+  dobInput.removeAttribute("readonly");
+
+  
 /* ✅ AUTO FILL DOB + GENDER FROM IC */
 function autoFillDOB() {
   const msgBox = document.getElementById("msg");
@@ -127,28 +130,47 @@ if (citizenship !== "Malaysian") return;
   if (ic.length < 12) return;
 
   /* ✅ Extract DOB */
-  const yy = ic.substring(0, 2);
-  const mm = parseInt(ic.substring(2, 4));
-  const dd = parseInt(ic.substring(4, 6));
+const yy = ic.substring(0, 2);
+const mm = parseInt(ic.substring(2, 4));
+const dd = parseInt(ic.substring(4, 6));
 
 const currentYear = new Date().getFullYear() % 100;
 const year = parseInt(yy) > currentYear
   ? 1900 + parseInt(yy)
   : 2000 + parseInt(yy);
 
+// ✅ strict date validation
+const inputDate = new Date(year, mm - 1, dd);
 
-/* ✅ Validate basic date */
-  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) {
-    msgBox.style.color = "red";
-    msgBox.textContent = "Invalid IC: Invalid date detected";
-    return;
-  }
+if (
+  inputDate.getFullYear() !== year ||
+  inputDate.getMonth() !== (mm - 1) ||
+  inputDate.getDate() !== dd
+) {
+  msgBox.style.color = "red";
+  msgBox.textContent = "Invalid IC: Invalid date detected";
+  return;
+}
 
-  const formatted = `${year}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
-  const inputDate = new Date(formatted);
-  const today = new Date();
+// ✅ prevent timezone issue
+const today = new Date();
+today.setHours(0,0,0,0);
+inputDate.setHours(0,0,0,0);
 
-  
+if (inputDate > today) {
+  msgBox.style.color = "red";
+  msgBox.textContent = "Date of Birth cannot be in the future";
+
+  dobInput.value = "";
+  genderSelect.value = "";
+  return;
+}
+
+// ✅ apply value
+dobInput.type = "date";
+dobInput.value = `${year}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+dobInput.setAttribute("readonly", true);
+
 /* ✅ BLOCK FUTURE DOB */
   if (inputDate > today) {
     msgBox.style.color = "red";
