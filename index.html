@@ -455,9 +455,27 @@ th {
   word-break: break-word;     /* ✅ break long names */
 }
 
+button, input, select {
+  touch-action: manipulation;
+}
+th, td {
+  pointer-events: auto;
+}
 
+.table-wrapper {
+  pointer-events: auto;
+}
 
-    
+table {
+  pointer-events: auto;
+}
+
+    @media (max-width: 768px) {
+  th,
+  td:last-child {
+    position: static !important;
+  }
+}
   </style>
 
 
@@ -732,10 +750,7 @@ let clients = [];
 let practitioners = [];
   let services = [];
 
-  
-button, input, select {
-  touch-action: manipulation;
-}
+
   
 document.querySelectorAll(".tabBtn").forEach(btn => {
   btn.addEventListener("click", function () {
