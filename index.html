@@ -1055,8 +1055,8 @@ tr.innerHTML =
    <td>${formatContact(c.contact || "")}</td>
    <td>
      <div class="action-group">
-       <button class="btn btn-edit" onclick="editClient(${c.id})">✏️</button>
-       <button class="btn btn-delete" onclick="deleteClient(${c.id})">🗑</button>
+       <button class="btn btn-edit" onclick="editClient('${c.id}')">✏️</button>
+       <button class="btn btn-delete" onclick="deleteClient('${c.id}')">🗑</button>
      </div>
    </td>`;
 
@@ -1514,7 +1514,7 @@ calculateCharges();
   apptSST.value = Number(data.sst).toFixed(2);
   apptTotal.value = Number(data.total).toFixed(2);
 
-  document.querySelector("#appointmentsTab .action").innerText = "Update Appointment";
+document.querySelector("#appointmentsTab button[onclick='saveAppointment()']").innerText = "Update Appointment";
 }
 
 window.saveAppointment = async function(){
@@ -1567,7 +1567,7 @@ const payload = {
 
   clearAppointmentForm();
   editingAppointmentId = null;
-  document.querySelector("#appointmentsTab .action").innerText = "Save Appointment";
+document.querySelector("#appointmentsTab button[onclick='saveAppointment()']").innerText = "Save Appointment";
   loadAppointments();
 }
   
