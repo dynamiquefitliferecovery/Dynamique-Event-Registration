@@ -1163,7 +1163,7 @@ window.saveClient = async function() {
 }
 
   /* =====EXPORT CLIENTS ===== */
-function exportClients() {
+window.exportClients = function () {
   if (!clients.length) {
     alert("No clients to export");
     return;
