@@ -1169,35 +1169,35 @@ function exportClients() {
     return;
   }
 
-  const sortedClients = [...clients].sort((a, b) =>
+  const sorted = [...clients].sort((a, b) =>
     (a.full_name || "").localeCompare(b.full_name || "")
   );
 
   let html = `
-  <table border="1">
-    <tr style="font-weight:bold;">
-      <th style="width:180px;">Name</th>
-      <th style="width:120px;">DOB (DD-MM-YYYY)</th>
-      <th style="width:60px;">Age</th>
-      <th style="width:80px;">Gender</th>
-      <th style="width:120px;">Citizenship</th>
-      <th style="width:160px;">IC</th>
-      <th style="width:140px;">Contact</th>
-      <th style="width:200px;">Email</th>
-      <th style="width:250px;">Address</th>
+  <table border="1" style="border-collapse:collapse; font-family:Segoe UI; font-size:14px;">
+    <tr style="background:#ff9800; color:#fff; font-weight:bold; text-align:center;">
+      <th>Name</th>
+      <th>DOB</th>
+      <th>Age</th>
+      <th>Gender</th>
+      <th>Citizenship</th>
+      <th>IC / Passport</th>
+      <th>Contact</th>
+      <th>Email</th>
+      <th>Address</th>
     </tr>
   `;
 
-  sortedClients.forEach(c => {
+  sorted.forEach(c => {
     const dob = c.date_of_birth
-      ? new Date(c.date_of_birth).toLocaleDateString("en-GB") // DD/MM/YYYY
+      ? new Date(c.date_of_birth).toLocaleDateString("en-GB")
       : "";
 
     html += `
       <tr>
         <td>${c.full_name || ""}</td>
         <td>${dob}</td>
-        <td>${calculateAge(c.date_of_birth)}</td>
+        <td style="text-align:center">${calculateAge(c.date_of_birth)}</td>
         <td>${c.gender || ""}</td>
         <td>${c.citizenship || ""}</td>
         <td style="mso-number-format:'\\@'">${c.ic_passport || ""}</td>
@@ -1208,12 +1208,12 @@ function exportClients() {
     `;
   });
 
-  html += "</table>";
+  html += `</table>`;
 
   const blob = new Blob([html], { type: "application/vnd.ms-excel" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "clients.xls";
+  a.download = "clients_report.xls";
   a.click();
 }
   
@@ -1701,39 +1701,56 @@ sumTotalEl.textContent = totalRevenue.toFixed(2);
 }
 
 window.exportReportExcel = function () {
-  if (!reportData.length) return alert("No data to export");
+  if (!reportData.length) {
+    alert("No data to export");
+    return;
+  }
 
-  const rows = [
-    "Date,Client,Age,Citizenship,Gender,Contact,Service,Amount,SST,Total,Payment,Remarks"
-  ];
+  let html = `
+  <table border="1" style="border-collapse:collapse; font-family:Segoe UI; font-size:14px;">
+    <tr style="background:#4caf50; color:#fff; font-weight:bold; text-align:center;">
+      <th>Date</th>
+      <th>Client</th>
+      <th>Age</th>
+      <th>Citizenship</th>
+      <th>Gender</th>
+      <th>Contact</th>
+      <th>Service</th>
+      <th>Amount (RM)</th>
+      <th>SST (RM)</th>
+      <th>Total (RM)</th>
+      <th>Payment</th>
+      <th>Remarks</th>
+    </tr>
+  `;
 
   reportData.forEach(r => {
-    rows.push([
-      formatCSV(r.date),
-      formatCSV(r.client),
-      r.age,
-      formatCSV(r.citizenship),
-      formatCSV(r.gender),
-
-      // ✅ Force TEXT (critical)
-      `="` + (r.contact || "") + `"`,
-
-      formatCSV(r.service),
-      r.amount.toFixed(2),
-      r.sst.toFixed(2),
-      r.total.toFixed(2),
-      formatCSV(r.payment),
-      formatCSV(r.remarks)
-    ].join(","));
+    html += `
+      <tr>
+        <td>${r.date}</td>
+        <td>${r.client}</td>
+        <td style="text-align:center">${r.age}</td>
+        <td>${r.citizenship}</td>
+        <td>${r.gender}</td>
+        <td style="mso-number-format:'\\@'">${r.contact}</td>
+        <td>${r.service}</td>
+        <td style="text-align:right">${r.amount.toFixed(2)}</td>
+        <td style="text-align:right">${r.sst.toFixed(2)}</td>
+        <td style="text-align:right">${r.total.toFixed(2)}</td>
+        <td>${r.payment}</td>
+        <td>${r.remarks}</td>
+      </tr>
+    `;
   });
 
-  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+  html += `</table>`;
+
+  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "sales_report.csv";
+  a.download = "sales_report.xls";
   a.click();
-  URL.revokeObjectURL(a.href);
-}
+};
 
 // ✅ SAFE CSV HANDLER (VERY IMPORTANT)
 function formatCSV(val) {
