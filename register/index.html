@@ -131,7 +131,10 @@ if (citizenship !== "Malaysian") return;
   const mm = parseInt(ic.substring(2, 4));
   const dd = parseInt(ic.substring(4, 6));
 
-  const year = 2000 + parseInt(yy);
+const currentYear = new Date().getFullYear() % 100;
+const year = parseInt(yy) > currentYear
+  ? 1900 + parseInt(yy)
+  : 2000 + parseInt(yy);
 
 
 /* ✅ Validate basic date */
