@@ -994,7 +994,7 @@ const saveClientBtn = document.getElementById("saveClientBtn");
 
 
 /* ===== LOAD CLIENTS ===== */
-async function loadClients() {
+window.loadClients = async function() {
   // ✅ Confirm auth state
   const { data: { user } } = await sb.auth.getUser();
   console.log("Admin user:", user);
@@ -1089,7 +1089,7 @@ if (saveClientBtn) {
 }
 
 
-async function saveClient() {
+window.saveClient = async function() {
   if (!clientName.value || !clientDob.value) {
     alert("Name and DOB are required");
     return;
@@ -1480,10 +1480,13 @@ window.editAppointment = async function(id) {
     hour12: false
   });
 
+fillAppointmentDropdowns();   // ✅ ADD THIS LINE
+
 apptClient.value = data.client_id;
 
 updateSelectedClientInfo();
 calculateCharges();
+
 
   apptPractitioner.value = data.practitioner_id;
   apptService.value = data.service_id;
