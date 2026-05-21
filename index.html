@@ -87,31 +87,35 @@ header {
 /* tabs */
 header button {
   border: none;
-  background: #f5f5f5;
-  padding: 10px 16px;
-  border-radius: 12px;
-  color: #555;
+  background: #fff3e0;
+  padding: 10px 18px;
+  border-radius: 20px;   /* ✅ rounded */
+  color: #e65100;
   cursor: pointer;
   font-weight: 600;
-  font-size: 16px;
-  transition: all 0.2s ease;
-
-  touch-action: manipulation;   /* ✅ ADD THIS LINE */
+  font-size: 15px;
+  transition: all 0.25s ease;
 }
 
-    
+/* Hover */
+header button:hover {
+  background: #ffe0b2;
+}
+
+/* Active tab */
 header button.active {
-  background: transparent;
-  color: #ff9800;
-  border-bottom: 3px solid #ff9800;
-  border-radius: 0;
+  background: #ff9800;
+  color: white;
+  box-shadow: 0 6px 16px rgba(255,152,0,0.35);
+  transform: translateY(-1px);
 }
 
-    
+
 button {
-  border: none;
-  outline: none;
+  font-family: inherit;
+  letter-spacing: 0.3px;
 }
+
 
 
 /* hover */
@@ -190,20 +194,28 @@ input:focus, select:focus{
 }
 
 .action {
-  background:#ffe0b2;
-  color:#e65100;
-  padding:8px 14px;
-  font-weight:600;
-  border-radius:12px;
-  border:none;          /* ✅ REMOVE OUTLINE */
+  background: #ffb74d;        /* ✅ lighter orange */
+  color: white;               /* ✅ white text */
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 14px;        /* ✅ rounded */
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-
-
-.action:hover{
-  background:#fb8c00;
-  transform:translateY(-1px);
+/* Hover */
+.action:hover {
+  background: #ff9800;        /* ✅ darker orange */
+  transform: translateY(-1px);
 }
+
+/* Click */
+.action:active {
+  background: #f57c00;        /* ✅ deeper orange */
+  transform: scale(0.97);
+}
+
 .action-bar {
   display: flex;
   justify-content: flex-start;
@@ -217,11 +229,15 @@ input:focus, select:focus{
   text-align: center;
 }
 
-.action-bar .primary {
-  background: #ff9800;
-  color: white;
-  font-weight: 700;
+
+.action.primary {
+  background: #fb8c00;
 }
+
+.action.primary:hover {
+  background: #f57c00;
+}
+
 
 table {
   width:100%;
