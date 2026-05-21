@@ -1046,25 +1046,39 @@ window.loadClients = async function() {
   clients.forEach(c => {
   const tr = document.createElement("tr");
 
-tr.innerHTML =
-  `<td>${c.full_name}</td>
-   <td>${c.date_of_birth}</td>
-   <td>${calculateAge(c.date_of_birth)}</td>
-   <td>${c.gender}</td>
-   <td>${c.citizenship}</td>
-   <td>${formatIc(c.ic_passport || "")}</td>
-   <td>${formatContact(c.contact || "")}</td>
-   <td>
-     <div class="action-group">
-       <button class="btn btn-edit" onclick="editClient(&quot;${c.id}&quot;)">✏️</button>
-       <button class="btn btn-delete" onclick="deleteClient(&quot;${c.id}&quot;)">🗑</button>
-     </div>
-   </td>`;
+  tr.innerHTML = `
+    <td>${c.full_name}</td>
+    <td>${c.date_of_birth}</td>
+    <td>${calculateAge(c.date_of_birth)}</td>
+    <td>${c.gender}</td>
+    <td>${c.citizenship}</td>
+    <td>${formatIc(c.ic_passport || "")}</td>
+    <td>${formatContact(c.contact || "")}</td>
+    <td></td>
+  `;
 
+  // ✅ CREATE ACTION CELL
+  const actionTd = tr.lastElementChild;
 
-  clientsTable.appendChild(tr);   // ✅ VERY IMPORTANT
-});  // ✅ THIS WAS MISSING
-} 
+  const wrapper = document.createElement("div");
+  wrapper.className = "action-group";
+
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "✏️";
+  editBtn.className = "btn btn-edit";
+  editBtn.onclick = () => editClient(c.id);   // ✅ FIXED
+
+  const delBtn = document.createElement("button");
+  delBtn.textContent = "🗑";
+  delBtn.className = "btn btn-delete";
+  delBtn.onclick = () => deleteClient(c.id);  // ✅ FIXED
+
+  wrapper.append(editBtn, delBtn);
+  actionTd.appendChild(wrapper);
+
+  clientsTable.appendChild(tr);
+});
+
   
 /* ===== EDIT CLIENT ===== */
 window.editClient = function (id) {
