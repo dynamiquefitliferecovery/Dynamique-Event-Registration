@@ -1169,53 +1169,29 @@ window.exportClients = function () {
     return;
   }
 
-  const sorted = [...clients].sort((a, b) =>
-    (a.full_name || "").localeCompare(b.full_name || "")
-  );
+  const headers = [
+    "Name", "DOB", "Age", "Gender",
+    "Citizenship", "IC / Passport",
+    "Contact", "Email", "Address"
+  ];
 
-  let html = `
-  <table border="1" style="border-collapse:collapse; font-family:Segoe UI; font-size:14px;">
-    <tr style="background:#ff9800; color:#fff; font-weight:bold; text-align:center;">
-      <th>Name</th>
-      <th>DOB</th>
-      <th>Age</th>
-      <th>Gender</th>
-      <th>Citizenship</th>
-      <th>IC / Passport</th>
-      <th>Contact</th>
-      <th>Email</th>
-      <th>Address</th>
-    </tr>
-  `;
-
-  sorted.forEach(c => {
-    const dob = c.date_of_birth
+  const rows = clients.map(c => [
+    c.full_name,
+    c.date_of_birth
       ? new Date(c.date_of_birth).toLocaleDateString("en-GB")
-      : "";
+      : "",
+    calculateAge(c.date_of_birth),
+    c.gender,
+    c.citizenship,
+    c.ic_passport,
+    c.contact,
+    c.email,
+    c.address
+  ]);
 
-    html += `
-      <tr>
-        <td>${c.full_name || ""}</td>
-        <td>${dob}</td>
-        <td style="text-align:center">${calculateAge(c.date_of_birth)}</td>
-        <td>${c.gender || ""}</td>
-        <td>${c.citizenship || ""}</td>
-        <td style="mso-number-format:'\\@'">${c.ic_passport || ""}</td>
-        <td style="mso-number-format:'\\@'">${c.contact || ""}</td>
-        <td>${c.email || ""}</td>
-        <td>${c.address || ""}</td>
-      </tr>
-    `;
-  });
+  downloadExcel("clients_report.xls", headers, rows, "#ff9800");
+};
 
-  html += `</table>`;
-
-  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "clients_report.xls";
-  a.click();
-}
   
 /* ===== CLEAR FORM ===== */
 function clearClientForm() {
@@ -1706,58 +1682,30 @@ window.exportReportExcel = function () {
     return;
   }
 
-  let html = `
-  <table border="1" style="border-collapse:collapse; font-family:Segoe UI; font-size:14px;">
-    <tr style="background:#4caf50; color:#fff; font-weight:bold; text-align:center;">
-      <th>Date</th>
-      <th>Client</th>
-      <th>Age</th>
-      <th>Citizenship</th>
-      <th>Gender</th>
-      <th>Contact</th>
-      <th>Service</th>
-      <th>Amount (RM)</th>
-      <th>SST (RM)</th>
-      <th>Total (RM)</th>
-      <th>Payment</th>
-      <th>Remarks</th>
-    </tr>
-  `;
+  const headers = [
+    "Date", "Client", "Age", "Citizenship",
+    "Gender", "Contact", "Service",
+    "Amount (RM)", "SST (RM)", "Total (RM)",
+    "Payment", "Remarks"
+  ];
 
-  reportData.forEach(r => {
-    html += `
-      <tr>
-        <td>${r.date}</td>
-        <td>${r.client}</td>
-        <td style="text-align:center">${r.age}</td>
-        <td>${r.citizenship}</td>
-        <td>${r.gender}</td>
-        <td style="mso-number-format:'\\@'">${r.contact}</td>
-        <td>${r.service}</td>
-        <td style="text-align:right">${r.amount.toFixed(2)}</td>
-        <td style="text-align:right">${r.sst.toFixed(2)}</td>
-        <td style="text-align:right">${r.total.toFixed(2)}</td>
-        <td>${r.payment}</td>
-        <td>${r.remarks}</td>
-      </tr>
-    `;
-  });
+  const rows = reportData.map(r => [
+    r.date,
+    r.client,
+    r.age,
+    r.citizenship,
+    r.gender,
+    r.contact,
+    r.service,
+    r.amount.toFixed(2),
+    r.sst.toFixed(2),
+    r.total.toFixed(2),
+    r.payment,
+    r.remarks
+  ]);
 
-  html += `</table>`;
-
-  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "sales_report.xls";
-  a.click();
+  downloadExcel("sales_report.xls", headers, rows, "#4caf50");
 };
-
-// ✅ SAFE CSV HANDLER (VERY IMPORTANT)
-function formatCSV(val) {
-  if (!val) return "";
-  const str = String(val).replace(/"/g, '""');
-  return `"${str}"`;
-}
 
 /* ================= LOAD ALL ================= */
 async function loadAll() {
