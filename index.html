@@ -363,12 +363,6 @@ th {
   z-index: 3;
 }
 
-    
-button {
-  position: relative;
-  z-index: 9999;
-  touch-action: manipulation;
-}
 
 
 .edit{
@@ -456,19 +450,19 @@ th {
 }
 
 button, input, select {
+  position: relative;
+  z-index: 9999;
   touch-action: manipulation;
 }
-th, td {
-  pointer-events: auto;
-}
+
 
 .table-wrapper {
-  pointer-events: auto;
+  overflow-x: auto;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
 }
 
-table {
-  pointer-events: auto;
-}
 
     @media (max-width: 768px) {
   th,
