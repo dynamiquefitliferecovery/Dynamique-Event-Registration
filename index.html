@@ -792,8 +792,39 @@ document.querySelectorAll(".tabBtn").forEach(btn => {
   
 console.log("JS loaded");
 
+// ✅ ASSIGN ALL DOM ELEMENTS (CRITICAL)
 
-// ✅ Explicit DOM bindings
+apptDate = document.getElementById("apptDate");
+apptTime = document.getElementById("apptTime");
+apptClient = document.getElementById("apptClient");
+apptPractitioner = document.getElementById("apptPractitioner");
+apptService = document.getElementById("apptService");
+apptPayment = document.getElementById("apptPayment");
+apptRemarks = document.getElementById("apptRemarks");
+apptCitizenship = document.getElementById("apptCitizenship");
+
+apptAmount = document.getElementById("apptAmount");
+apptSST = document.getElementById("apptSST");
+apptTotal = document.getElementById("apptTotal");
+
+apptTable = document.getElementById("apptTable");
+
+reportFrom = document.getElementById("reportFrom");
+reportTo = document.getElementById("reportTo");
+
+sumAmountEl = document.getElementById("sumAmount");
+sumSSTEl = document.getElementById("sumSST");
+sumTotalEl = document.getElementById("sumTotal");
+
+clientName = document.getElementById("clientName");
+clientDob = document.getElementById("clientDob");
+clientGender = document.getElementById("clientGender");
+clientCitizenship = document.getElementById("clientCitizenship");
+clientIc = document.getElementById("clientIc");
+clientContact = document.getElementById("clientContact");
+clientEmail = document.getElementById("clientEmail");
+clientAddress = document.getElementById("clientAddress");
+clientsTable = document.getElementById("clientsTable");
 
   
 /* ================= SUPABASE ================= */
@@ -983,7 +1014,7 @@ clientContact = document.getElementById("clientContact");
 clientEmail = document.getElementById("clientEmail");
 clientAddress = document.getElementById("clientAddress");
 clientsTable = document.getElementById("clientsTable");
-saveClientBtn = document.getElementById("saveClientBtn");
+
 
 
 /* ===== LOAD CLIENTS ===== */
@@ -1074,13 +1105,6 @@ window.deleteClient = async function(id) {
 
   loadClients();
 }
-
-
-/* ===== SAVE CLIENT (INSERT + UPDATE) ===== */
-if (saveClientBtn) {
-  saveClientBtn.addEventListener("click", saveClient);
-}
-
 
 window.saveClient = async function() {
   if (!clientName.value || !clientDob.value) {
