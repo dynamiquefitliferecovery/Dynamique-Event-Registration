@@ -1449,7 +1449,7 @@ actionTd.appendChild(wrapper);
 
 } // ✅ CLOSE loadAppointments ✅
 
- async function editAppointment(id) {
+async function editAppointment(id) {
   const { data, error } = await sb
     .from("appointments")
     .select("*")
@@ -1463,16 +1463,23 @@ actionTd.appendChild(wrapper);
 
   editingAppointmentId = id;
 
-const start = toMYTime(data.start_time);
+  const start = toMYTime(data.start_time);
 
-apptDate.value = start.toLocaleDateString("en-CA"); // YYYY-MM-DD
-apptTime.value = start.toLocaleTimeString("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false
-});
+  apptDate.value = start.toLocaleDateString("en-CA");
+  apptTime.value = start.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
 
-  apptClient.value = data.client_id;
+apptClient.value = data.client_id;
+
+updateSelectedClientInfo();
+calculateCharges();
+
+  ✅ // ADD THIS LINE
+  updateSelectedClientInfo();
+
   apptPractitioner.value = data.practitioner_id;
   apptService.value = data.service_id;
   apptPayment.value = data.payment_method;
