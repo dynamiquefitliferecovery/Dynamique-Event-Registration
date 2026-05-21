@@ -961,7 +961,8 @@ document.querySelectorAll(".tabBtn").forEach(b => b.classList.remove("active"));
 
 if (id === "appointmentsTab") {
   fillAppointmentDropdowns();
-  clearAppointmentForm();  // ✅ USE THIS INSTEAD
+  clearAppointmentForm();
+  updateSelectedClientInfo();   // ✅ ADD THIS LINE
   loadAppointments();
 }
 
@@ -1055,8 +1056,8 @@ tr.innerHTML =
    <td>${formatContact(c.contact || "")}</td>
    <td>
      <div class="action-group">
-       <button class="btn btn-edit" onclick="editClient('${c.id}')">✏️</button>
-       <button class="btn btn-delete" onclick="deleteClient('${c.id}')">🗑</button>
+       <button class="btn btn-edit" onclick="editClient(&quot;${c.id}&quot;)">✏️</button>
+       <button class="btn btn-delete" onclick="deleteClient(&quot;${c.id}&quot;)">🗑</button>
      </div>
    </td>`;
 
