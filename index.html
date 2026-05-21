@@ -348,12 +348,13 @@ td {
   line-height:1.4;
 }
 
+td:last-child,
+th:last-child {
+  z-index: 1;
+}
 
-td:last-child {
-  position: sticky;
-  right: 0;
-  background: #fff;
-  z-index: 2;
+.table-wrapper {
+  z-index: 0;
 }
 /* ✅ FORCE ACTION COLUMN WHITE ALWAYS */
 #clientsTab td:last-child,
@@ -564,7 +565,7 @@ th {
 </div>
 
 <div class="action-bar">
-  <button class="action primary" id="saveClientBtn">💾 Save</button>
+  <button class="action primary" onclick="saveClient()">💾 Save</button>
   <button class="action" onclick="loadClients()">🔄 Refresh</button>
   <button class="action" onclick="exportClients()">📥 Export</button>
 </div>
@@ -1041,7 +1042,7 @@ tr.innerHTML =
 } 
   
 /* ===== EDIT CLIENT ===== */
-function editClient(id) {
+window.editClient = function (id) {
   const c = clients.find(x => String(x.id) === String(id));
 
   if (!c) {
@@ -1064,7 +1065,7 @@ function editClient(id) {
 
 
 /* ===== DELETE CLIENT ===== */
-async function deleteClient(id) {
+window.deleteClient = async function(id) {
   if (!confirm("Delete this client?")) return;
 
   const { error } = await sb
@@ -1080,6 +1081,7 @@ async function deleteClient(id) {
 
   loadClients();
 }
+
 
 /* ===== SAVE CLIENT (INSERT + UPDATE) ===== */
 if (saveClientBtn) {
@@ -1455,7 +1457,7 @@ actionTd.appendChild(wrapper);
 
 } // ✅ CLOSE loadAppointments ✅
 
-async function editAppointment(id) {
+window.editAppointment = async function(id) {
   const { data, error } = await sb
     .from("appointments")
     .select("*")
@@ -1550,7 +1552,7 @@ const payload = {
 }
   
 
-async function deleteAppointment(id) {
+window.deleteAppointment = async function(id
   if (!confirm("Delete this appointment?")) return;
 
   const { error } = await sb
