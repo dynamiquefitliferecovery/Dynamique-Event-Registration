@@ -1688,20 +1688,13 @@ sumTotalEl.textContent = totalRevenue.toFixed(2);
 }
 
 window.exportReportExcel = function () {
-2
- 
-3
-console.log("✅ Export button clicked");
-4
- 
-5
-if (!reportData.length) {
-6
-alert("No data to export");
-7
-return;
-8
-}
+
+  console.log("✅ Export button clicked");
+
+  if (!reportData.length) {
+    alert("No data to export");
+    return;
+  }
 
   const headers = [
     "Date", "Client", "Age", "Citizenship",
@@ -1725,7 +1718,7 @@ return;
     r.remarks
   ]);
 
-  downloadExcel("sales_report.xls", headers, rows, "#4caf50");
+  downloadExcel("sales_report.csv", headers, rows);
 };
 
 /* ================= LOAD ALL ================= */
