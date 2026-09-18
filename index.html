@@ -1612,18 +1612,12 @@ let totalRevenue = 0;
     `)
     .order("start_time", { ascending: false });
 
- if (from) {
-  query = query.gte(
-    "start_time",
-    new Date(from + "T00:00:00").toISOString()
-  );
+if (from) {
+  query = query.gte("start_time", from);
 }
 
 if (to) {
-  query = query.lte(
-    "start_time",
-    new Date(to + "T23:59:59").toISOString()
-  );
+  query = query.lte("start_time", to + "T23:59:59");
 }
 
   const { data, error } = await query;
