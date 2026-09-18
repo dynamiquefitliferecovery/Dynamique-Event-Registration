@@ -999,9 +999,8 @@ function formatContact(v = "") {
   return age;
 }
 
-  function toMYTime(dateString) {
-  const d = new Date(dateString);
-  return new Date(d.getTime() + 8 * 60 * 60 * 1000);
+function toMYTime(dateString) {
+  return new Date(dateString);
 }
   
 /* ================= CLIENTS ================= */
@@ -1520,12 +1519,12 @@ window.saveAppointment = async function(){
     return;
   }
 
-  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
+  const startTime = `${apptDate.value}T${apptTime.value}:00`;
   const endTime = new Date(startTime);
   endTime.setHours(endTime.getHours() + 1);
 
 const payload = {
-  start_time: startTime.toISOString(),
+  start_time: startTime,
   end_time: endTime.toISOString(),
   client_id: apptClient.value,              // ✅ UUID (string)
   practitioner_id: apptPractitioner.value,  // ✅ UUID
@@ -1719,7 +1718,7 @@ function downloadExcel(filename, headers, rows) {
   let csv = headers.join(",") + "\n";
 
   rows.forEach(row => {
-    csv += row.join(",") + "\n";
+    csv += row.map(v => `"${v ?? ""}"`).join(",") + "\n";
   });
 
   const blob = new Blob(
