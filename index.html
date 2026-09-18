@@ -1614,8 +1614,19 @@ let totalRevenue = 0;
     `)
     .order("start_time", { ascending: false });
 
-  if (from) query = query.gte("start_time", from);
-  if (to) query = query.lte("start_time", to + "T23:59:59");
+ if (from) {
+  query = query.gte(
+    "start_time",
+    new Date(from + "T00:00:00").toISOString()
+  );
+}
+
+if (to) {
+  query = query.lte(
+    "start_time",
+    new Date(to + "T23:59:59").toISOString()
+  );
+}
 
   const { data, error } = await query;
 
@@ -1677,10 +1688,20 @@ sumTotalEl.textContent = totalRevenue.toFixed(2);
 }
 
 window.exportReportExcel = function () {
-  if (!reportData.length) {
-    alert("No data to export");
-    return;
-  }
+2
+ 
+3
+console.log("✅ Export button clicked");
+4
+ 
+5
+if (!reportData.length) {
+6
+alert("No data to export");
+7
+return;
+8
+}
 
   const headers = [
     "Date", "Client", "Age", "Citizenship",
@@ -1708,7 +1729,31 @@ window.exportReportExcel = function () {
 };
 
 /* ================= LOAD ALL ================= */
-async function loadAll() {
+function downloadExcel(filename, headers, rows) {
+
+  let csv = headers.join(",") + "\n";
+
+  rows.forEach(row => {
+    csv += row.join(",") + "\n";
+  });
+
+  const blob = new Blob(
+    [csv],
+    { type: "text/csv;charset=utf-8;" }
+  );
+
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+  
+  
+  async function loadAll() {
   await loadClients();
   await loadPractitioners();
 
