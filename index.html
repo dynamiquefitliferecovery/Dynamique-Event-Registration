@@ -1189,7 +1189,7 @@ window.exportClients = function () {
     c.address
   ]);
 
-  downloadExcel("clients_report.xls", headers, rows, "#ff9800");
+  downloadExcel("clients_report.csv", headers, rows);
 };
 
   
@@ -1590,8 +1590,6 @@ function updateSelectedClientInfo() {
 
 /* ================= REPORT ================= */
 window.loadReport = async function () {
-
-  alert("Generate clicked ✅");   // ✅ ADD THIS LINE
 
   const from = reportFrom.value;
   const to = reportTo.value;
