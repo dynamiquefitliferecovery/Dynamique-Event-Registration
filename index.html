@@ -1182,8 +1182,8 @@ window.exportClients = function () {
     calculateAge(c.date_of_birth),
     c.gender,
     c.citizenship,
-    c.ic_passport,
-    c.contact,
+    `="${c.ic_passport || ""}"`,
+    `="${c.contact || ""}"`,
     c.email,
     c.address
   ]);
