@@ -1723,6 +1723,19 @@ function downloadExcel(filename, headers, rows) {
   ];
 
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  const range = XLSX.utils.decode_range(worksheet["!ref"]);
+
+for (let c = 0; c <= range.e.c; c++) {
+  const cell = XLSX.utils.encode_cell({ r: 0, c });
+
+  if (worksheet[cell]) {
+    worksheet[cell].s = {
+      font: {
+        bold: true
+      }
+    };
+  }
+}
 
   // Force ALL cells to text
   const range = XLSX.utils.decode_range(worksheet["!ref"]);
@@ -1738,6 +1751,23 @@ function downloadExcel(filename, headers, rows) {
     }
   }
 
+  worksheet["!cols"] = headers.map((h, colIndex) => {
+
+  let maxLength = h.length;
+
+  rows.forEach(row => {
+    const value = row[colIndex] || "";
+    maxLength = Math.max(
+      maxLength,
+      String(value).length
+    );
+  });
+
+  return {
+    wch: maxLength + 5
+  };
+});
+  
   XLSX.utils.book_append_sheet(
     workbook,
     worksheet,
