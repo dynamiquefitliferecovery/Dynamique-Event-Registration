@@ -1000,7 +1000,7 @@ function formatContact(v = "") {
   return age;
 }
 
-  function toMYTime(dateString) {
+function toMYTime(dateString) {
   const d = new Date(dateString);
 
   return new Date(
@@ -1414,8 +1414,11 @@ async function loadAppointments() {
     // Date + Time
     tr.appendChild(
       td(
-        dt.toLocaleDateString("en-MY") + " " +
+        dt.toLocaleDateString("en-MY", {
+  timeZone: "Asia/Kuala_Lumpur"
+}) + " " +
         dt.toLocaleTimeString("en-MY", {
+  timeZone: "Asia/Kuala_Lumpur",
           hour: "2-digit",
           minute: "2-digit",
           hour12: false
@@ -1484,16 +1487,20 @@ window.editAppointment = async function(id) {
 
   editingAppointmentId = id;
 
-  const start = new Date(data.start_time);
+const start = new Date(data.start_time);
 
-  apptTime.value =
+apptDate.value =
+  start.toLocaleDateString("en-CA", {
+    timeZone: "Asia/Kuala_Lumpur"
+  });
+
+apptTime.value =
   start.toLocaleTimeString("en-GB", {
     timeZone: "Asia/Kuala_Lumpur",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false
   });
-
 fillAppointmentDropdowns();   // ✅ ADD THIS LINE
 
 apptClient.value = data.client_id;
@@ -1641,9 +1648,11 @@ let totalRevenue = 0;
       return c;
     };
 
-    const d = toMYTime(r.start_time);
+    const d = new Date(r.start_time);
 
-    tr.appendChild(td(d.toLocaleDateString("en-MY")));
+    tr.appendChild(td(d.toLocaleDateString("en-MY", {
+  timeZone: "Asia/Kuala_Lumpur"
+})));
     tr.appendChild(td(r.client?.full_name || ""));
     tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
     tr.appendChild(td(r.client?.citizenship || ""));
