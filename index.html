@@ -1414,11 +1414,8 @@ async function loadAppointments() {
     // Date + Time
     tr.appendChild(
       td(
-        dt.toLocaleDateString("en-MY", {
-  timeZone: "Asia/Kuala_Lumpur"
-}) + " " +
-        dt.toLocaleTimeString("en-MY", {
-  timeZone: "Asia/Kuala_Lumpur",
+        dt.toLocaleDateString("en-MY")
+        dt.toLocaleTimeString("en-MY")
           hour: "2-digit",
           minute: "2-digit",
           hour12: false
@@ -1489,18 +1486,10 @@ window.editAppointment = async function(id) {
 
 const start = new Date(data.start_time);
 
-apptDate.value =
-  start.toLocaleDateString("en-CA", {
-    timeZone: "Asia/Kuala_Lumpur"
-  });
+apptDate.value = start.toISOString().split("T")[0];
 
 apptTime.value =
-  start.toLocaleTimeString("en-GB", {
-    timeZone: "Asia/Kuala_Lumpur",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  });
+  start.toTimeString().slice(0, 5);
 fillAppointmentDropdowns();   // ✅ ADD THIS LINE
 
 apptClient.value = data.client_id;
@@ -1537,9 +1526,28 @@ window.saveAppointment = async function(){
   const endTime = new Date(startTime);
   endTime.setHours(endTime.getHours() + 1);
 
+const startDateTime =
+  `${apptDate.value} ${apptTime.value}:00`;
+
+const endDate = new Date(
+  `${apptDate.value}T${apptTime.value}:00`
+);
+endDate.setHours(endDate.getHours() + 1);
+
+const endDateTime =
+  `${endDate.getFullYear()}-${
+    String(endDate.getMonth() + 1).padStart(2, "0")
+  }-${
+    String(endDate.getDate()).padStart(2, "0")
+  } ${
+    String(endDate.getHours()).padStart(2, "0")
+  }:${
+    String(endDate.getMinutes()).padStart(2, "0")
+  }:00`;
+
 const payload = {
-  start_time: startTime.toISOString(),
-  end_time: endTime.toISOString(),
+  start_time: startDateTime,
+  end_time: endDateTime,
   client_id: apptClient.value,              // ✅ UUID (string)
   practitioner_id: apptPractitioner.value,  // ✅ UUID
   service_id: apptService.value,             // ✅ UUID
