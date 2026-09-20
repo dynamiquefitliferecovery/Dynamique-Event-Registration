@@ -1001,10 +1001,8 @@ function formatContact(v = "") {
 }
 
   function toMYTime(dateString) {
-  const d = new Date(dateString);
-  return new Date(d.getTime() + 8 * 60 * 60 * 1000);
+  return new Date(dateString);
 }
-  
 /* ================= CLIENTS ================= */
 
 clientName = document.getElementById("clientName");
