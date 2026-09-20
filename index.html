@@ -1533,9 +1533,7 @@ window.saveAppointment = async function(){
     return;
   }
 
-  const startTime = new Date(
-  `${apptDate.value}T${apptTime.value}:00+08:00`
-);
+  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
   const endTime = new Date(startTime);
   endTime.setHours(endTime.getHours() + 1);
 
