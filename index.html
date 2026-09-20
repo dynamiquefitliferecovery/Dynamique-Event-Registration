@@ -1723,12 +1723,17 @@ function downloadExcel(filename, headers, rows) {
 
 for (let r = 1; r <= range.e.r; r++) {
 
-  if (worksheet[XLSX.utils.encode_cell({ r, c: 5 })]) {
-    worksheet[XLSX.utils.encode_cell({ r, c: 5 })].t = "s";
+  const icCell = XLSX.utils.encode_cell({ r, c: 5 });
+  const contactCell = XLSX.utils.encode_cell({ r, c: 6 });
+
+  if (worksheet[icCell]) {
+    worksheet[icCell].v = String(worksheet[icCell].v || "");
+    worksheet[icCell].t = "s";
   }
 
-  if (worksheet[XLSX.utils.encode_cell({ r, c: 6 })]) {
-    worksheet[XLSX.utils.encode_cell({ r, c: 6 })].t = "s";
+  if (worksheet[contactCell]) {
+    worksheet[contactCell].v = String(worksheet[contactCell].v || "");
+    worksheet[contactCell].t = "s";
   }
 
 }
