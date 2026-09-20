@@ -6,7 +6,6 @@
   
   <!-- Supabase JS (logic will come later) -->
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
 
     
@@ -1183,8 +1182,8 @@ window.exportClients = function () {
   calculateAge(c.date_of_birth),
   c.gender,
   c.citizenship,
-  String(c.ic_passport || ""),
-  String(c.contact || ""),
+  "'" + (c.ic_passport || ""),
+  "'" + (c.contact || ""),
   c.email,
   c.address
 ]);
@@ -1664,7 +1663,7 @@ totalRevenue += Number(r.total || 0);
       age: calculateAge(r.client?.date_of_birth),
       citizenship: r.client?.citizenship || "", 
       gender: r.client?.gender || "",
-      contact: String(r.client?.contact || ""),
+      contact: "'" + (r.client?.contact || ""),
       service: r.service?.name || "",
       amount: Number(r.amount),
       sst: Number(r.sst),
