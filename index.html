@@ -1184,8 +1184,8 @@ const rows = clients.map(c => [
   calculateAge(c.date_of_birth),
   c.gender,
   c.citizenship,
-  `="${c.ic_passport || ""}"`,
-  `="${c.contact || ""}"`,
+  c.ic_passport || "",
+  c.contact || "",
   c.email,
   c.address
 ]);
@@ -1695,7 +1695,7 @@ window.exportReportExcel = function () {
     r.age,
     r.citizenship,
     r.gender,
-    `="${r.contact || ""}"`,
+    r.contact || "",
     r.service,
     r.amount.toFixed(2),
     r.sst.toFixed(2),
@@ -1719,6 +1719,19 @@ function downloadExcel(filename, headers, rows) {
 
   const worksheet =
     XLSX.utils.aoa_to_sheet(worksheetData);
+  const range = XLSX.utils.decode_range(worksheet["!ref"]);
+
+for (let r = 1; r <= range.e.r; r++) {
+
+  if (worksheet[XLSX.utils.encode_cell({ r, c: 5 })]) {
+    worksheet[XLSX.utils.encode_cell({ r, c: 5 })].t = "s";
+  }
+
+  if (worksheet[XLSX.utils.encode_cell({ r, c: 6 })]) {
+    worksheet[XLSX.utils.encode_cell({ r, c: 6 })].t = "s";
+  }
+
+}
 
   worksheet["!cols"] = headers.map((h, colIndex) => {
 
