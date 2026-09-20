@@ -1001,7 +1001,13 @@ function formatContact(v = "") {
 }
 
   function toMYTime(dateString) {
-  return new Date(dateString);
+  const d = new Date(dateString);
+
+  return new Date(
+    d.toLocaleString("en-US", {
+      timeZone: "Asia/Kuala_Lumpur"
+    })
+  );
 }
 /* ================= CLIENTS ================= */
 
@@ -1403,7 +1409,7 @@ async function loadAppointments() {
       return cell;
     };
 
-    const dt = toMYTime(a.start_time);
+    const dt = new Date(a.start_time);
 
     // Date + Time
     tr.appendChild(
@@ -1478,10 +1484,11 @@ window.editAppointment = async function(id) {
 
   editingAppointmentId = id;
 
-  const start = toMYTime(data.start_time);
+  const start = new Date(data.start_time);
 
-  apptDate.value = start.toLocaleDateString("en-CA");
-  apptTime.value = start.toLocaleTimeString("en-GB", {
+  apptTime.value =
+  start.toLocaleTimeString("en-GB", {
+    timeZone: "Asia/Kuala_Lumpur",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false
