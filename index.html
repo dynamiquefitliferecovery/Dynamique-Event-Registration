@@ -1413,15 +1413,15 @@ async function loadAppointments() {
 
     // Date + Time
     tr.appendChild(
-      td(
-        dt.toLocaleDateString("en-MY")
-        dt.toLocaleTimeString("en-MY")
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false
-        })
-      )
-    );
+  td(
+    dt.toLocaleDateString("en-MY") + " " +
+    dt.toLocaleTimeString("en-MY", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    })
+  )
+);
 
 // Client
 tr.appendChild(td(a.client?.full_name || ""));
@@ -1486,7 +1486,12 @@ window.editAppointment = async function(id) {
 
 const start = new Date(data.start_time);
 
-apptDate.value = start.toISOString().split("T")[0];
+apptDate.value =
+  `${start.getFullYear()}-${
+    String(start.getMonth() + 1).padStart(2, "0")
+  }-${
+    String(start.getDate()).padStart(2, "0")
+  }`;
 
 apptTime.value =
   start.toTimeString().slice(0, 5);
@@ -1658,9 +1663,9 @@ let totalRevenue = 0;
 
     const d = new Date(r.start_time);
 
-    tr.appendChild(td(d.toLocaleDateString("en-MY", {
-  timeZone: "Asia/Kuala_Lumpur"
-})));
+    tr.appendChild(td(
+  d.toLocaleDateString("en-MY")
+));
     tr.appendChild(td(r.client?.full_name || ""));
     tr.appendChild(td(calculateAge(r.client?.date_of_birth)));
     tr.appendChild(td(r.client?.citizenship || ""));
@@ -1678,9 +1683,7 @@ totalSST += Number(r.sst || 0);
 totalRevenue += Number(r.total || 0);
 
     reportData.push({
-      date: d.toLocaleDateString("en-MY", {
-  timeZone: "Asia/Kuala_Lumpur"
-}),
+      date: d.toLocaleDateString("en-MY"),
       client: r.client?.full_name || "",
       age: calculateAge(r.client?.date_of_birth),
       citizenship: r.client?.citizenship || "", 
