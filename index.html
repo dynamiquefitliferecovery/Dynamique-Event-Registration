@@ -1700,7 +1700,7 @@ window.exportReportExcel = function () {
     r.age,
     r.citizenship,
     r.gender,
-    r.contact,
+    `="${r.contact || ""}"`,
     r.service,
     r.amount.toFixed(2),
     r.sst.toFixed(2),
@@ -1738,7 +1738,6 @@ for (let c = 0; c <= range.e.c; c++) {
 }
 
   // Force ALL cells to text
-  const range = XLSX.utils.decode_range(worksheet["!ref"]);
 
   for (let r = 1; r <= range.e.r; r++) {
     for (let c = 0; c <= range.e.c; c++) {
