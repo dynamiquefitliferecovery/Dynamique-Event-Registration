@@ -6,7 +6,7 @@
   
   <!-- Supabase JS (logic will come later) -->
  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.jsscript"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
 
     
@@ -1184,8 +1184,8 @@ const rows = clients.map(c => [
   calculateAge(c.date_of_birth),
   c.gender,
   c.citizenship,
-  c.ic_passport || "",
-  c.contact || "",
+  String(c.ic_passport || ""),
+  String(c.contact || ""),
   c.email,
   c.address
 ]);
@@ -1695,7 +1695,7 @@ window.exportReportExcel = function () {
     r.age,
     r.citizenship,
     r.gender,
-    r.contact || "",
+    String(r.contact || ""),
     r.service,
     r.amount.toFixed(2),
     r.sst.toFixed(2),
