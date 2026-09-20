@@ -1175,21 +1175,21 @@ window.exportClients = function () {
     "Contact", "Email", "Address"
   ];
 
-  const rows = clients.map(c => [
-    c.full_name,
-    c.date_of_birth
-      ? new Date(c.date_of_birth).toLocaleDateString("en-GB")
-      : "",
-    calculateAge(c.date_of_birth),
-    c.gender,
-    c.citizenship,
-    c.ic_passport,
-    c.contact,
-    c.email,
-    c.address
-  ]);
+const rows = clients.map(c => [
+  c.full_name,
+  c.date_of_birth
+    ? new Date(c.date_of_birth).toLocaleDateString("en-GB")
+    : "",
+  calculateAge(c.date_of_birth),
+  c.gender,
+  c.citizenship,
+  `="${c.ic_passport || ""}"`,
+  `="${c.contact || ""}"`,
+  c.email,
+  c.address
+]);
 
-  downloadExcel("clients_report.xls", headers, rows, "#ff9800");
+  downloadExcel("clients_report.csv", headers, rows);
 };
 
   
@@ -1704,7 +1704,7 @@ window.exportReportExcel = function () {
     r.remarks
   ]);
 
-  downloadExcel("sales_report.xls", headers, rows, "#4caf50");
+  downloadExcel("sales_report.csv", headers, rows);
 };
 
 /* ================= LOAD ALL ================= */
