@@ -1591,7 +1591,6 @@ function updateSelectedClientInfo() {
 /* ================= REPORT ================= */
 window.loadReport = async function () {
 
-  alert("Generate clicked ✅");   // ✅ ADD THIS LINE
 
   const from = reportFrom.value;
   const to = reportTo.value;
@@ -1695,7 +1694,7 @@ window.exportReportExcel = function () {
     r.age,
     r.citizenship,
     r.gender,
-    r.contact,
+    `="${r.contact || ""}"`,
     r.service,
     r.amount.toFixed(2),
     r.sst.toFixed(2),
@@ -1708,7 +1707,30 @@ window.exportReportExcel = function () {
 };
 
 /* ================= LOAD ALL ================= */
-async function loadAll() {
+function downloadExcel(filename, headers, rows) {
+
+  let csv = headers.join(",") + "\n";
+
+  rows.forEach(row => {
+    csv += row.map(v => `"${v ?? ""}"`).join(",") + "\n";
+  });
+
+  const blob = new Blob(
+    [csv],
+    { type: "text/csv;charset=utf-8;" }
+  );
+
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+  
+  async function loadAll() {
   await loadClients();
   await loadPractitioners();
 
