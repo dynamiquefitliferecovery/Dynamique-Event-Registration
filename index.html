@@ -1533,7 +1533,9 @@ window.saveAppointment = async function(){
     return;
   }
 
-  const startTime = new Date(`${apptDate.value}T${apptTime.value}:00`);
+  const startTime = new Date(
+  `${apptDate.value}T${apptTime.value}:00+08:00`
+);
   const endTime = new Date(startTime);
   endTime.setHours(endTime.getHours() + 1);
 
@@ -1670,7 +1672,9 @@ totalSST += Number(r.sst || 0);
 totalRevenue += Number(r.total || 0);
 
     reportData.push({
-      date: d.toLocaleDateString("en-MY"),
+      date: d.toLocaleDateString("en-MY", {
+  timeZone: "Asia/Kuala_Lumpur"
+}),
       client: r.client?.full_name || "",
       age: calculateAge(r.client?.date_of_birth),
       citizenship: r.client?.citizenship || "", 
